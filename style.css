@@ -92,10 +92,9 @@
   #boardWrap{
     position:relative; width:100%;
     flex:1 1 auto; min-height:0;
-    background:linear-gradient(180deg,#1c3a63,#0c1f3b);
-    border-radius:16px; border:4px solid #fff;
-    box-shadow:0 6px 14px rgba(60,110,160,0.25);
-    padding:4px; min-width:0;
+    background:url('assets/images/board_bg.png') center/100% 100% no-repeat;
+    border-radius:16px;
+    padding:5%; min-width:0;
   }
   #grid{
     position:relative; width:100%; height:100%;
