@@ -128,6 +128,9 @@
   const starsValEl = document.getElementById('starsVal');
   const clearBestLineEl = document.getElementById('clearBestLine');
   const toastEl = document.getElementById('toast');
+  const popEffectEl = document.getElementById('popEffect');
+  const popTextEl = document.getElementById('popText');
+  const popParticlesEl = document.getElementById('popParticles');
   const clearOverlay = document.getElementById('clearOverlay');
   const clearDescEl = document.getElementById('clearDesc');
   const clearStarsEl = document.getElementById('clearStars');
@@ -162,6 +165,26 @@
     toastEl.classList.add('show');
     clearTimeout(showToast._t);
     showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 1000);
+  }
+
+  function triggerPopEffect(count, gained){
+    popTextEl.innerHTML = '<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
+    popParticlesEl.innerHTML = '';
+    const symbols = ['⭐','✨','🌟'];
+    const n = Math.min(18, 8 + count);
+    for(let i=0;i<n;i++){
+      const s = document.createElement('span');
+      s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      const angle = Math.random()*Math.PI*2;
+      const dist = 50 + Math.random()*90;
+      s.style.setProperty('--dx', Math.cos(angle)*dist+'px');
+      s.style.setProperty('--dy', Math.sin(angle)*dist+'px');
+      s.style.animationDelay = Math.floor(Math.random()*120)+'ms';
+      popParticlesEl.appendChild(s);
+    }
+    popEffectEl.classList.remove('show');
+    void popEffectEl.offsetWidth;
+    popEffectEl.classList.add('show');
   }
 
   function buildGrid(){
@@ -304,7 +327,7 @@
     const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
     stageScore += gained;
     awardCoins(Math.max(1, Math.floor(gained/20)));
-    showToast(cells.length+'개 연결! +'+gained);
+    triggerPopEffect(cells.length, gained);
     cells.forEach(({r,c})=>{
       cellEls[r][c].classList.add('popping');
       board[r][c] = null;
