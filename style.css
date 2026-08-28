@@ -77,6 +77,8 @@
     color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:15px;
   }
   .movesBadge .lbl{font-size:8px; color:#7d93a6; margin-top:2px;}
+  .movesBadge .movesStars{ font-size:10px; letter-spacing:1px; margin-top:3px; }
+  .movesBadge .movesScore{ font-size:10px; font-weight:bold; color:var(--ink); margin-top:1px; }
 
   /* ---------- board area ---------- */
   .stageLabelBar{

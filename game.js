@@ -121,6 +121,8 @@
   const stageNumEl = document.getElementById('stageNum');
   const stageNameLblEl = document.getElementById('stageNameLbl');
   const movesValEl = document.getElementById('movesVal');
+  const movesStarsEl = document.getElementById('movesStars');
+  const movesScoreEchoEl = document.getElementById('movesScoreEcho');
   const heartsValEl = document.getElementById('heartsVal');
   const coinsValEl = document.getElementById('coinsVal');
   const starsValEl = document.getElementById('starsVal');
@@ -200,6 +202,10 @@
     const pct = Math.min(100, (stageScore/st.target)*100);
     progressFillEl.style.width = pct+'%';
     movesValEl.textContent = movesLeft;
+    const ratio = stageScore / st.target;
+    const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
+    movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
+    movesScoreEchoEl.textContent = fmt(stageScore);
     heartsValEl.textContent = hearts;
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
