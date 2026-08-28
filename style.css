@@ -110,6 +110,7 @@
     transition:transform 0.12s ease, filter 0.12s ease, opacity 0.18s ease;
   }
   .die.selected{ transform:scale(1.12); filter:drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 10px rgba(242,169,59,0.6)); }
+  .die.imgTile{ background:none; }
   .die.popping{ transform:scale(0.2) rotate(25deg); opacity:0; }
 
   .popEffect{

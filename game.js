@@ -243,6 +243,7 @@
         if(v===null){ el.style.visibility='hidden'; }
         else { el.style.visibility='visible'; el.dataset.v=v; el.innerHTML = renderSymbolHTML(stage, v); }
         el.classList.remove('selected','popping');
+        el.classList.toggle('imgTile', stage.type==='img6');
       }
     }
   }
