@@ -33,8 +33,9 @@
     background:radial-gradient(circle at 35% 30%, #fff6d8, #ffd76e 70%);
     display:flex; align-items:center; justify-content:center;
     font-size:22px; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.15);
-    flex:0 0 auto;
+    flex:0 0 auto; overflow:hidden;
   }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
   .pill{
     display:flex; align-items:center; gap:4px;
     background:var(--panel); border:1px solid var(--panel-border);
@@ -153,6 +154,7 @@
     box-shadow:0 10px 24px rgba(0,0,0,0.25);
   }
   .card h2{ margin:0 0 6px; color:var(--ink); }
+  .card .mascotPop{ width:90px; height:90px; object-fit:contain; margin-bottom:4px; }
   .card p{ font-size:13px; color:#7d93a6; margin:4px 0 16px; }
   .stars{ font-size:30px; margin:6px 0 12px; letter-spacing:4px; }
   .btn{
