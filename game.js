@@ -40,12 +40,15 @@
     { name:'표준 주사위',      type:'dice-std' },
     { name:'점 하나 (넓게)',    type:'dot',     positions:DOT_WIDE },
     { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
+    { name:'씨앗 위치 (넓게)',   type:'seed',    positions:[1,3,5,6,7,8] },
     { name:'건곤감리',          type:'trigram', set:TRIGRAM4 },
     { name:'표정 (뚜렷하게)',   type:'face',    set:FACE_EASY },
+    { name:'클로버',            type:'clover' },
     { name:'점 4개 배치 A',     type:'pips',    combos:PIP4_A },
     { name:'화살표 6방향',      type:'arrow',   dirs:DIR6 },
     { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8 },
     { name:'표정 (미세하게)',   type:'img6',    prefix:'face' },
+    { name:'씨앗 위치 (좁게)',   type:'seed',    positions:[1,2,3,4] },
     { name:'점 3개 배치',       type:'pips',    combos:PIP3 },
     { name:'점 5개 배치',       type:'pips',    combos:PIP5 },
     { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE },
@@ -86,11 +89,34 @@
       + '<polygon points="50,15 76,68 50,54 24,68" fill="#1f2a44"/>'
       + '</g></svg>';
   }
+  const SEED_SPOTS = { 1:[50,38],2:[36,50],3:[64,50],4:[50,58],5:[30,68],6:[70,68],7:[42,78],8:[58,78] };
+  function svgSeedAt(spotNum){
+    const p = SEED_SPOTS[spotNum];
+    return '<svg viewBox="0 0 100 100" width="82%" height="82%">'
+      + '<path d="M50,18 C32,18 18,36 18,56 C18,78 34,92 50,92 C66,92 82,78 82,56 C82,36 68,18 50,18 Z" fill="#e5484d" stroke="#8a1f24" stroke-width="4"/>'
+      + '<path d="M38,20 L46,10 L50,20 L54,10 L62,20 Z" fill="#4caf50" stroke="#2e6b31" stroke-width="2"/>'
+      + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="5" ry="7" fill="#f7d84a" stroke="#8a6a12" stroke-width="1.5"/>'
+      + '</svg>';
+  }
+  const CLOVER_POS = { 1:[50,30],2:[70,50],3:[50,70],4:[30,50] };
+  function svgCloverAt(leafNum){
+    const p = CLOVER_POS[leafNum];
+    const leaves = [[50,30],[70,50],[50,70],[30,50]].map(function(c){
+      return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="19" fill="#5fbf5f" stroke="#2e6b31" stroke-width="3"/>';
+    }).join('');
+    return '<svg viewBox="0 0 100 100" width="82%" height="82%">'
+      + '<line x1="50" y1="58" x2="50" y2="88" stroke="#2e6b31" stroke-width="5" stroke-linecap="round"/>'
+      + leaves
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#2e6b31"/>'
+      + '</svg>';
+  }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:100%;height:100%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
+      case 'seed':     return svgSeedAt(stage.positions[v]);
+      case 'clover':   return svgCloverAt(v+1);
       case 'arrow':    return svgArrow(stage.dirs[v]);
       case 'trigram':  return stage.set[v];
       case 'face':     return svgFaceCfg(stage.set[v]);
@@ -103,6 +129,8 @@
       case 'dice-std': return STD_DICE.length;
       case 'img6':     return 6;
       case 'dot':      return stage.positions.length;
+      case 'seed':     return stage.positions.length;
+      case 'clover':   return 4;
       case 'arrow':    return stage.dirs.length;
       case 'trigram':  return stage.set.length;
       case 'face':     return stage.set.length;
