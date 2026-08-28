@@ -20,9 +20,9 @@
 
   <div class="statsRow">
     <div class="targetCard">
-      <div class="row1"><span id="stageNameLbl">-</span><span>목표 점수</span></div>
-      <div class="row2"><span id="score">0</span><span id="targetVal">0</span></div>
-      <div class="barTrack"><div class="barFill" id="progressFill"></div></div>
+      <div class="targetBadge">목표 점수</div>
+      <div class="targetBig" id="targetVal">0</div>
+      <div class="barTrack"><div class="barFill" id="progressFill"></div><div class="barStar" id="barStar">⭐</div></div>
     </div>
     <div class="movesBadge">
       <div class="circle" id="movesVal">-</div>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  <div class="stageLabelBar">STAGE <span id="stageNum">01</span></div>
+  <div class="stageLabelBar">STAGE <span id="stageNum">01</span> · <span id="stageNameLbl">-</span></div>
 
   <div id="boardWrap">
     <div id="grid"></div>

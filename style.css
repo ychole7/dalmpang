@@ -61,14 +61,23 @@
   /* ---------- stats row ---------- */
   .statsRow{ display:flex; align-items:stretch; gap:6px; margin-bottom:8px; flex:0 0 auto; }
   .targetCard{
-    flex:1 1 auto; background:var(--panel); border:1px solid var(--panel-border);
-    border-radius:14px; padding:6px 10px; min-width:0;
+    position:relative; flex:1 1 auto; background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; padding:14px 12px 10px; min-width:0; text-align:center;
     box-shadow:0 2px 3px rgba(0,0,0,0.06);
   }
-  .targetCard .row1{ display:flex; justify-content:space-between; font-size:10px; color:#7d93a6; }
-  .targetCard .row2{ display:flex; justify-content:space-between; font-size:13px; font-weight:bold; color:var(--ink); margin:1px 0 4px;}
-  .barTrack{ height:8px; border-radius:6px; background:#eef3f8; overflow:hidden; }
-  .barFill{ height:100%; background:linear-gradient(90deg,var(--gold),#ffd98a); width:0%; transition:width .3s; }
+  .targetBadge{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff;
+    font-size:10px; font-weight:bold; padding:3px 12px; border-radius:12px;
+    box-shadow:0 2px 0 #234f7d; white-space:nowrap;
+  }
+  .targetBig{ font-size:22px; font-weight:900; color:var(--ink); margin-bottom:6px; }
+  .barTrack{ position:relative; height:8px; border-radius:6px; background:#eef3f8; overflow:visible; }
+  .barFill{ height:100%; border-radius:6px; background:linear-gradient(90deg,var(--gold),#ffd98a); width:0%; transition:width .3s; }
+  .barStar{
+    position:absolute; top:50%; left:0%; transform:translate(-50%,-50%);
+    font-size:14px; transition:left .3s;
+  }
   .movesBadge{
     background:var(--panel); border:1px solid var(--panel-border); border-radius:14px;
     min-width:58px; display:flex; flex-direction:column; align-items:center; justify-content:center;

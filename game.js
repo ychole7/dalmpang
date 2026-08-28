@@ -113,9 +113,9 @@
 
   const gridEl = document.getElementById('grid');
   const lineLayer = document.getElementById('lineLayer');
-  const scoreEl = document.getElementById('score');
   const targetValEl = document.getElementById('targetVal');
   const progressFillEl = document.getElementById('progressFill');
+  const barStarEl = document.getElementById('barStar');
   const stageNumEl = document.getElementById('stageNum');
   const stageNameLblEl = document.getElementById('stageNameLbl');
   const movesValEl = document.getElementById('movesVal');
@@ -218,10 +218,10 @@
     const st = currentStage();
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
-    scoreEl.textContent = fmt(stageScore);
     targetValEl.textContent = fmt(st.target);
     const pct = Math.min(100, (stageScore/st.target)*100);
     progressFillEl.style.width = pct+'%';
+    barStarEl.style.left = pct+'%';
     movesValEl.textContent = movesLeft;
     const ratio = stageScore / st.target;
     const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
