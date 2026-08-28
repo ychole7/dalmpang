@@ -37,7 +37,7 @@
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
   const STAGES = [
-    { name:'표준 주사위',      type:'img6',    prefix:'dice' },
+    { name:'표준 주사위',      type:'dice-std' },
     { name:'점 하나 (넓게)',    type:'dot',     positions:DOT_WIDE },
     { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
     { name:'건곤감리',          type:'trigram', set:TRIGRAM4 },
@@ -51,7 +51,7 @@
     { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE },
     { name:'화살표 8방향',      type:'arrow',   dirs:DIR8 },
     { name:'점 4개 배치 B',     type:'pips',    combos:PIP4_B },
-    { name:'표준 주사위 한번 더', type:'img6',   prefix:'dice' },
+    { name:'표준 주사위 한번 더', type:'dice-std' },
     { name:'점 위치 (9칸 전체)', type:'dot',    positions:DOT_ALL9 },
     { name:'건곤감리 (다시)',   type:'trigram', set:TRIGRAM4 },
     { name:'표정 (섞어서)',     type:'face',    set:FACE_MIXED },
