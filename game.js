@@ -18,6 +18,7 @@
   const DIR8 = [0,45,90,135,180,225,270,315];
 
   const TRIGRAM4 = ['☰','☷','☵','☲'];
+  const SUIT_SET = ['♠','♥','♦','♣'];
   const TRIGRAM8 = ['☰','☱','☲','☳','☴','☵','☶','☷'];
 
   const FACE_EASY = [
@@ -36,31 +37,47 @@
   ];
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
-  const STAGES = [
+  const STAGE_POOL = [
     { name:'표준 주사위',      type:'dice-std' },
-    { name:'점 하나 (넓게)',    type:'dot',     positions:DOT_WIDE },
+    { name:'점 하나',          type:'dot',     positions:DOT_WIDE },
     { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
-    { name:'씨앗 위치 (넓게)',   type:'seed',    positions:[1,3,5,6,7,8] },
+    { name:'씨앗 위치',        type:'seed',    positions:[1,3,5,6,7,8] },
     { name:'건곤감리',          type:'trigram', set:TRIGRAM4 },
     { name:'표정 (뚜렷하게)',   type:'face',    set:FACE_EASY },
     { name:'클로버',            type:'clover' },
+    { name:'물방울',            type:'drop',    positions:[1,2,3,4,5,6] },
     { name:'점 4개 배치 A',     type:'pips',    combos:PIP4_A },
     { name:'화살표 6방향',      type:'arrow',   dirs:DIR6 },
+    { name:'종',                type:'bell',    positions:[1,2,3,4] },
     { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8 },
     { name:'표정 (미세하게)',   type:'img6',    prefix:'face' },
     { name:'씨앗 위치 (좁게)',   type:'seed',    positions:[1,2,3,4] },
+    { name:'퍼즐 조각',         type:'puzzle',  positions:[1,2,3,4] },
     { name:'점 3개 배치',       type:'pips',    combos:PIP3 },
     { name:'점 5개 배치',       type:'pips',    combos:PIP5 },
     { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE },
     { name:'화살표 8방향',      type:'arrow',   dirs:DIR8 },
     { name:'점 4개 배치 B',     type:'pips',    combos:PIP4_B },
-    { name:'표준 주사위 한번 더', type:'dice-std' },
     { name:'점 위치 (9칸 전체)', type:'dot',    positions:DOT_ALL9 },
-    { name:'건곤감리 (다시)',   type:'trigram', set:TRIGRAM4 },
     { name:'표정 (섞어서)',     type:'face',    set:FACE_MIXED },
-    { name:'팔괘 (다시)',       type:'trigram', set:TRIGRAM8 },
-    { name:'점 4개 배치 (최종)', type:'pips',   combos:PIP4_B }
-  ].map(function(s,i){ s.target = 250 + i*40; return s; });
+    { name:'시계 바늘',         type:'clock',   dirs:DIR6 },
+    { name:'카드 무늬',         type:'trigram', set:SUIT_SET },
+    { name:'단추 구멍',         type:'button',  positions:[1,2,3,4] },
+    { name:'신호등',            type:'traffic' }
+  ];
+
+  // 풀을 순환시키면서 스테이지 번호가 올라갈수록 목표점수/이동횟수를 자동으로 늘려서
+  // 총 TOTAL_STAGES개의 스테이지를 생성 (하나하나 손으로 안 만듦)
+  const TOTAL_STAGES = 1000;
+  function buildStages(total){
+    const arr = [];
+    for(let i=0;i<total;i++){
+      const base = STAGE_POOL[i % STAGE_POOL.length];
+      arr.push(Object.assign({}, base, { target: 250 + i*20 }));
+    }
+    return arr;
+  }
+  const STAGES = buildStages(TOTAL_STAGES);
 
   function svgFaceCfg(cfg){
     return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
@@ -110,6 +127,73 @@
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#2e6b31"/>'
       + '</svg>';
   }
+  const DROP_SPOTS = { 1:[40,35],2:[58,32],3:[35,55],4:[62,55],5:[45,70],6:[58,68] };
+  function svgDropAt(spotNum){
+    const p = DROP_SPOTS[spotNum];
+    return '<svg viewBox="0 0 100 100" width="76%" height="82%">'
+      + '<path d="M50,12 C62,32 78,52 78,68 C78,85 65,94 50,94 C35,94 22,85 22,68 C22,52 38,32 50,12 Z" fill="#4aa8e8" stroke="#1f5f8f" stroke-width="4"/>'
+      + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="6" ry="8" fill="#ffffff" opacity="0.85"/>'
+      + '</svg>';
+  }
+  const BELL_SPOTS = { 1:[50,45],2:[38,55],3:[62,55],4:[50,62] };
+  function svgBellAt(spotNum){
+    const p = BELL_SPOTS[spotNum];
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<path d="M50,15 C56,15 60,19 60,24 C72,28 78,40 78,55 L82,72 L18,72 L22,55 C22,40 28,28 40,24 C40,19 44,15 50,15 Z" fill="#f2b73b" stroke="#8a611a" stroke-width="4"/>'
+      + '<circle cx="50" cy="82" r="7" fill="#f2b73b" stroke="#8a611a" stroke-width="3"/>'
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#8a3b2b"/>'
+      + '</svg>';
+  }
+  const PUZZLE_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
+  function svgPuzzleAt(spotNum){
+    const p = PUZZLE_SPOTS[spotNum];
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<path d="M25,25 H45 C45,18 55,18 55,25 H75 V45 C82,45 82,55 75,55 V75 H55 C55,82 45,82 45,75 H25 V55 C18,55 18,45 25,45 Z" fill="#6ec06e" stroke="#2e6b31" stroke-width="4"/>'
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#2e6b31"/>'
+      + '</svg>';
+  }
+  function svgClockAt(deg){
+    let ticks = '';
+    for(let i=0;i<12;i++){
+      const a = i*30*Math.PI/180;
+      const x1=50+Math.sin(a)*36, y1=50-Math.cos(a)*36;
+      const x2=50+Math.sin(a)*30, y2=50-Math.cos(a)*30;
+      ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#8a5a2b" stroke-width="2.5"/>';
+    }
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<circle cx="50" cy="50" r="40" fill="#fffdf7" stroke="#8a5a2b" stroke-width="4"/>'
+      + ticks
+      + '<g transform="rotate('+deg+' 50 50)"><line x1="50" y1="50" x2="50" y2="20" stroke="#1f2a44" stroke-width="5" stroke-linecap="round"/></g>'
+      + '<line x1="50" y1="50" x2="68" y2="50" stroke="#1f2a44" stroke-width="4" stroke-linecap="round"/>'
+      + '<circle cx="50" cy="50" r="4" fill="#1f2a44"/>'
+      + '</svg>';
+  }
+  function svgTrafficAt(lit){
+    const colors = ['#e5484d','#f2c14e','#4caf50'];
+    const dim    = ['#7a3a3c','#7a6a3a','#3a5a3c'];
+    const circles = [1,2,3].map(function(n){
+      const on = n===lit;
+      const c = on ? colors[n-1] : dim[n-1];
+      const glow = on ? ' filter="drop-shadow(0 0 4px '+colors[n-1]+')"' : '';
+      return '<circle cx="50" cy="'+(28+n*22)+'" r="12" fill="'+c+'"'+glow+'/>';
+    }).join('');
+    return '<svg viewBox="0 0 100 100" width="62%" height="90%">'
+      + '<rect x="28" y="10" width="44" height="82" rx="14" fill="#2b2118" stroke="#000" stroke-width="2"/>'
+      + circles
+      + '</svg>';
+  }
+  const BUTTON_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
+  function svgButtonAt(holeNum){
+    const holes = [1,2,3,4].map(function(n){
+      const p = BUTTON_SPOTS[n];
+      const active = n===holeNum;
+      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+(active?'#c94f6b':'#8a7a5a')+'"/>';
+    }).join('');
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<circle cx="50" cy="50" r="42" fill="#f2e6c9" stroke="#8a7a5a" stroke-width="4"/>'
+      + holes
+      + '</svg>';
+  }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
@@ -117,6 +201,12 @@
       case 'dot':      return svgDotAt(stage.positions[v]);
       case 'seed':     return svgSeedAt(stage.positions[v]);
       case 'clover':   return svgCloverAt(v+1);
+      case 'drop':     return svgDropAt(stage.positions[v]);
+      case 'bell':     return svgBellAt(stage.positions[v]);
+      case 'puzzle':   return svgPuzzleAt(stage.positions[v]);
+      case 'clock':    return svgClockAt(stage.dirs[v]);
+      case 'traffic':  return svgTrafficAt(v+1);
+      case 'button':   return svgButtonAt(stage.positions[v]);
       case 'arrow':    return svgArrow(stage.dirs[v]);
       case 'trigram':  return stage.set[v];
       case 'face':     return svgFaceCfg(stage.set[v]);
@@ -131,6 +221,12 @@
       case 'dot':      return stage.positions.length;
       case 'seed':     return stage.positions.length;
       case 'clover':   return 4;
+      case 'drop':     return stage.positions.length;
+      case 'bell':     return stage.positions.length;
+      case 'puzzle':   return stage.positions.length;
+      case 'clock':    return stage.dirs.length;
+      case 'traffic':  return 3;
+      case 'button':   return stage.positions.length;
       case 'arrow':    return stage.dirs.length;
       case 'trigram':  return stage.set.length;
       case 'face':     return stage.set.length;
@@ -230,7 +326,7 @@
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
-  function movesBudget(){ return 18 + (stageIndex % STAGES.length); }
+  function movesBudget(){ return 18 + Math.min(24, Math.floor(stageIndex/25)); }
 
   function showToast(msg){
     toastEl.textContent = msg;
