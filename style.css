@@ -174,7 +174,7 @@
   .powerBtn img{ width:100%; height:100%; object-fit:contain; border-radius:16px; }
   .powerBtn:active img{ transform:translateY(2px); }
   .powerBtn .cnt{
-    position:absolute; bottom:-6px; right:-6px; background:var(--red); color:#fff;
+    position:absolute; bottom:-6px; right:-6px; background:#e8235c; color:#fff;
     font-size:14px; font-weight:bold; border-radius:50%; width:26px; height:26px;
     display:flex; align-items:center; justify-content:center; border:3px solid #fff;
   }
