@@ -124,12 +124,15 @@
   const heartsValEl = document.getElementById('heartsVal');
   const coinsValEl = document.getElementById('coinsVal');
   const starsValEl = document.getElementById('starsVal');
+  const stageBestValEl = document.getElementById('stageBestVal');
   const toastEl = document.getElementById('toast');
   const clearOverlay = document.getElementById('clearOverlay');
   const clearDescEl = document.getElementById('clearDesc');
   const clearStarsEl = document.getElementById('clearStars');
   const failOverlay = document.getElementById('failOverlay');
   const failDescEl = document.getElementById('failDesc');
+
+  function fmt(n){ return n.toLocaleString('ko-KR'); }
 
   let board = [];
   let cellEls = [];
@@ -139,14 +142,16 @@
   let hearts = 5;
   let coins = parseInt(localStorage.getItem('sp_coins')||'0',10);
   let totalStars = parseInt(localStorage.getItem('sp_stars')||'0',10);
+  let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
   let dragging = false;
   let powerCounts = { candy:3, bomb:2, shuffle:2, rainbow:2 };
 
-  coinsValEl.textContent = coins;
+  coinsValEl.textContent = fmt(coins);
   starsValEl.textContent = totalStars;
 
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
+  function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
   function movesBudget(){ return 18 + (stageIndex % STAGES.length); }
 
@@ -188,14 +193,15 @@
 
   function updateHud(){
     const st = currentStage();
-    stageNumEl.textContent = String((stageIndex%20)+1).padStart(2,'0');
+    stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
-    scoreEl.textContent = stageScore;
-    targetValEl.textContent = st.target;
+    scoreEl.textContent = fmt(stageScore);
+    targetValEl.textContent = fmt(st.target);
     const pct = Math.min(100, (stageScore/st.target)*100);
     progressFillEl.style.width = pct+'%';
     movesValEl.textContent = movesLeft;
     heartsValEl.textContent = hearts;
+    stageBestValEl.textContent = fmt(stageBests[stageSlot()]||0);
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
     document.getElementById('cntShuffle').textContent = powerCounts.shuffle;
@@ -286,7 +292,7 @@
   function awardCoins(n){
     coins += n;
     localStorage.setItem('sp_coins', coins);
-    coinsValEl.textContent = coins;
+    coinsValEl.textContent = fmt(coins);
   }
 
   function popCells(cells, isBonus){
@@ -364,6 +370,11 @@
     const ratio = stageScore / st.target;
     const stars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : 1);
     clearStarsEl.textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+    const slot = stageSlot();
+    if(stageScore > (stageBests[slot]||0)){
+      stageBests[slot] = stageScore;
+      localStorage.setItem('sp_stage_bests', JSON.stringify(stageBests));
+    }
     totalStars += stars;
     localStorage.setItem('sp_stars', totalStars);
     starsValEl.textContent = totalStars;
