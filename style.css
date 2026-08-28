@@ -174,9 +174,9 @@
   .powerBtn img{ width:100%; height:100%; object-fit:contain; border-radius:16px; }
   .powerBtn:active img{ transform:translateY(2px); }
   .powerBtn .cnt{
-    position:absolute; bottom:-6px; right:-6px; background:#e8235c; color:#fff;
-    font-size:14px; font-weight:bold; border-radius:50%; width:26px; height:26px;
-    display:flex; align-items:center; justify-content:center; border:3px solid #fff;
+    position:absolute; left:78%; top:77%; transform:translate(-50%,-50%);
+    color:#fff; font-size:17px; font-weight:900;
+    text-shadow:0 1px 2px rgba(0,0,0,0.4);
   }
   .powerBtn.disabled{ opacity:0.4; }
 
