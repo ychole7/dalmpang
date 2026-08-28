@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>닮팡</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="avatar">🐥</div>
+    <div class="pill"><span class="ico">❤️</span><span id="heartsVal">5</span><span class="plus" id="heartPlus">+</span></div>
+    <div class="pill"><span class="ico">🪙</span><span id="coinsVal">0</span><span class="plus" id="coinPlus">+</span></div>
+    <div class="pill"><span class="ico">⭐</span><span id="starsVal">0</span></div>
+    <div class="gearBtn" id="gearBtn">⚙️</div>
+  </div>
+
+  <div class="statsRow">
+    <div class="stageBadge"><div class="lbl">STAGE</div><div class="num" id="stageNum">01</div></div>
+    <div class="targetCard">
+      <div class="row1"><span id="stageNameLbl">-</span><span>목표 점수</span></div>
+      <div class="row2"><span id="score">0</span><span id="targetVal">0</span></div>
+      <div class="barTrack"><div class="barFill" id="progressFill"></div></div>
+    </div>
+    <div class="movesBadge"><div class="circle" id="movesVal">-</div><div class="lbl">MOVES</div></div>
+  </div>
+
+  <div class="boardRow">
+    <div id="boardWrap">
+      <div id="grid"></div>
+      <svg id="lineLayer"></svg>
+    </div>
+    <div class="powerCol">
+      <div class="powerBtn" id="btnCandy">🍭<span class="cnt" id="cntCandy">3</span></div>
+      <div class="powerBtn" id="btnBomb">💣<span class="cnt" id="cntBomb">2</span></div>
+      <div class="powerBtn" id="btnShuffle">🔄<span class="cnt" id="cntShuffle">2</span></div>
+      <div class="powerBtn" id="btnRainbow">🌈<span class="cnt" id="cntRainbow">2</span></div>
+    </div>
+  </div>
+
+  <div class="bottomNav">
+    <div class="navBtn" id="navShop"><div class="ico">🛒</div>상점</div>
+    <div class="navBtn" id="navEvent"><div class="ico">🎁</div>이벤트</div>
+    <div class="navBtn home" id="navHome"><div class="ico">🏠</div></div>
+    <div class="navBtn" id="navRank"><div class="ico">👑</div>랭킹</div>
+    <div class="navBtn" id="navMail"><div class="ico">✉️</div>우편함</div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<div class="overlay" id="clearOverlay">
+  <div class="card">
+    <h2>스테이지 클리어!</h2>
+    <div class="stars" id="clearStars">⭐⭐⭐</div>
+    <p id="clearDesc"></p>
+    <button class="btn" id="nextStageBtn">다음 스테이지</button>
+  </div>
+</div>
+
+<div class="overlay" id="failOverlay">
+  <div class="card">
+    <h2>이동 횟수 소진!</h2>
+    <p id="failDesc"></p>
+    <button class="btn secondary" id="giveUpBtn">그만하기</button>
+    <button class="btn" id="retryBtn">하트 사용해서 재도전</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>
