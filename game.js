@@ -137,12 +137,18 @@
 
   function fmt(n){ return n.toLocaleString('ko-KR'); }
 
+  const HEART_MAX = 5;
+  const HEART_REGEN_MS = 60*1000; // 1분당 1개
+
   let board = [];
   let cellEls = [];
   let stageIndex = 0;
   let stageScore = 0;
   let movesLeft = 0;
-  let hearts = 5;
+  let hearts = parseInt(localStorage.getItem('sp_hearts'), 10);
+  if(isNaN(hearts)) hearts = HEART_MAX;
+  let heartRegenAt = parseInt(localStorage.getItem('sp_heart_regen_at'), 10);
+  if(isNaN(heartRegenAt)) heartRegenAt = 0;
   let coins = parseInt(localStorage.getItem('sp_coins')||'0',10);
   let totalStars = parseInt(localStorage.getItem('sp_stars')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
@@ -152,6 +158,46 @@
 
   coinsValEl.textContent = fmt(coins);
   starsValEl.textContent = totalStars;
+
+  function saveHearts(){
+    localStorage.setItem('sp_hearts', hearts);
+    localStorage.setItem('sp_heart_regen_at', heartRegenAt);
+  }
+
+  function spendHeart(){
+    if(hearts>=HEART_MAX && !heartRegenAt){
+      heartRegenAt = Date.now() + HEART_REGEN_MS;
+    }
+    hearts = Math.max(0, hearts-1);
+    saveHearts();
+  }
+
+  function tickHeartRegen(){
+    if(hearts>=HEART_MAX){ heartRegenAt = 0; saveHearts(); return; }
+    if(!heartRegenAt) return;
+    const now = Date.now();
+    if(now >= heartRegenAt){
+      const gained = Math.floor((now-heartRegenAt)/HEART_REGEN_MS) + 1;
+      hearts = Math.min(HEART_MAX, hearts+gained);
+      heartRegenAt = hearts>=HEART_MAX ? 0 : heartRegenAt + gained*HEART_REGEN_MS;
+      saveHearts();
+    }
+    updateHeartTimerDisplay();
+  }
+
+  function updateHeartTimerDisplay(){
+    const timerEl = document.getElementById('heartTimer');
+    if(!timerEl) return;
+    if(hearts>=HEART_MAX || !heartRegenAt){
+      timerEl.textContent = 'MAX';
+    } else {
+      const remain = Math.max(0, heartRegenAt - Date.now());
+      const s = Math.ceil(remain/1000);
+      const mm = Math.floor(s/60);
+      const ss = String(s%60).padStart(2,'0');
+      timerEl.textContent = mm+':'+ss;
+    }
+  }
 
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
   function stageSlot(){ return stageIndex % STAGES.length; }
@@ -228,6 +274,7 @@
     movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
     movesScoreEchoEl.textContent = fmt(stageScore);
     heartsValEl.textContent = hearts;
+    updateHeartTimerDisplay();
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
     document.getElementById('cntShuffle').textContent = powerCounts.shuffle;
@@ -428,7 +475,8 @@
   });
   document.getElementById('retryBtn').addEventListener('click', ()=>{
     if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
-    hearts--;
+    spendHeart();
+    updateHud();
     failOverlay.classList.remove('show');
     newStageBoard();
   });
@@ -503,7 +551,7 @@
   });
 
   // ---- top bar / bottom nav stubs ----
-  document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=5; updateHud(); showToast('하트를 채웠습니다 (데모)'); });
+  document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
   ['navShop','navEvent','navRank','navMail'].forEach(id=>{
@@ -512,6 +560,8 @@
   document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
 
   buildGrid();
+  tickHeartRegen();
   newStageBoard();
   window.addEventListener('resize', drawChainLine);
+  setInterval(()=>{ tickHeartRegen(); heartsValEl.textContent = hearts; }, 1000);
 })();
