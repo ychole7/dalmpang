@@ -72,14 +72,12 @@
   function svgDotAt(posNum){
     const p = POS[posNum];
     return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
-      + '<rect x="8" y="8" width="84" height="84" rx="18" fill="#f1ead8" stroke="#8a5a2b" stroke-width="4"/>'
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="10" fill="#1f2a44"/>'
       + '</svg>';
   }
   function svgPipsCombo(combo){
     let dots = combo.map(function(p){ const c=POS[p]; return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="9" fill="#1f2a44"/>'; }).join('');
     return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
-      + '<rect x="6" y="6" width="88" height="88" rx="16" fill="#fffdf7" stroke="#8a5a2b" stroke-width="4"/>'
       + dots + '</svg>';
   }
   function svgArrow(deg){
