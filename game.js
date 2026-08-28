@@ -124,7 +124,7 @@
   const heartsValEl = document.getElementById('heartsVal');
   const coinsValEl = document.getElementById('coinsVal');
   const starsValEl = document.getElementById('starsVal');
-  const stageBestValEl = document.getElementById('stageBestVal');
+  const clearBestLineEl = document.getElementById('clearBestLine');
   const toastEl = document.getElementById('toast');
   const clearOverlay = document.getElementById('clearOverlay');
   const clearDescEl = document.getElementById('clearDesc');
@@ -201,7 +201,6 @@
     progressFillEl.style.width = pct+'%';
     movesValEl.textContent = movesLeft;
     heartsValEl.textContent = hearts;
-    stageBestValEl.textContent = fmt(stageBests[stageSlot()]||0);
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
     document.getElementById('cntShuffle').textContent = powerCounts.shuffle;
@@ -371,9 +370,15 @@
     const stars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : 1);
     clearStarsEl.textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
     const slot = stageSlot();
-    if(stageScore > (stageBests[slot]||0)){
+    const prevBest = stageBests[slot]||0;
+    if(stageScore > prevBest){
       stageBests[slot] = stageScore;
       localStorage.setItem('sp_stage_bests', JSON.stringify(stageBests));
+      clearBestLineEl.textContent = prevBest>0
+        ? '신기록! '+fmt(prevBest)+' → '+fmt(stageScore)
+        : '이 스테이지 첫 기록: '+fmt(stageScore);
+    } else {
+      clearBestLineEl.textContent = '최고 기록 '+fmt(prevBest)+' (이번 '+fmt(stageScore)+')';
     }
     totalStars += stars;
     localStorage.setItem('sp_stars', totalStars);

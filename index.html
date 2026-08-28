@@ -27,28 +27,18 @@
     <div class="movesBadge"><div class="circle" id="movesVal">-</div><div class="lbl">MOVES</div></div>
   </div>
 
-  <div class="boardRow">
-    <div class="stageSidebar">
-      <div class="stRibbon">
-        <div class="lbl">STAGE</div>
-        <div class="num" id="stageNum">01</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="stStar"><img src="assets/images/icon_star.png" alt=""></div>
-      <div class="stTrailLine"></div>
-      <div class="stChest">🎁</div>
-      <div class="stBest" id="stageBestVal">0</div>
-    </div>
-    <div id="boardWrap">
-      <div id="grid"></div>
-      <svg id="lineLayer"></svg>
-    </div>
-    <div class="powerCol">
-      <div class="powerBtn" id="btnCandy"><img src="assets/images/powerup_candy.png" alt="사탕"><span class="cnt" id="cntCandy">3</span></div>
-      <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
-      <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
-      <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
-    </div>
+  <div class="stageLabelBar">STAGE <span id="stageNum">01</span></div>
+
+  <div id="boardWrap">
+    <div id="grid"></div>
+    <svg id="lineLayer"></svg>
+  </div>
+
+  <div class="powerRow">
+    <div class="powerBtn" id="btnCandy"><img src="assets/images/powerup_candy.png" alt="사탕"><span class="cnt" id="cntCandy">3</span></div>
+    <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
+    <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
+    <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
   </div>
 
   <div class="bottomNav">
@@ -69,6 +59,7 @@
     <h2>스테이지 클리어!</h2>
     <div class="stars" id="clearStars">⭐⭐⭐</div>
     <p id="clearDesc"></p>
+    <p class="bestLine" id="clearBestLine"></p>
     <button class="btn" id="nextStageBtn">다음 스테이지</button>
   </div>
 </div>
