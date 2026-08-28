@@ -37,7 +37,7 @@
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
   const STAGES = [
-    { name:'표준 주사위',      type:'dice-std' },
+    { name:'표준 주사위',      type:'img6',    prefix:'dice' },
     { name:'점 하나 (넓게)',    type:'dot',     positions:DOT_WIDE },
     { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
     { name:'건곤감리',          type:'trigram', set:TRIGRAM4 },
@@ -45,13 +45,13 @@
     { name:'점 4개 배치 A',     type:'pips',    combos:PIP4_A },
     { name:'화살표 6방향',      type:'arrow',   dirs:DIR6 },
     { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8 },
-    { name:'표정 (미세하게)',   type:'face',    set:FACE_HARD },
+    { name:'표정 (미세하게)',   type:'img6',    prefix:'face' },
     { name:'점 3개 배치',       type:'pips',    combos:PIP3 },
     { name:'점 5개 배치',       type:'pips',    combos:PIP5 },
     { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE },
     { name:'화살표 8방향',      type:'arrow',   dirs:DIR8 },
     { name:'점 4개 배치 B',     type:'pips',    combos:PIP4_B },
-    { name:'표준 주사위 한번 더', type:'dice-std' },
+    { name:'표준 주사위 한번 더', type:'img6',   prefix:'dice' },
     { name:'점 위치 (9칸 전체)', type:'dot',    positions:DOT_ALL9 },
     { name:'건곤감리 (다시)',   type:'trigram', set:TRIGRAM4 },
     { name:'표정 (섞어서)',     type:'face',    set:FACE_MIXED },
@@ -91,6 +91,7 @@
   function renderSymbolHTML(stage, v){
     switch(stage.type){
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
+      case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:100%;height:100%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
       case 'arrow':    return svgArrow(stage.dirs[v]);
       case 'trigram':  return stage.set[v];
@@ -102,6 +103,7 @@
   function stageSize(stage){
     switch(stage.type){
       case 'dice-std': return STD_DICE.length;
+      case 'img6':     return 6;
       case 'dot':      return stage.positions.length;
       case 'arrow':    return stage.dirs.length;
       case 'trigram':  return stage.set.length;
