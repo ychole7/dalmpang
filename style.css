@@ -41,15 +41,15 @@
   .pill{
     display:flex; align-items:center; gap:4px;
     background:rgba(20,30,55,0.68); border:1px solid rgba(255,255,255,0.12);
-    border-radius:13px; height:25px; padding:0 8px 0 4px;
+    border-radius:0 13px 13px 0; height:25px; padding:0 8px 0 2px;
     font-size:14px; font-weight:bold; color:#fff; box-shadow:0 2px 3px rgba(0,0,0,0.2);
     flex:1 1 auto; justify-content:center; min-width:0; overflow:visible;
   }
   .pill .plus{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
-  .pill .ico{font-size:15px; position:relative; z-index:1; margin-left:-16px;}
+  .pill .ico{font-size:15px; position:relative; z-index:1; margin-left:-19px;}
   .pill .ico img{ width:38px; height:38px; object-fit:contain; display:block; }
   .heartWrap{
-    position:relative; z-index:1; width:38px; height:38px; margin-left:-16px;
+    position:relative; z-index:1; width:38px; height:38px; margin-left:-19px;
     flex:0 0 auto; display:flex; align-items:center; justify-content:center;
   }
   .heartWrap img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
