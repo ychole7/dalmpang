@@ -45,6 +45,10 @@
     font-size:13px; font-weight:bold; box-shadow:0 2px 3px rgba(0,0,0,0.08);
     flex:1 1 auto; justify-content:center; min-width:0;
   }
+  .pill-heart{ background:linear-gradient(180deg,#ffe7ea,#ffd2d8); border-color:#ffc2ca; color:#a03a45; }
+  .pill-coin{ background:linear-gradient(180deg,#fff4d9,#ffe6a8); border-color:#f5cf72; color:#8a6412; }
+  .pill-star{ background:linear-gradient(180deg,#f1e9ff,#e2d3ff); border-color:#cbb3f5; color:#5c3d9c; }
+  .pill .plus{ box-shadow:0 1px 2px rgba(0,0,0,0.15); }
   .pill .ico{font-size:15px;}
   .pill .ico img{ width:18px; height:18px; object-fit:contain; display:block; }
   .pill .plus{
