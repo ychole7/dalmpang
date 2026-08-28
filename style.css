@@ -171,7 +171,7 @@
     display:flex; align-items:center; justify-content:center; font-size:22px;
     width:92px; height:92px; flex:0 0 auto;
   }
-  .powerBtn img{ width:100%; height:100%; object-fit:contain; border-radius:16px; box-shadow:0 3px 0 rgba(0,0,0,0.15); }
+  .powerBtn img{ width:100%; height:100%; object-fit:contain; border-radius:16px; }
   .powerBtn:active img{ transform:translateY(2px); }
   .powerBtn .cnt{
     position:absolute; bottom:-6px; right:-6px; background:var(--red); color:#fff;
