@@ -227,7 +227,7 @@
     const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
     movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
     movesScoreEchoEl.textContent = fmt(stageScore);
-    heartsValEl.textContent = hearts>=5 ? (hearts+' MAX') : hearts;
+    heartsValEl.textContent = hearts;
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
     document.getElementById('cntShuffle').textContent = powerCounts.shuffle;
