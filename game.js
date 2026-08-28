@@ -73,7 +73,7 @@
     const arr = [];
     for(let i=0;i<total;i++){
       const base = STAGE_POOL[i % STAGE_POOL.length];
-      arr.push(Object.assign({}, base, { target: 250 + i*20 }));
+      arr.push(Object.assign({}, base, { target: 250 + Math.round(300*Math.sqrt(i)) }));
     }
     return arr;
   }
@@ -326,7 +326,7 @@
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
-  function movesBudget(){ return 18 + Math.min(24, Math.floor(stageIndex/25)); }
+  function movesBudget(){ return 16 + Math.min(30, Math.floor(stageIndex/15)); }
 
   function showToast(msg){
     toastEl.textContent = msg;
@@ -582,7 +582,7 @@
     totalStars += stars;
     localStorage.setItem('sp_stars', totalStars);
     starsValEl.textContent = totalStars;
-    awardCoins(30*stars);
+    awardCoins(30*stars + Math.floor(stageIndex/20));
     clearDescEl.textContent = st.name+' 스테이지 완료! 다음은 "'+STAGES[(stageIndex+1)%STAGES.length].name+'" 테마입니다.';
     clearOverlay.classList.add('show');
   }
