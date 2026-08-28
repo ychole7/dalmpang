@@ -91,7 +91,7 @@
   }
   #boardWrap{
     position:relative; width:100%;
-    aspect-ratio:7/9;
+    aspect-ratio:7/8;
     background:linear-gradient(180deg,#dff0ff,#c3e3ff);
     border-radius:16px; border:4px solid #fff;
     box-shadow:0 6px 14px rgba(60,110,160,0.25);
@@ -99,7 +99,7 @@
   }
   #grid{
     position:relative; width:100%; height:100%;
-    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr); gap:0.6%;
+    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(8,1fr); gap:0.6%;
   }
   svg#lineLayer{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5;}
   .die{
