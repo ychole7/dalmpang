@@ -39,6 +39,7 @@
 
   const STAGE_POOL = [
     { name:'표준 주사위',      type:'dice-std' },
+    { name:'색깔 풍선',        type:'balloon' },
     { name:'점 하나',          type:'dot',     positions:DOT_WIDE },
     { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
     { name:'씨앗 위치',        type:'seed',    positions:[1,3,5,6,7,8] },
@@ -194,6 +195,16 @@
       + holes
       + '</svg>';
   }
+  const BALLOON_COLORS = ['#e5484d','#4a90d9','#f2c14e','#4caf50','#9b59b6','#f2914e'];
+  function svgBalloonAt(idx){
+    const c = BALLOON_COLORS[idx];
+    return '<svg viewBox="0 0 100 100" width="76%" height="90%">'
+      + '<ellipse cx="50" cy="42" rx="27" ry="33" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="2.5"/>'
+      + '<ellipse cx="39" cy="27" rx="8" ry="13" fill="#ffffff" opacity="0.4"/>'
+      + '<polygon points="46,73 54,73 50,81" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="1.5"/>'
+      + '<path d="M50,81 C47,87 53,91 50,98" stroke="#6b5842" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
+  }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
@@ -207,6 +218,7 @@
       case 'clock':    return svgClockAt(stage.dirs[v]);
       case 'traffic':  return svgTrafficAt(v+1);
       case 'button':   return svgButtonAt(stage.positions[v]);
+      case 'balloon':  return svgBalloonAt(v);
       case 'arrow':    return svgArrow(stage.dirs[v]);
       case 'trigram':  return stage.set[v];
       case 'face':     return svgFaceCfg(stage.set[v]);
@@ -227,6 +239,7 @@
       case 'clock':    return stage.dirs.length;
       case 'traffic':  return 3;
       case 'button':   return stage.positions.length;
+      case 'balloon':  return BALLOON_COLORS.length;
       case 'arrow':    return stage.dirs.length;
       case 'trigram':  return stage.set.length;
       case 'face':     return stage.set.length;
