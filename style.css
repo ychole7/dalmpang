@@ -268,29 +268,35 @@
   /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
   .clearCardImg{
     position:relative; width:320px; max-width:90vw;
-    aspect-ratio:1264/1152;
+    aspect-ratio:1287/1080;
   }
   .clearCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
-  .clearStarsRow{ display:none; }
+  .clearStarsRow{
+    position:absolute; left:50%; top:47%; transform:translate(-50%,-50%);
+    display:flex; align-items:center; gap:3%; z-index:2;
+  }
+  .clearStarsRow img{ width:8%; height:auto; object-fit:contain; }
+  .clearStarsRow img:nth-child(2){ width:11%; margin-top:-6%; }
+  .clearStarsRow img.dim{ filter:grayscale(1) opacity(0.45); }
   .statOverlay{
-    position:absolute; top:54%; transform:translate(-50%,-50%);
+    position:absolute; top:64%; transform:translate(-50%,-50%);
     font-size:clamp(14px, 5.5vw, 22px); font-weight:900; z-index:2;
   }
-  .statBest{ left:22.7%; color:#d9772f; }
-  .statCurrent{ left:46.4%; color:#e0447c; }
-  .statTarget{ left:67%; color:#3a3226; }
+  .statBest{ left:27.6%; color:#d9772f; }
+  .statCurrent{ left:50.9%; color:#e0447c; }
+  .statTarget{ left:73.4%; color:#3a3226; }
   .rewardOverlay{
-    position:absolute; top:64%; transform:translateX(-50%);
+    position:absolute; top:70%; transform:translateX(-50%);
     display:flex; flex-direction:column; align-items:center; gap:2px; z-index:2;
     font-size:clamp(11px, 4.2vw, 15px); font-weight:900; color:#3a3226;
   }
-  .rewardOverlay img{ width:10%; height:auto; object-fit:contain; }
-  .rewardCoin{ left:26%; }
-  .rewardStar{ left:46.6%; }
-  .rewardHeart{ left:67.2%; }
+  .rewardOverlay img{ width:9%; height:auto; object-fit:contain; }
+  .rewardCoin{ left:27.6%; }
+  .rewardStar{ left:50.9%; }
+  .rewardHeart{ left:73.4%; }
   .clearBtnHit{
-    position:absolute; top:71.6%; height:8.7%;
+    position:absolute; top:87%; height:10%;
     background:transparent; border:none; z-index:3;
   }
-  .btnRetry{ left:16.2%; width:29.3%; }
-  .btnNext{ left:48.7%; width:30.1%; }
+  .btnRetry{ left:20%; width:30%; }
+  .btnNext{ left:55%; width:33%; }
