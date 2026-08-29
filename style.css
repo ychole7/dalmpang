@@ -268,7 +268,7 @@
   /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
   .clearCardImg{
     position:relative; width:380px; max-width:94vw;
-    aspect-ratio:1162/1353;
+    aspect-ratio:1173/1341;
   }
   .clearCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .clearStarsRow{ position:absolute; inset:0; z-index:2; }
@@ -276,29 +276,29 @@
     position:absolute; width:9%; height:auto; object-fit:contain;
     transform:translate(-50%,-50%);
   }
-  .clearStarsRow img:nth-child(1){ left:24%; top:42%; }
+  .clearStarsRow img:nth-child(1){ left:22%; top:42%; }
   .clearStarsRow img:nth-child(2){ left:50%; width:12%; top:41%; }
-  .clearStarsRow img:nth-child(3){ left:76%; top:42%; }
+  .clearStarsRow img:nth-child(3){ left:78%; top:42%; }
   .clearStarsRow img.dim{ filter:grayscale(1) opacity(0.45); }
   .statOverlay{
-    position:absolute; top:56%; transform:translate(-50%,-50%);
+    position:absolute; top:58%; transform:translate(-50%,-50%);
     font-size:clamp(14px, 5.5vw, 22px); font-weight:900; z-index:2;
   }
-  .statBest{ left:24%; color:#d9772f; }
+  .statBest{ left:22%; color:#d9772f; }
   .statCurrent{ left:50%; color:#e0447c; }
-  .statTarget{ left:76%; color:#3a3226; }
+  .statTarget{ left:78%; color:#3a3226; }
   .rewardOverlay{
-    position:absolute; top:72%; transform:translateX(-50%);
+    position:absolute; top:74%; transform:translateX(-50%);
     display:flex; flex-direction:column; align-items:center; gap:2px; z-index:2;
     font-size:clamp(11px, 4.2vw, 15px); font-weight:900; color:#3a3226;
   }
   .rewardOverlay img{ width:9%; height:auto; object-fit:contain; }
-  .rewardCoin{ left:24%; }
+  .rewardCoin{ left:22%; }
   .rewardStar{ left:50%; }
-  .rewardHeart{ left:76%; }
+  .rewardHeart{ left:78%; }
   .clearBtnHit{
-    position:absolute; top:84%; height:9%;
+    position:absolute; top:85%; height:9%;
     background:transparent; border:none; z-index:3;
   }
-  .btnRetry{ left:13%; width:27%; }
-  .btnNext{ left:57%; width:30%; }
+  .btnRetry{ left:15%; width:30%; }
+  .btnNext{ left:55%; width:35%; }
