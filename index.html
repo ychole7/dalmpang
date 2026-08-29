@@ -70,13 +70,30 @@
 <div id="toast"></div>
 
 <div class="overlay" id="clearOverlay">
-  <div class="card">
-    <img class="mascotPop" src="assets/images/mascot_win.png" alt="">
-    <h2>스테이지 클리어!</h2>
-    <div class="stars" id="clearStars">⭐⭐⭐</div>
-    <p id="clearDesc"></p>
-    <p class="bestLine" id="clearBestLine"></p>
-    <button class="btn" id="nextStageBtn">다음 스테이지</button>
+  <div class="clearCard">
+    <button class="closeX" id="clearCloseBtn">✕</button>
+    <div class="clearRibbonWrap">
+      <img class="clearMascot" src="assets/images/mascot_win.png" alt="">
+      <div class="clearRibbon">스테이지 클리어!</div>
+    </div>
+    <div class="clearStarsRow" id="clearStarsRow"></div>
+    <div class="clearStatsRow">
+      <div class="statCol"><div class="statLabel">최고 기록</div><div class="statVal best" id="clearBestVal">0</div></div>
+      <div class="statCol"><div class="statLabel">이번 기록</div><div class="statVal current" id="clearScoreVal">0</div></div>
+      <div class="statCol"><div class="statLabel">목표 점수</div><div class="statVal target" id="clearTargetVal">0</div></div>
+    </div>
+    <div class="clearRewards">
+      <div class="rewardsTitle">🌿 획득 보상 🌿</div>
+      <div class="rewardsRow">
+        <div class="rewardItem"><img src="assets/images/icon_coin.png" alt=""><span id="clearCoinGain">0</span></div>
+        <div class="rewardItem"><img src="assets/images/icon_star.png" alt=""><span id="clearStarGain">0</span></div>
+        <div class="rewardItem"><img src="assets/images/icon_heart.png" alt=""><span id="clearHeartGain">+1</span></div>
+      </div>
+    </div>
+    <div class="clearButtons">
+      <button class="btn secondary" id="retryClearBtn">🔄 다시하기</button>
+      <button class="btn primary" id="nextStageBtn">▶ 다음 스테이지</button>
+    </div>
   </div>
 </div>
 
