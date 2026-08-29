@@ -265,50 +265,32 @@
   }
   .btn.secondary{ background:linear-gradient(180deg,#b9c6d3,#8fa2b3); box-shadow:0 3px 0 #5f7284; margin-right:8px;}
 
-  /* ---------- stage clear card ---------- */
-  .clearCard{
-    position:relative; width:300px; max-width:88vw;
-    background:#fdf7e8; border:4px solid #c99a5b; border-radius:22px;
-    padding:46px 16px 18px; text-align:center;
-    box-shadow:0 12px 28px rgba(0,0,0,0.35);
+  /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
+  .clearCardImg{
+    position:relative; width:320px; max-width:90vw;
+    aspect-ratio:1264/1152;
   }
-  .closeX{
-    position:absolute; top:-10px; right:-10px; width:32px; height:32px; border-radius:50%;
-    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff; border:2px solid #fff;
-    font-size:14px; font-weight:bold; box-shadow:0 3px 0 #234f7d; z-index:3;
+  .clearCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
+  .clearStarsRow{ display:none; }
+  .statOverlay{
+    position:absolute; top:54%; transform:translate(-50%,-50%);
+    font-size:clamp(14px, 5.5vw, 22px); font-weight:900; z-index:2;
   }
-  .clearRibbonWrap{ position:absolute; top:-40px; left:0; right:0; display:flex; flex-direction:column; align-items:center; }
-  .clearMascot{ width:64px; height:64px; object-fit:contain; z-index:2; filter:drop-shadow(0 3px 4px rgba(0,0,0,0.25)); }
-  .clearRibbon{
-    margin-top:-14px; background:linear-gradient(180deg,#f2607e,#d43a5c); color:#fff9de;
-    font-size:15px; font-weight:900; padding:7px 22px; border-radius:8px;
-    box-shadow:0 3px 0 #a02a44; position:relative; white-space:nowrap;
+  .statBest{ left:22.7%; color:#d9772f; }
+  .statCurrent{ left:46.4%; color:#e0447c; }
+  .statTarget{ left:67%; color:#3a3226; }
+  .rewardOverlay{
+    position:absolute; top:64%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:2px; z-index:2;
+    font-size:clamp(11px, 4.2vw, 15px); font-weight:900; color:#3a3226;
   }
-  .clearRibbon::before, .clearRibbon::after{
-    content:''; position:absolute; top:3px; width:0; height:0;
-    border-top:12px solid #a02a44; 
+  .rewardOverlay img{ width:10%; height:auto; object-fit:contain; }
+  .rewardCoin{ left:26%; }
+  .rewardStar{ left:46.6%; }
+  .rewardHeart{ left:67.2%; }
+  .clearBtnHit{
+    position:absolute; top:71.6%; height:8.7%;
+    background:transparent; border:none; z-index:3;
   }
-  .clearRibbon::before{ left:-14px; border-right:14px solid transparent; }
-  .clearRibbon::after{ right:-14px; border-left:14px solid transparent; }
-  .clearStarsRow{ display:flex; justify-content:center; gap:10px; margin:6px 0 14px; }
-  .clearStarsRow img{ width:40px; height:40px; object-fit:contain; }
-  .clearStarsRow img.dim{ filter:grayscale(1) opacity(0.4); }
-  .clearStatsRow{
-    display:flex; background:#fff; border:1px solid #eadfc4; border-radius:12px;
-    padding:10px 4px; margin-bottom:12px;
-  }
-  .statCol{ flex:1; border-right:1px solid #eadfc4; }
-  .statCol:last-child{ border-right:none; }
-  .statLabel{ font-size:10px; color:#9a8a6a; margin-bottom:3px; }
-  .statVal{ font-size:18px; font-weight:900; }
-  .statVal.best{ color:#d9772f; }
-  .statVal.current{ color:#e0447c; }
-  .statVal.target{ color:var(--ink); }
-  .clearRewards{ background:#eef5e3; border-radius:12px; padding:10px 8px 12px; margin-bottom:16px; }
-  .rewardsTitle{ font-size:12px; color:#5a8a4a; font-weight:bold; margin-bottom:8px; }
-  .rewardsRow{ display:flex; justify-content:center; gap:22px; }
-  .rewardItem{ display:flex; flex-direction:column; align-items:center; gap:2px; font-size:14px; font-weight:900; color:var(--ink); }
-  .rewardItem img{ width:34px; height:34px; object-fit:contain; }
-  .clearButtons{ display:flex; gap:10px; }
-  .clearButtons .btn{ flex:1; margin-right:0; display:flex; align-items:center; justify-content:center; gap:4px; font-size:12px; padding:10px 6px; white-space:nowrap; }
-  .btn.primary{ background:linear-gradient(180deg,#6dc257,#3f9e33); box-shadow:0 3px 0 #276b1f; }
+  .btnRetry{ left:16.2%; width:29.3%; }
+  .btnNext{ left:48.7%; width:30.1%; }
