@@ -143,8 +143,24 @@
   }
   .die.selected{ transform:scale(1.12); filter:drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 10px rgba(242,169,59,0.6)); }
   .die.imgTile{ background:none; }
-  .die.popping{ transform:scale(0.2) rotate(25deg); opacity:0; }
+  .die.popping{ animation: tilePunchPop 260ms ease forwards; }
+  @keyframes tilePunchPop{
+    0%{ transform:scale(1); opacity:1; }
+    25%{ transform:scale(1.28); opacity:1; }
+    100%{ transform:scale(0.15) rotate(20deg); opacity:0; }
+  }
 
+  #boardFlash{
+    position:absolute; inset:0; pointer-events:none; z-index:12;
+    opacity:0; border-radius:12px;
+  }
+  #boardFlash.show.flashGreat{ animation:flashPulse 300ms ease; background:radial-gradient(circle, rgba(255,255,255,0.55), rgba(242,169,59,0.25) 70%, transparent 100%); }
+  #boardFlash.show.flashAmazing{ animation:flashPulse 380ms ease; background:radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,95,122,0.35) 70%, transparent 100%); }
+  @keyframes flashPulse{
+    0%{ opacity:0; }
+    20%{ opacity:1; }
+    100%{ opacity:0; }
+  }
   .popEffect{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     pointer-events:none; z-index:15; opacity:0;

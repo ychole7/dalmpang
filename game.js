@@ -340,6 +340,12 @@
     if(count>=9) tier = '<div class="line0">AMAZING!</div>';
     else if(count>=5) tier = '<div class="line0">GREAT!</div>';
     popTextEl.innerHTML = tier+'<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
+    if(count>=5){
+      const flash = document.getElementById('boardFlash');
+      flash.className = count>=9 ? 'flashAmazing' : 'flashGreat';
+      void flash.offsetWidth;
+      flash.classList.add('show');
+    }
     popParticlesEl.innerHTML = '';
     const symbols = ['⭐','✨','🌟'];
     const n = Math.min(18, 8 + count);
@@ -525,7 +531,7 @@
       if(stageScore >= currentStage().target){ showStageClear(); }
       else if(movesLeft<=0){ showStageFail(); }
       else { checkNoMoves(); }
-    }, 180);
+    }, 260);
   }
 
   function popChain(cells){
