@@ -496,6 +496,15 @@
     coinsValEl.textContent = fmt(coins);
   }
 
+  function shakeBoard(count){
+    const el = document.getElementById('boardWrap');
+    const mag = count>=9 ? '10px' : count>=5 ? '6px' : '3px';
+    el.style.setProperty('--shakeMag', mag);
+    el.classList.remove('shaking');
+    void el.offsetWidth;
+    el.classList.add('shaking');
+  }
+
   function popCells(cells, isBonus){
     const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
     stageScore += gained;
@@ -504,6 +513,7 @@
     else if(cells.length>=5) coinGain += 5;
     awardCoins(coinGain);
     triggerPopEffect(cells.length, gained);
+    shakeBoard(cells.length);
     cells.forEach(({r,c})=>{
       cellEls[r][c].classList.add('popping');
       board[r][c] = null;
