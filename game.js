@@ -652,9 +652,6 @@
     clearOverlay.classList.remove('show');
     newStageBoard();
   });
-  document.getElementById('clearCloseBtn').addEventListener('click', ()=>{
-    clearOverlay.classList.remove('show');
-  });
   document.getElementById('retryBtn').addEventListener('click', ()=>{
     if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
     spendHeart();
