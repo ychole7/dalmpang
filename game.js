@@ -20,6 +20,20 @@
   const TRIGRAM4 = ['☰','☷','☵','☲'];
   const SUIT_SET = ['♠','♥','♦','♣'];
   const TRIGRAM8 = ['☰','☱','☲','☳','☴','☵','☶','☷'];
+  const TRIGRAM_LINES = {
+    '☰':[1,1,1], '☱':[1,1,0], '☲':[1,0,1], '☳':[1,0,0],
+    '☴':[0,1,1], '☵':[0,1,0], '☶':[0,0,1], '☷':[0,0,0]
+  };
+  function svgTrigramAt(ch){
+    const lines = TRIGRAM_LINES[ch];
+    const ys = [28,50,72];
+    const bars = lines.map(function(solid,i){
+      const y = ys[i];
+      if(solid) return '<rect x="18" y="'+(y-5)+'" width="64" height="10" rx="3" fill="#1f2a44"/>';
+      return '<rect x="18" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#1f2a44"/><rect x="56" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#1f2a44"/>';
+    }).join('');
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'+bars+'</svg>';
+  }
 
   const FACE_EASY = [
     { brow:0,   mouth:'M28,60 Q50,82 72,60' },
@@ -220,7 +234,7 @@
       case 'button':   return svgButtonAt(stage.positions[v]);
       case 'balloon':  return svgBalloonAt(v);
       case 'arrow':    return svgArrow(stage.dirs[v]);
-      case 'trigram':  return stage.set[v];
+      case 'trigram':  return TRIGRAM_LINES[stage.set[v]] ? svgTrigramAt(stage.set[v]) : stage.set[v];
       case 'face':     return svgFaceCfg(stage.set[v]);
       case 'pips':     return svgPipsCombo(stage.combos[v]);
       default: return '?';
