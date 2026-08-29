@@ -336,7 +336,10 @@
   }
 
   function triggerPopEffect(count, gained){
-    popTextEl.innerHTML = '<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
+    let tier = '';
+    if(count>=9) tier = '<div class="line0">AMAZING!</div>';
+    else if(count>=5) tier = '<div class="line0">GREAT!</div>';
+    popTextEl.innerHTML = tier+'<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
     popParticlesEl.innerHTML = '';
     const symbols = ['⭐','✨','🌟'];
     const n = Math.min(18, 8 + count);
@@ -496,7 +499,10 @@
   function popCells(cells, isBonus){
     const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
     stageScore += gained;
-    awardCoins(Math.max(1, Math.floor(gained/20)));
+    let coinGain = Math.max(1, Math.floor(gained/20));
+    if(cells.length>=9) coinGain += 15;
+    else if(cells.length>=5) coinGain += 5;
+    awardCoins(coinGain);
     triggerPopEffect(cells.length, gained);
     cells.forEach(({r,c})=>{
       cellEls[r][c].classList.add('popping');

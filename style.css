@@ -147,6 +147,11 @@
     100%{ opacity:0; transform:scale(1.08); }
   }
   .popText{ position:relative; z-index:2; text-align:center; }
+  .popText .line0{
+    font-size:20px; font-weight:900; color:#ff5f7a;
+    text-shadow:0 2px 0 #a01f34, 0 0 12px rgba(255,95,122,0.7);
+    margin-bottom:2px;
+  }
   .popText .line1{
     font-size:16px; font-weight:bold; color:#fff;
     text-shadow:0 2px 4px rgba(0,0,0,0.35), 0 0 8px rgba(255,255,255,0.5);
