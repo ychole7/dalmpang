@@ -757,4 +757,9 @@
   newStageBoard();
   window.addEventListener('resize', drawChainLine);
   setInterval(()=>{ tickHeartRegen(); heartsValEl.textContent = hearts; }, 1000);
+
+  const splashEl = document.getElementById('splashScreen');
+  if(splashEl){
+    splashEl.addEventListener('click', ()=> splashEl.classList.add('hide'), { once:true });
+  }
 })();
