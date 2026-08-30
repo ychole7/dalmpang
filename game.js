@@ -65,7 +65,6 @@
     { name:'화살표 6방향',      type:'arrow',   dirs:DIR6 },
     { name:'종',                type:'bell',    positions:[1,2,3,4] },
     { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8 },
-    { name:'표정 (미세하게)',   type:'img6',    prefix:'face' },
     { name:'씨앗 위치 (좁게)',   type:'seed',    positions:[1,2,3,4] },
     { name:'퍼즐 조각',         type:'puzzle',  positions:[1,2,3,4] },
     { name:'점 3개 배치',       type:'pips',    combos:PIP3 },
