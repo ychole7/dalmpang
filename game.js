@@ -318,6 +318,9 @@
   let totalStagesCleared = parseInt(localStorage.getItem('sp_total_cleared')||'0',10);
   let totalCoinsEarned = parseInt(localStorage.getItem('sp_total_coins_earned')||'0',10);
   let loginStreak = parseInt(localStorage.getItem('sp_login_streak')||'0',10);
+  let totalTilesRemoved = parseInt(localStorage.getItem('sp_total_tiles')||'0',10);
+  let totalPops = parseInt(localStorage.getItem('sp_total_pops')||'0',10);
+  let achievementsClaimed = JSON.parse(localStorage.getItem('sp_achievements_claimed')||'[]');
 
   (function trackDailyLogin(){
     const today = new Date().toISOString().slice(0,10);
@@ -579,6 +582,10 @@
       maxCombo = cells.length;
       localStorage.setItem('sp_max_combo', maxCombo);
     }
+    totalTilesRemoved += cells.length;
+    totalPops += 1;
+    localStorage.setItem('sp_total_tiles', totalTilesRemoved);
+    localStorage.setItem('sp_total_pops', totalPops);
     triggerPopEffect(cells.length, gained);
     shakeBoard(cells.length);
     cells.forEach(({r,c})=>{
@@ -795,75 +802,89 @@
   document.getElementById('navShop').addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
   document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
 
-  function tierProgress(value, tiers){
-    // tiers: 오름차순 임계값 배열. 도달한 단계 수와 다음 목표까지 진행률 반환
-    let reached = 0;
-    for(const t of tiers){ if(value>=t) reached++; }
-    const next = tiers[reached];
-    const prev = reached>0 ? tiers[reached-1] : 0;
-    const pct = next ? Math.min(100, ((value-prev)/(next-prev))*100) : 100;
-    return { reached, total: tiers.length, next, pct, done: reached>=tiers.length };
+  const ACHIEVEMENTS = [
+    { id:'pattern10',   icon:'🧩',  name:'패턴 수집가',   desc:'서로 다른 패턴 10개 클리어',              target:10,     get:()=>patternsCleared.length, reward:{coin:100} },
+    { id:'pattern27',   icon:'🧩✨', name:'패턴 마스터',   desc:'서로 다른 패턴 '+STAGE_POOL.length+'개 모두 클리어', target:STAGE_POOL.length, get:()=>patternsCleared.length, reward:{coin:500,star:20} },
+    { id:'combo5',      icon:'⭐',  name:'콤보 스타터',   desc:'한 번에 타일 5개 연결',                    target:5,      get:()=>maxCombo, reward:{coin:20} },
+    { id:'combo9',      icon:'⚡',  name:'콤보 러너',     desc:'한 번에 타일 9개 연결',                    target:9,      get:()=>maxCombo, reward:{coin:50} },
+    { id:'combo15',     icon:'🔥',  name:'콤보 마스터',   desc:'한 번에 타일 15개 연결',                   target:15,     get:()=>maxCombo, reward:{coin:100} },
+    { id:'perfect10',   icon:'💯',  name:'완벽주의자',    desc:'목표 점수의 200% 이상으로 클리어 10회',      target:10,     get:()=>perfectClears, reward:{coin:50} },
+    { id:'perfect50',   icon:'👑',  name:'퍼펙트 플레이', desc:'목표 점수의 200% 이상으로 클리어 50회',      target:50,     get:()=>perfectClears, reward:{coin:150} },
+    { id:'perfect100',  icon:'💎',  name:'완벽의 경지',   desc:'목표 점수의 200% 이상으로 클리어 100회',     target:100,    get:()=>perfectClears, reward:{coin:300} },
+    { id:'star3_10',    icon:'⭐⭐⭐', name:'별 세 개!',   desc:'⭐⭐⭐ 10회 달성',                          target:10,     get:()=>perfectClears, reward:{coin:100} },
+    { id:'star3_50',    icon:'🌟',  name:'별빛 수집가',   desc:'⭐⭐⭐ 50회 달성',                          target:50,     get:()=>perfectClears, reward:{coin:300} },
+    { id:'stage10',     icon:'👣',  name:'첫 발자국',     desc:'스테이지 10개 클리어',                     target:10,     get:()=>totalStagesCleared, reward:{coin:30} },
+    { id:'stage50',     icon:'🔍',  name:'꾸준한 탐정',   desc:'스테이지 50개 클리어',                     target:50,     get:()=>totalStagesCleared, reward:{coin:100} },
+    { id:'stage100',    icon:'🧭',  name:'숙련된 탐험가', desc:'스테이지 100개 클리어',                    target:100,    get:()=>totalStagesCleared, reward:{coin:250} },
+    { id:'stage250',    icon:'🗺️',  name:'대단한 여정',   desc:'스테이지 250개 클리어',                    target:250,    get:()=>totalStagesCleared, reward:{coin:500} },
+    { id:'stage500',    icon:'🏆',  name:'닮팡 마스터',   desc:'스테이지 500개 클리어',                    target:500,    get:()=>totalStagesCleared, reward:{star:30}, special:true },
+    { id:'tile100',     icon:'🧱',  name:'타일 수집가',   desc:'타일 100개 제거',                          target:100,    get:()=>totalTilesRemoved, reward:{coin:50} },
+    { id:'tile1000',    icon:'💥',  name:'타일 파괴자',   desc:'타일 1,000개 제거',                        target:1000,   get:()=>totalTilesRemoved, reward:{coin:200} },
+    { id:'tilebomb10',  icon:'💥',  name:'타일 폭격',     desc:'한 번에 타일 10개 이상 제거',               target:10,     get:()=>maxCombo, reward:{coin:150} },
+    { id:'chain100',    icon:'🔗',  name:'연쇄의 달인',   desc:'타일 연쇄 제거 100회',                     target:100,    get:()=>totalPops, reward:{coin:200} },
+    { id:'coin1000',    icon:'🪙',  name:'동전 한 닢',    desc:'누적 코인 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
+    { id:'coin10000',   icon:'💰',  name:'알뜰 닮팡',     desc:'누적 코인 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
+    { id:'coin100000',  icon:'💎',  name:'부자 닮팡',     desc:'누적 코인 100,000개 획득',                 target:100000, get:()=>totalCoinsEarned, reward:{star:40} },
+    { id:'login3',      icon:'🌱',  name:'다시 만나요',   desc:'3일 연속 접속',                            target:3,      get:()=>loginStreak, reward:{coin:30,heart:1} },
+    { id:'login7',      icon:'🔥',  name:'매일 만나요',   desc:'7일 연속 접속',                            target:7,      get:()=>loginStreak, reward:{coin:100,heart:2} },
+    { id:'login30',     icon:'📅',  name:'한 달 개근',    desc:'30일 연속 접속',                           target:30,     get:()=>loginStreak, reward:{coin:500,heart:5} }
+  ];
+
+  function rewardText(reward){
+    const parts = [];
+    if(reward.coin) parts.push('🪙'+fmt(reward.coin));
+    if(reward.star) parts.push('⭐'+reward.star);
+    if(reward.heart) parts.push('❤️'+reward.heart);
+    return parts.join(' ');
+  }
+
+  function claimAchievement(id){
+    const a = ACHIEVEMENTS.find(x=>x.id===id);
+    if(!a || achievementsClaimed.includes(id)) return;
+    if(a.get() < a.target) return;
+    if(a.reward.coin) awardCoins(a.reward.coin);
+    if(a.reward.star){ totalStars += a.reward.star; localStorage.setItem('sp_stars', totalStars); starsValEl.textContent = totalStars; }
+    if(a.reward.heart){ hearts = Math.min(HEART_MAX, hearts + a.reward.heart); saveHearts(); }
+    achievementsClaimed.push(id);
+    localStorage.setItem('sp_achievements_claimed', JSON.stringify(achievementsClaimed));
+    updateHud();
+    renderAchievements();
+    showToast(a.name+' 보상 수령! '+rewardText(a.reward));
   }
 
   function renderAchievements(){
     const list = document.getElementById('achieveList');
-    const rows = [];
+    const doneCount = ACHIEVEMENTS.filter(a=>achievementsClaimed.includes(a.id)).length;
+    document.getElementById('achieveSummary').textContent = doneCount+' / '+ACHIEVEMENTS.length+' 달성';
 
-    const patternPct = Math.min(100, (patternsCleared.length/STAGE_POOL.length)*100);
-    rows.push({
-      icon:'🧩', title:'패턴 마스터',
-      desc:'서로 다른 '+STAGE_POOL.length+'가지 패턴을 각각 한 번 이상 클리어',
-      progressText: patternsCleared.length+' / '+STAGE_POOL.length,
-      pct: patternPct, done: patternsCleared.length>=STAGE_POOL.length
-    });
-
-    const comboT = tierProgress(maxCombo, [5,9,15]);
-    rows.push({
-      icon:'⭐', title:'연결 콤보',
-      desc:'한 번에 5개 → 9개 → 15개 이상 연결',
-      progressText:'최고 '+maxCombo+'개 연결 ('+comboT.reached+'/'+comboT.total+' 단계)',
-      pct: comboT.pct, done: comboT.done
-    });
-
-    const perfT = tierProgress(perfectClears, [10,50,100]);
-    rows.push({
-      icon:'💯', title:'완벽주의자',
-      desc:'별 3개(목표의 200% 이상)로 클리어 10 → 50 → 100회',
-      progressText: perfectClears+'회 ('+perfT.reached+'/'+perfT.total+' 단계)',
-      pct: perfT.pct, done: perfT.done
-    });
-
-    const clearT = tierProgress(totalStagesCleared, [10,50,100,500]);
-    rows.push({
-      icon:'🔍', title:'꾸준한 탐정',
-      desc:'누적 스테이지 클리어 10 → 50 → 100 → 500회',
-      progressText: totalStagesCleared+'회 ('+clearT.reached+'/'+clearT.total+' 단계)',
-      pct: clearT.pct, done: clearT.done
-    });
-
-    const coinT = tierProgress(totalCoinsEarned, [1000,10000,100000]);
-    rows.push({
-      icon:'💰', title:'부자 닮팡',
-      desc:'누적 획득 코인 1,000 → 10,000 → 100,000',
-      progressText: fmt(totalCoinsEarned)+'코인 ('+coinT.reached+'/'+coinT.total+' 단계)',
-      pct: coinT.pct, done: coinT.done
-    });
-
-    const loginT = tierProgress(loginStreak, [3,7,30]);
-    rows.push({
-      icon:'📅', title:'매일 접속',
-      desc:'연속 접속 3일 → 7일 → 30일',
-      progressText: loginStreak+'일 연속 ('+loginT.reached+'/'+loginT.total+' 단계)',
-      pct: loginT.pct, done: loginT.done
-    });
-
-    list.innerHTML = rows.map(function(r){
-      return '<div class="achieveRow'+(r.done?' done':'')+'">'
-        + '<div class="aTitle"><span><span class="aIcon">'+r.icon+'</span>'+r.title+(r.done?' ✅':'')+'</span><span>'+r.progressText+'</span></div>'
-        + '<div class="aDesc">'+r.desc+'</div>'
-        + '<div class="aBarTrack"><div class="aBarFill" style="width:'+r.pct+'%"></div></div>'
+    // 순서는 고정 — 완료된 걸 위로 재정렬하지 않음
+    list.innerHTML = ACHIEVEMENTS.map(function(a){
+      const val = Math.min(a.target, a.get());
+      const pct = Math.min(100, (val/a.target)*100);
+      const claimed = achievementsClaimed.includes(a.id);
+      const ready = !claimed && a.get()>=a.target;
+      let rightHtml;
+      if(claimed){
+        rightHtml = '<div class="aStatus done">✓ 완료</div>';
+      } else if(ready){
+        rightHtml = '<button class="aClaimBtn" data-id="'+a.id+'">보상 받기</button>';
+      } else {
+        rightHtml = '<div class="aStatus">'+val+' / '+a.target+'</div>';
+      }
+      return '<div class="achieveRow'+(claimed?' done':'')+(a.special?' special':'')+'">'
+        + '<div class="aBadge">'+a.icon+'</div>'
+        + '<div class="aBody">'
+        +   '<div class="aTitle">'+a.name+'</div>'
+        +   '<div class="aDesc">'+a.desc+'</div>'
+        +   '<div class="aBarTrack"><div class="aBarFill" style="width:'+pct+'%"></div></div>'
+        +   '<div class="aFoot"><span class="aReward">'+rewardText(a.reward)+'</span>'+rightHtml+'</div>'
+        + '</div>'
         + '</div>';
     }).join('');
+
+    list.querySelectorAll('.aClaimBtn').forEach(function(btn){
+      btn.addEventListener('click', function(){ claimAchievement(btn.dataset.id); });
+    });
   }
 
   document.getElementById('navAchieve').addEventListener('click', ()=>{
