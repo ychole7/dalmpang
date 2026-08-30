@@ -311,6 +311,30 @@
   let dragging = false;
   let powerCounts = { candy:3, bomb:2, shuffle:2, rainbow:2 };
 
+  // ---- 업적 추적용 데이터 ----
+  let patternsCleared = JSON.parse(localStorage.getItem('sp_patterns_cleared')||'[]');
+  let maxCombo = parseInt(localStorage.getItem('sp_max_combo')||'0',10);
+  let perfectClears = parseInt(localStorage.getItem('sp_perfect_clears')||'0',10);
+  let totalStagesCleared = parseInt(localStorage.getItem('sp_total_cleared')||'0',10);
+  let totalCoinsEarned = parseInt(localStorage.getItem('sp_total_coins_earned')||'0',10);
+  let loginStreak = parseInt(localStorage.getItem('sp_login_streak')||'0',10);
+
+  (function trackDailyLogin(){
+    const today = new Date().toISOString().slice(0,10);
+    const lastDate = localStorage.getItem('sp_last_login_date');
+    if(lastDate === today) return; // 오늘 이미 기록됨
+    if(lastDate){
+      const diffDays = Math.round((new Date(today)-new Date(lastDate))/86400000);
+      loginStreak = diffDays===1 ? loginStreak+1 : 1;
+    } else {
+      loginStreak = 1;
+    }
+    localStorage.setItem('sp_last_login_date', today);
+    localStorage.setItem('sp_login_streak', loginStreak);
+  })();
+
+  function poolSlot(){ return stageIndex % STAGE_POOL.length; }
+
   coinsValEl.textContent = fmt(coins);
   starsValEl.textContent = totalStars;
 
@@ -529,7 +553,9 @@
 
   function awardCoins(n){
     coins += n;
+    totalCoinsEarned += n;
     localStorage.setItem('sp_coins', coins);
+    localStorage.setItem('sp_total_coins_earned', totalCoinsEarned);
     coinsValEl.textContent = fmt(coins);
   }
 
@@ -549,6 +575,10 @@
     if(cells.length>=9) coinGain += 15;
     else if(cells.length>=5) coinGain += 5;
     awardCoins(coinGain);
+    if(cells.length > maxCombo){
+      maxCombo = cells.length;
+      localStorage.setItem('sp_max_combo', maxCombo);
+    }
     triggerPopEffect(cells.length, gained);
     shakeBoard(cells.length);
     cells.forEach(({r,c})=>{
@@ -648,6 +678,18 @@
       hearts = Math.min(HEART_MAX, hearts+1);
       saveHearts();
       updateHud();
+    }
+
+    totalStagesCleared++;
+    localStorage.setItem('sp_total_cleared', totalStagesCleared);
+    if(stars>=3){
+      perfectClears++;
+      localStorage.setItem('sp_perfect_clears', perfectClears);
+    }
+    const pSlot = poolSlot();
+    if(!patternsCleared.includes(pSlot)){
+      patternsCleared.push(pSlot);
+      localStorage.setItem('sp_patterns_cleared', JSON.stringify(patternsCleared));
     }
 
     clearOverlay.classList.add('show');
@@ -750,10 +792,87 @@
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
-  ['navShop','navAchieve'].forEach(id=>{
-    document.getElementById(id).addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
-  });
+  document.getElementById('navShop').addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
   document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
+
+  function tierProgress(value, tiers){
+    // tiers: 오름차순 임계값 배열. 도달한 단계 수와 다음 목표까지 진행률 반환
+    let reached = 0;
+    for(const t of tiers){ if(value>=t) reached++; }
+    const next = tiers[reached];
+    const prev = reached>0 ? tiers[reached-1] : 0;
+    const pct = next ? Math.min(100, ((value-prev)/(next-prev))*100) : 100;
+    return { reached, total: tiers.length, next, pct, done: reached>=tiers.length };
+  }
+
+  function renderAchievements(){
+    const list = document.getElementById('achieveList');
+    const rows = [];
+
+    const patternPct = Math.min(100, (patternsCleared.length/STAGE_POOL.length)*100);
+    rows.push({
+      icon:'🧩', title:'패턴 마스터',
+      desc:'서로 다른 '+STAGE_POOL.length+'가지 패턴을 각각 한 번 이상 클리어',
+      progressText: patternsCleared.length+' / '+STAGE_POOL.length,
+      pct: patternPct, done: patternsCleared.length>=STAGE_POOL.length
+    });
+
+    const comboT = tierProgress(maxCombo, [5,9,15]);
+    rows.push({
+      icon:'⭐', title:'연결 콤보',
+      desc:'한 번에 5개 → 9개 → 15개 이상 연결',
+      progressText:'최고 '+maxCombo+'개 연결 ('+comboT.reached+'/'+comboT.total+' 단계)',
+      pct: comboT.pct, done: comboT.done
+    });
+
+    const perfT = tierProgress(perfectClears, [10,50,100]);
+    rows.push({
+      icon:'💯', title:'완벽주의자',
+      desc:'별 3개(목표의 200% 이상)로 클리어 10 → 50 → 100회',
+      progressText: perfectClears+'회 ('+perfT.reached+'/'+perfT.total+' 단계)',
+      pct: perfT.pct, done: perfT.done
+    });
+
+    const clearT = tierProgress(totalStagesCleared, [10,50,100,500]);
+    rows.push({
+      icon:'🔍', title:'꾸준한 탐정',
+      desc:'누적 스테이지 클리어 10 → 50 → 100 → 500회',
+      progressText: totalStagesCleared+'회 ('+clearT.reached+'/'+clearT.total+' 단계)',
+      pct: clearT.pct, done: clearT.done
+    });
+
+    const coinT = tierProgress(totalCoinsEarned, [1000,10000,100000]);
+    rows.push({
+      icon:'💰', title:'부자 닮팡',
+      desc:'누적 획득 코인 1,000 → 10,000 → 100,000',
+      progressText: fmt(totalCoinsEarned)+'코인 ('+coinT.reached+'/'+coinT.total+' 단계)',
+      pct: coinT.pct, done: coinT.done
+    });
+
+    const loginT = tierProgress(loginStreak, [3,7,30]);
+    rows.push({
+      icon:'📅', title:'매일 접속',
+      desc:'연속 접속 3일 → 7일 → 30일',
+      progressText: loginStreak+'일 연속 ('+loginT.reached+'/'+loginT.total+' 단계)',
+      pct: loginT.pct, done: loginT.done
+    });
+
+    list.innerHTML = rows.map(function(r){
+      return '<div class="achieveRow'+(r.done?' done':'')+'">'
+        + '<div class="aTitle"><span><span class="aIcon">'+r.icon+'</span>'+r.title+(r.done?' ✅':'')+'</span><span>'+r.progressText+'</span></div>'
+        + '<div class="aDesc">'+r.desc+'</div>'
+        + '<div class="aBarTrack"><div class="aBarFill" style="width:'+r.pct+'%"></div></div>'
+        + '</div>';
+    }).join('');
+  }
+
+  document.getElementById('navAchieve').addEventListener('click', ()=>{
+    renderAchievements();
+    document.getElementById('achieveOverlay').classList.add('show');
+  });
+  document.getElementById('achieveCloseBtn').addEventListener('click', ()=>{
+    document.getElementById('achieveOverlay').classList.remove('show');
+  });
 
   buildGrid();
   tickHeartRegen();

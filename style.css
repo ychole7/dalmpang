@@ -257,6 +257,20 @@
   .card h2{ margin:0 0 6px; color:var(--ink); }
   .card .mascotPop{ width:90px; height:90px; object-fit:contain; margin-bottom:4px; }
   .card p{ font-size:13px; color:#7d93a6; margin:4px 0 16px; }
+  .achieveCard{ position:relative; width:340px; max-width:90vw; text-align:left; padding:22px 18px 18px; max-height:80vh; overflow-y:auto; }
+  .achieveCard h2{ text-align:center; margin-bottom:14px; }
+  .achieveCloseBtn{
+    position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff; border:2px solid #fff;
+    font-size:13px; font-weight:bold; box-shadow:0 2px 0 #234f7d;
+  }
+  .achieveRow{ margin-bottom:14px; }
+  .achieveRow .aTitle{ display:flex; justify-content:space-between; font-size:13px; font-weight:bold; color:var(--ink); margin-bottom:4px; }
+  .achieveRow .aTitle span.aIcon{ margin-right:6px; }
+  .achieveRow .aDesc{ font-size:11px; color:#7d93a6; margin-bottom:5px; }
+  .achieveRow .aBarTrack{ height:8px; border-radius:5px; background:#eef3f8; overflow:hidden; }
+  .achieveRow .aBarFill{ height:100%; border-radius:5px; background:linear-gradient(90deg,var(--gold),#ffd98a); }
+  .achieveRow.done .aBarFill{ background:linear-gradient(90deg,#4fc78a,#7fe0ab); }
   .card p.bestLine{ font-size:12px; color:var(--gold-dark); font-weight:bold; margin-top:-10px; }
   .stars{ font-size:30px; margin:6px 0 12px; letter-spacing:4px; }
   .btn{
