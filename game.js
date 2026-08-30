@@ -222,7 +222,7 @@
   function renderSymbolHTML(stage, v){
     switch(stage.type){
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
-      case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:100%;height:100%;object-fit:contain;">';
+      case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:122%;height:122%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
       case 'seed':     return svgSeedAt(stage.positions[v]);
       case 'clover':   return svgCloverAt(v+1);
