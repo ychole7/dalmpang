@@ -296,7 +296,8 @@
 
   let board = [];
   let cellEls = [];
-  let stageIndex = 0;
+  let stageIndex = parseInt(localStorage.getItem('sp_stage_index'), 10);
+  if(isNaN(stageIndex)) stageIndex = 0;
   let stageScore = 0;
   let movesLeft = 0;
   let hearts = parseInt(localStorage.getItem('sp_hearts'), 10);
@@ -660,6 +661,7 @@
   document.getElementById('nextStageBtn').addEventListener('click', ()=>{
     clearOverlay.classList.remove('show');
     stageIndex++;
+    localStorage.setItem('sp_stage_index', stageIndex);
     newStageBoard();
   });
   document.getElementById('retryClearBtn').addEventListener('click', ()=>{
@@ -676,6 +678,7 @@
   document.getElementById('giveUpBtn').addEventListener('click', ()=>{
     failOverlay.classList.remove('show');
     stageIndex = 0;
+    localStorage.setItem('sp_stage_index', stageIndex);
     newStageBoard();
   });
 
