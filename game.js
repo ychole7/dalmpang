@@ -750,7 +750,7 @@
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
-  ['navShop','navRank','navAchieve'].forEach(id=>{
+  ['navShop','navAchieve'].forEach(id=>{
     document.getElementById(id).addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
   });
   document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
