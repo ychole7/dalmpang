@@ -795,8 +795,14 @@
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
-  document.getElementById('navShop').addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
-  document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
+  document.getElementById('navShop').addEventListener('click', ()=>{
+    showToast('준비 중인 기능이에요');
+    setActiveTab('shop');
+  });
+  document.getElementById('navHome').addEventListener('click', ()=>{
+    document.getElementById('achieveOverlay').classList.remove('show');
+    setActiveTab('home');
+  });
 
   document.querySelectorAll('.navBtn').forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -893,12 +899,21 @@
     });
   }
 
+  function setActiveTab(tab){
+    document.querySelectorAll('.navBtn').forEach(function(btn){ btn.classList.remove('selected'); });
+    const map = { achieve:'navAchieve', home:'navHome', shop:'navShop' };
+    document.getElementById(map[tab]).classList.add('selected');
+  }
+  setActiveTab('home');
+
   document.getElementById('navAchieve').addEventListener('click', ()=>{
     renderAchievements();
     document.getElementById('achieveOverlay').classList.add('show');
+    setActiveTab('achieve');
   });
   document.getElementById('achieveCloseBtn').addEventListener('click', ()=>{
     document.getElementById('achieveOverlay').classList.remove('show');
+    setActiveTab('home');
   });
 
   buildGrid();
