@@ -718,7 +718,11 @@
     newStageBoard();
   });
   document.getElementById('giveUpBtn').addEventListener('click', ()=>{
+    if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
+    spendHeart();
+    updateHud();
     failOverlay.classList.remove('show');
+    newStageBoard();
   });
 
   gridEl.addEventListener('pointerdown', (e)=>{
