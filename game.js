@@ -916,6 +916,10 @@
     setActiveTab('home');
   });
 
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
   buildGrid();
   tickHeartRegen();
   newStageBoard();

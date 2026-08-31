@@ -13,8 +13,15 @@
     --ink:#33475b;
     --cream:#f1ead8;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-touch-callout:none; -webkit-user-drag:none;}
-  img{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+  *{
+    box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+    -webkit-touch-callout:none; -webkit-user-drag:none;
+  }
+  html, body{
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  }
+  img{ -webkit-user-drag:none; user-drag:none; pointer-events:none; -webkit-touch-callout:none; }
   html,body{height:100%; margin:0; overflow:hidden;}
   #splashScreen{
     position:fixed; inset:0; z-index:200; background:#efe6d8;
