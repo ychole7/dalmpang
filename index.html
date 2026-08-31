@@ -88,11 +88,12 @@
 </div>
 
 <div class="overlay" id="failOverlay">
-  <div class="card">
-    <img class="mascotPop" src="assets/images/mascot_fail.png" alt="">
-    <h2>이동 횟수 소진!</h2>
-    <p id="failDesc"></p>
-    <button class="btn" id="retryBtn">하트 사용해서 재도전</button>
+  <div class="failCardImg">
+    <img src="assets/images/fail_card.png" alt="">
+    <div class="failTargetVal" id="failTargetVal">0</div>
+    <div class="failBarTrack"><div class="failBarFill" id="failBarFill"></div></div>
+    <div class="failStageNum" id="failStageNum">01</div>
+    <button class="failBtnHit" id="retryBtn"></button>
   </div>
 </div>
 

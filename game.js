@@ -286,7 +286,9 @@
   const clearCoinGainEl = document.getElementById('clearCoinGain');
   const clearStarGainEl = document.getElementById('clearStarGain');
   const failOverlay = document.getElementById('failOverlay');
-  const failDescEl = document.getElementById('failDesc');
+  const failTargetValEl = document.getElementById('failTargetVal');
+  const failStageNumEl = document.getElementById('failStageNum');
+  const failBarFillEl = document.getElementById('failBarFill');
 
   function fmt(n){ return n.toLocaleString('ko-KR'); }
 
@@ -696,7 +698,10 @@
   }
 
   function showStageFail(){
-    failDescEl.textContent = '목표 점수까지 '+(currentStage().target-stageScore)+'점 남았어요. 하트를 사용해서 이 스테이지를 다시 도전할까요?';
+    const st = currentStage();
+    failTargetValEl.textContent = fmt(st.target);
+    failStageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
+    failBarFillEl.style.width = Math.min(100, (stageScore/st.target)*100)+'%';
     failOverlay.classList.add('show');
   }
 
