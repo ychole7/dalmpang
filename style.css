@@ -339,25 +339,25 @@
   /* ---------- stage fail card ---------- */
   .failCardImg{
     position:relative; width:380px; max-width:94vw;
-    aspect-ratio:1199/1312;
+    aspect-ratio:1254/1254;
   }
   .failCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .failTargetVal{
-    position:absolute; left:42%; top:53%; transform:translate(-50%,-50%);
+    position:absolute; left:45%; top:52%; transform:translate(-50%,-50%);
     font-size:clamp(16px, 6vw, 26px); font-weight:900; color:#3a3226; z-index:2;
   }
   .failStageNum{
-    position:absolute; left:83%; top:58%; transform:translate(-50%,-50%);
+    position:absolute; left:79%; top:58%; transform:translate(-50%,-50%);
     font-size:clamp(14px, 5vw, 20px); font-weight:900; color:#fff; z-index:2;
   }
   .failBarTrack{
-    position:absolute; left:8%; width:66%; top:59%; height:3%;
+    position:absolute; left:10%; width:60%; top:57%; height:3%;
     background:#f0e0c0; border-radius:8px; overflow:hidden; z-index:1;
   }
   .failBarFill{
     height:100%; border-radius:8px; background:linear-gradient(90deg,var(--gold),#ffd98a);
   }
   .failBtnHit{
-    position:absolute; left:50%; width:44%; top:82%; height:9%;
+    position:absolute; left:26%; width:48%; top:83%; height:9%;
     background:transparent; border:none; z-index:3;
   }
