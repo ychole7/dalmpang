@@ -306,29 +306,29 @@
   .clearCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .clearStarsRow{ position:absolute; inset:0; z-index:2; }
   .clearStarsRow img{
-    position:absolute; width:9%; height:auto; object-fit:contain;
+    position:absolute; width:11%; height:auto; object-fit:contain;
     transform:translate(-50%,-50%);
   }
-  .clearStarsRow img:nth-child(1){ left:22%; top:44%; }
-  .clearStarsRow img:nth-child(2){ left:50%; width:12%; top:43%; }
-  .clearStarsRow img:nth-child(3){ left:78%; top:44%; }
+  .clearStarsRow img:nth-child(1){ left:38%; top:44%; }
+  .clearStarsRow img:nth-child(2){ left:50%; width:15%; top:43%; }
+  .clearStarsRow img:nth-child(3){ left:62%; top:44%; }
   .clearStarsRow img.dim{ filter:grayscale(1) opacity(0.45); }
   .statOverlay{
-    position:absolute; top:59%; transform:translate(-50%,-50%);
-    font-size:clamp(14px, 5.5vw, 22px); font-weight:900; z-index:2;
+    position:absolute; top:61%; transform:translate(-50%,-50%);
+    font-size:clamp(13px, 5vw, 20px); font-weight:900; z-index:2; text-align:center;
   }
   .statBest{ left:22%; color:#d9772f; }
   .statCurrent{ left:50%; color:#e0447c; }
   .statTarget{ left:78%; color:#3a3226; }
-  .rewardOverlay{
-    position:absolute; top:74%; transform:translateX(-50%);
-    display:flex; flex-direction:column; align-items:center; gap:2px; z-index:2;
-    font-size:clamp(11px, 4.2vw, 15px); font-weight:900; color:#3a3226;
+  .rewardRow{
+    position:absolute; left:50%; top:74%; transform:translate(-50%,-50%);
+    display:flex; align-items:center; justify-content:center; gap:22px; z-index:2;
   }
-  .rewardOverlay img{ width:9%; height:auto; object-fit:contain; }
-  .rewardCoin{ left:22%; }
-  .rewardStar{ left:50%; }
-  .rewardHeart{ left:78%; }
+  .rewardItem{
+    display:flex; align-items:center; gap:5px;
+    font-size:clamp(16px, 6vw, 24px); font-weight:900; color:#3a3226;
+  }
+  .rewardItem img{ width:30px; height:30px; object-fit:contain; }
   .clearBtnHit{
     position:absolute; top:84%; height:9%;
     background:transparent; border:none; z-index:3;
