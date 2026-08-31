@@ -798,6 +798,16 @@
   document.getElementById('navShop').addEventListener('click', ()=> showToast('준비 중인 기능이에요'));
   document.getElementById('navHome').addEventListener('click', ()=> showToast('현재 화면이 홈이에요'));
 
+  document.querySelectorAll('.navBtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const ico = btn.querySelector('.ico');
+      ico.classList.remove('tapped');
+      void ico.offsetWidth;
+      ico.classList.add('tapped');
+      setTimeout(()=> ico.classList.remove('tapped'), 260);
+    });
+  });
+
   const ACHIEVEMENTS = [
     { id:'pattern10',   icon:'🧩',  name:'패턴 수집가',   desc:'서로 다른 패턴 10개 클리어',              target:10,     get:()=>patternsCleared.length, reward:{coin:100} },
     { id:'pattern27',   icon:'🧩✨', name:'패턴 마스터',   desc:'서로 다른 패턴 '+STAGE_POOL.length+'개 모두 클리어', target:STAGE_POOL.length, get:()=>patternsCleared.length, reward:{coin:500,star:20} },
