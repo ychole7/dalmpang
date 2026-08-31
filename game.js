@@ -680,12 +680,6 @@
     clearCoinGainEl.textContent = fmt(coinGain);
     clearStarGainEl.textContent = stars;
 
-    if(hearts < HEART_MAX){
-      hearts = Math.min(HEART_MAX, hearts+1);
-      saveHearts();
-      updateHud();
-    }
-
     totalStagesCleared++;
     localStorage.setItem('sp_total_cleared', totalStagesCleared);
     if(stars>=3){
@@ -725,9 +719,6 @@
   });
   document.getElementById('giveUpBtn').addEventListener('click', ()=>{
     failOverlay.classList.remove('show');
-    stageIndex = 0;
-    localStorage.setItem('sp_stage_index', stageIndex);
-    newStageBoard();
   });
 
   gridEl.addEventListener('pointerdown', (e)=>{
@@ -758,6 +749,7 @@
   });
   document.getElementById('btnBomb').addEventListener('click', ()=>{
     if(powerCounts.bomb<=0){ showToast('폭탄 개수가 없어요'); return; }
+    if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]!==null) candidates.push({r,c});
     if(!candidates.length) return;
@@ -768,6 +760,7 @@
       if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null) cells.push({r,c});
     }
     powerCounts.bomb--;
+    movesLeft = Math.max(0, movesLeft-1);
     updateHud();
     popCells(cells, true);
   });
@@ -782,6 +775,7 @@
   });
   document.getElementById('btnRainbow').addEventListener('click', ()=>{
     if(powerCounts.rainbow<=0){ showToast('무지개 개수가 없어요'); return; }
+    if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]!==null) candidates.push({r,c});
     if(!candidates.length) return;
@@ -790,6 +784,7 @@
     const cells=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===value) cells.push({r,c});
     powerCounts.rainbow--;
+    movesLeft = Math.max(0, movesLeft-1);
     updateHud();
     popCells(cells, true);
   });
