@@ -301,7 +301,7 @@
   /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
   .clearCardImg{
     position:relative; width:380px; max-width:94vw;
-    aspect-ratio:1173/1341;
+    aspect-ratio:1086/1448;
   }
   .clearCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .clearStarsRow{ position:absolute; inset:0; z-index:2; }
@@ -309,12 +309,12 @@
     position:absolute; width:9%; height:auto; object-fit:contain;
     transform:translate(-50%,-50%);
   }
-  .clearStarsRow img:nth-child(1){ left:22%; top:42%; }
-  .clearStarsRow img:nth-child(2){ left:50%; width:12%; top:41%; }
-  .clearStarsRow img:nth-child(3){ left:78%; top:42%; }
+  .clearStarsRow img:nth-child(1){ left:22%; top:44%; }
+  .clearStarsRow img:nth-child(2){ left:50%; width:12%; top:43%; }
+  .clearStarsRow img:nth-child(3){ left:78%; top:44%; }
   .clearStarsRow img.dim{ filter:grayscale(1) opacity(0.45); }
   .statOverlay{
-    position:absolute; top:58%; transform:translate(-50%,-50%);
+    position:absolute; top:59%; transform:translate(-50%,-50%);
     font-size:clamp(14px, 5.5vw, 22px); font-weight:900; z-index:2;
   }
   .statBest{ left:22%; color:#d9772f; }
@@ -330,8 +330,8 @@
   .rewardStar{ left:50%; }
   .rewardHeart{ left:78%; }
   .clearBtnHit{
-    position:absolute; top:85%; height:9%;
+    position:absolute; top:84%; height:9%;
     background:transparent; border:none; z-index:3;
   }
-  .btnRetry{ left:15%; width:30%; }
-  .btnNext{ left:55%; width:35%; }
+  .btnRetry{ left:10%; width:38%; }
+  .btnNext{ left:53%; width:40%; }
