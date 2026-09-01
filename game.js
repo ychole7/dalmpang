@@ -421,33 +421,37 @@
   }
 
   function triggerPopEffect(count, gained){
-    let tier = '';
-    let tierClass = '';
-    if(count>=9){ tier = '<div class="line0">AMAZING!</div>'; tierClass = 'tierAmazing'; }
-    else if(count>=5){ tier = '<div class="line0">GREAT!</div>'; tierClass = 'tierGreat'; }
-    popTextEl.innerHTML = tier+'<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
-    if(count>=5){
+    const t = comboTierFor(count);
+    let popHTML = '';
+    let sub = '연결 '+count+'개!';
+    if(t){
+      popHTML = '<div class="line0">'+t.label+'</div>';
+      sub = t.sub+' '+count+'개 연속 터트렸어요!';
+    }
+    popTextEl.innerHTML = popHTML+'<div class="line1">'+sub+'</div><div class="line2">+'+fmt(gained)+'</div>';
+    if(t){
       const flash = document.getElementById('boardFlash');
-      flash.className = count>=9 ? 'flashAmazing' : 'flashGreat';
+      flash.className = 'flash-'+t.key;
       void flash.offsetWidth;
       flash.classList.add('show');
     }
     popParticlesEl.innerHTML = '';
     const symbols = ['⭐','✨','🌟'];
-    const cap = count>=9 ? 26 : 18;
+    const cap = t ? (26 + COMBO_TIERS.length - COMBO_TIERS.indexOf(t)) : 18;
     const n = Math.min(cap, 8 + count);
+    const distBase = t ? 55 + (COMBO_TIERS.length - COMBO_TIERS.indexOf(t))*5 : 50;
     for(let i=0;i<n;i++){
       const s = document.createElement('span');
       s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
       const angle = Math.random()*Math.PI*2;
-      const dist = (count>=9 ? 65 : 50) + Math.random()*90;
+      const dist = distBase + Math.random()*90;
       s.style.setProperty('--dx', Math.cos(angle)*dist+'px');
       s.style.setProperty('--dy', Math.sin(angle)*dist+'px');
       s.style.animationDelay = Math.floor(Math.random()*120)+'ms';
       popParticlesEl.appendChild(s);
     }
-    popEffectEl.classList.remove('show','tierGreat','tierAmazing');
-    if(tierClass) popEffectEl.classList.add(tierClass);
+    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS);
+    if(t) popEffectEl.classList.add('tier-'+t.key);
     void popEffectEl.offsetWidth;
     popEffectEl.classList.add('show');
   }
@@ -592,9 +596,29 @@
     coinsValEl.textContent = fmt(coins);
   }
 
+  const COMBO_TIERS = [
+    { min:30, key:'legendary',  label:'LEGENDARY!',  sub:'전설이에요!' },
+    { min:25, key:'incredible', label:'INCREDIBLE!', sub:'믿을 수 없어요!' },
+    { min:20, key:'superb',     label:'SUPERB!',     sub:'완벽해요!' },
+    { min:15, key:'awesome',    label:'AWESOME!',    sub:'놀라워요!' },
+    { min:9,  key:'amazing',    label:'AMAZING!',    sub:'대단해요!' },
+    { min:5,  key:'great',      label:'GREAT!',      sub:'좋아요!' }
+  ];
+  const COMBO_TIER_KEYS = COMBO_TIERS.map(t=>'tier-'+t.key);
+  function comboTierFor(count){
+    for(let i=0;i<COMBO_TIERS.length;i++){ if(count>=COMBO_TIERS[i].min) return COMBO_TIERS[i]; }
+    return null;
+  }
+
   function shakeBoard(count){
     const el = document.getElementById('boardWrap');
-    const mag = count>=9 ? '14px' : count>=5 ? '9px' : '4px';
+    let mag = '4px';
+    if(count>=30) mag='22px';
+    else if(count>=25) mag='19px';
+    else if(count>=20) mag='16px';
+    else if(count>=15) mag='13px';
+    else if(count>=9) mag='10px';
+    else if(count>=5) mag='7px';
     el.style.setProperty('--shakeMag', mag);
     el.classList.remove('shaking');
     void el.offsetWidth;

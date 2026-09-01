@@ -166,8 +166,12 @@
     position:absolute; inset:0; pointer-events:none; z-index:12;
     opacity:0; border-radius:12px;
   }
-  #boardFlash.show.flashGreat{ animation:flashPulse 320ms ease; background:radial-gradient(circle, rgba(255,255,255,0.55), rgba(242,169,59,0.25) 70%, transparent 100%); }
-  #boardFlash.show.flashAmazing{ animation:flashPulse 420ms ease; background:radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,45,85,0.45) 65%, transparent 100%); }
+  #boardFlash.show.flash-great{      animation:flashPulse 300ms ease; background:radial-gradient(circle, rgba(255,255,255,0.55), rgba(123,211,63,0.30) 70%, transparent 100%); }
+  #boardFlash.show.flash-amazing{    animation:flashPulse 340ms ease; background:radial-gradient(circle, rgba(255,255,255,0.6), rgba(74,179,255,0.35) 70%, transparent 100%); }
+  #boardFlash.show.flash-awesome{    animation:flashPulse 380ms ease; background:radial-gradient(circle, rgba(255,255,255,0.65), rgba(255,120,50,0.4) 68%, transparent 100%); }
+  #boardFlash.show.flash-superb{     animation:flashPulse 400ms ease; background:radial-gradient(circle, rgba(255,255,255,0.7), rgba(180,110,255,0.45) 66%, transparent 100%); }
+  #boardFlash.show.flash-incredible{ animation:flashPulse 440ms ease; background:radial-gradient(circle, rgba(255,255,255,0.75), rgba(255,90,190,0.4) 55%, rgba(90,150,255,0.4) 80%, transparent 100%); }
+  #boardFlash.show.flash-legendary{  animation:flashPulse 480ms ease; background:radial-gradient(circle, rgba(255,255,255,0.85), rgba(255,196,60,0.55) 65%, transparent 100%); }
   @keyframes flashPulse{
     0%{ opacity:0; }
     20%{ opacity:1; }
@@ -175,10 +179,14 @@
   }
   .popEffect{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    pointer-events:none; z-index:15; opacity:0; --popPeak:1.08;
+    pointer-events:none; z-index:15; opacity:0; --popPeak:1.06;
   }
-  .popEffect.tierGreat{ --popPeak:1.16; }
-  .popEffect.tierAmazing{ --popPeak:1.26; }
+  .popEffect.tier-great{      --popPeak:1.12; }
+  .popEffect.tier-amazing{    --popPeak:1.17; }
+  .popEffect.tier-awesome{    --popPeak:1.22; }
+  .popEffect.tier-superb{     --popPeak:1.27; }
+  .popEffect.tier-incredible{ --popPeak:1.32; }
+  .popEffect.tier-legendary{  --popPeak:1.38; }
   .popEffect.show{ animation:popShow 900ms ease forwards; }
   @keyframes popShow{
     0%{ opacity:0; transform:scale(0.6); }
@@ -189,18 +197,52 @@
   }
   .popText{ position:relative; z-index:2; text-align:center; }
   .popText .line0{
-    display:inline-block;
-    font-size:22px; font-weight:900; color:#ff5f7a;
-    text-shadow:0 2px 0 #a01f34, 0 0 12px rgba(255,95,122,0.7);
-    margin-bottom:2px;
+    display:inline-block; font-size:22px; font-weight:900;
     animation: labelPunch 480ms cubic-bezier(.17,.89,.32,1.49);
   }
-  .popEffect.tierAmazing .popText .line0{
-    font-size:36px; letter-spacing:1px; color:#fff;
-    -webkit-text-stroke:1.5px #ff2d55;
-    text-shadow:0 3px 0 #7a0e28, 0 0 10px #ff5f7a, 0 0 26px rgba(255,45,85,0.9);
+  /* GREAT! - 초록 */
+  .tier-great .popText .line0{
+    color:#8fe23f; -webkit-text-stroke:1.5px #2f6b1f;
+    text-shadow:0 3px 0 #2f6b1f, 0 0 14px rgba(143,226,63,0.7);
+  }
+  /* AMAZING! - 파랑 */
+  .tier-amazing .popText .line0{
+    font-size:28px; letter-spacing:0.5px;
+    color:#79c8ff; -webkit-text-stroke:1.5px #0a4a8a;
+    text-shadow:0 3px 0 #0a4a8a, 0 0 16px rgba(74,179,255,0.75);
     animation: labelPunch 500ms cubic-bezier(.17,.89,.32,1.49), labelShake 500ms ease 500ms;
   }
+  /* AWESOME! - 주황~빨강 */
+  .tier-awesome .popText .line0{
+    font-size:31px; letter-spacing:0.5px; color:#ffb24d;
+    -webkit-text-stroke:1.5px #a3260a;
+    text-shadow:0 3px 0 #a3260a, 0 0 18px rgba(255,90,40,0.8);
+    animation: labelPunch 500ms cubic-bezier(.17,.89,.32,1.49), labelShake 520ms ease 500ms;
+  }
+  /* SUPERB! - 보라 */
+  .tier-superb .popText .line0{
+    font-size:33px; letter-spacing:0.5px; color:#e3c8ff;
+    -webkit-text-stroke:1.5px #5b2e99;
+    text-shadow:0 3px 0 #5b2e99, 0 0 20px rgba(185,140,255,0.85);
+    animation: labelPunch 520ms cubic-bezier(.17,.89,.32,1.49), labelShake 540ms ease 520ms;
+  }
+  /* INCREDIBLE! - 무지개 */
+  .tier-incredible .popText .line0{
+    font-size:35px; letter-spacing:0.5px; font-weight:900;
+    background:linear-gradient(90deg,#ff5a7a,#ffb24d,#ffe14d,#7be07b,#5ab4ff,#c17bff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    -webkit-text-stroke:1.5px rgba(60,20,60,0.55);
+    filter:drop-shadow(0 3px 0 rgba(60,20,60,0.55)) drop-shadow(0 0 20px rgba(255,255,255,0.6));
+    animation: labelPunch 540ms cubic-bezier(.17,.89,.32,1.49), labelShake 560ms ease 540ms;
+  }
+  /* LEGENDARY! - 금빛 + 왕관 */
+  .tier-legendary .popText .line0{
+    font-size:38px; letter-spacing:1px; color:#fff2c4;
+    -webkit-text-stroke:1.5px #8a5a12;
+    text-shadow:0 3px 0 #8a5a12, 0 0 14px #ffd76b, 0 0 30px rgba(255,196,60,0.9);
+    animation: labelPunch 560ms cubic-bezier(.17,.89,.32,1.49), labelShake 580ms ease 560ms;
+  }
+  .tier-legendary .popText .line0::before{ content:'👑 '; }
   @keyframes labelPunch{
     0%{ transform:scale(0.3) rotate(-8deg); opacity:0; }
     55%{ transform:scale(1.3) rotate(4deg); opacity:1; }
@@ -215,20 +257,29 @@
     80%{ transform:translateX(2px); }
   }
   .popText .line1{
-    font-size:16px; font-weight:bold; color:#fff;
-    text-shadow:0 2px 4px rgba(0,0,0,0.35), 0 0 8px rgba(255,255,255,0.5);
+    display:inline-block; margin-top:4px; padding:4px 14px; border-radius:14px;
+    background:rgba(20,16,10,0.55);
+    font-size:14px; font-weight:bold; color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,0.5);
   }
   .popText .line2{
-    font-size:32px; font-weight:900; color:var(--gold);
+    margin-top:2px;
+    font-size:30px; font-weight:900; color:var(--gold);
     text-shadow:0 3px 0 #a9711b, 0 0 16px rgba(242,169,59,0.6);
   }
-  .popEffect.tierAmazing .popText .line2{ font-size:40px; }
+  .tier-awesome .popText .line2{ font-size:33px; }
+  .tier-superb .popText .line2,
+  .tier-incredible .popText .line2,
+  .tier-legendary .popText .line2{ font-size:36px; }
   .popParticles{ position:absolute; inset:0; }
   .popParticles span{
     position:absolute; left:50%; top:50%; font-size:16px;
     animation:starBurst 750ms ease-out forwards;
   }
-  .popEffect.tierAmazing .popParticles span{ font-size:20px; }
+  .tier-awesome .popParticles span,
+  .tier-superb .popParticles span{ font-size:19px; }
+  .tier-incredible .popParticles span,
+  .tier-legendary .popParticles span{ font-size:22px; }
   @keyframes starBurst{
     0%{ transform:translate(-50%,-50%) scale(0.3) rotate(0deg); opacity:1; }
     100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(200deg); opacity:0; }
