@@ -13,15 +13,7 @@
     --ink:#33475b;
     --cream:#f1ead8;
   }
-  *{
-    box-sizing:border-box; -webkit-tap-highlight-color:transparent;
-    -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
-    -webkit-touch-callout:none; -webkit-user-drag:none;
-  }
-  html, body{
-    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
-  }
-  img{ -webkit-user-drag:none; user-drag:none; pointer-events:none; -webkit-touch-callout:none; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
   html,body{height:100%; margin:0; overflow:hidden;}
   #splashScreen{
     position:fixed; inset:0; z-index:200; background:#efe6d8;
@@ -237,22 +229,20 @@
     box-shadow:0 -3px 8px rgba(0,0,0,0.2);
   }
   .navBtn{ display:flex; flex-direction:column; align-items:center; font-size:11px; color:#bcd2ea; gap:4px; flex:1; transition:color 0.18s ease; }
-  .navLabel{ display:none; }
   .navBtn.selected{ color:#fff; font-weight:900; }
-  .navBtn.selected .navLabel{ display:block; }
   .navBtn .ico{
     font-size:22px; width:48px; height:48px;
     display:flex; align-items:center; justify-content:center;
     transition:transform 0.18s ease; position:relative;
   }
   .navBtn .ico img{ width:100%; height:100%; object-fit:contain; }
-  .navBtn.selected .ico{ transform:scale(1.28); }
+  .navBtn.selected .ico{ transform:scale(1.15); }
   .navBtn.selected .ico::before{
-    content:''; position:absolute; inset:-16px; border-radius:50%; z-index:-1;
-    background:radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,224,140,0.35) 55%, rgba(255,255,255,0) 75%);
+    content:''; position:absolute; inset:-10px; border-radius:50%; z-index:-1;
+    background:radial-gradient(circle, rgba(255,255,255,0.4), rgba(255,255,255,0) 72%);
   }
-  .navBtn .ico.tapped{ transform:scale(1.35); }
-  .navBtn.selected .ico.tapped{ transform:scale(1.4); }
+  .navBtn .ico.tapped{ transform:scale(1.22); }
+  .navBtn.selected .ico.tapped{ transform:scale(1.28); }
 
   #toast{
     position:fixed; top:14px; left:50%; transform:translateX(-50%);
@@ -278,6 +268,17 @@
     position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%;
     background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff; border:2px solid #fff;
     font-size:13px; font-weight:bold; box-shadow:0 2px 0 #234f7d; z-index:2;
+  }
+  .achieveTabs{
+    display:flex; gap:4px; margin-bottom:12px; background:#eef3f8; border-radius:12px; padding:4px;
+  }
+  .achieveTabBtn{
+    flex:1 1 0; border:none; background:transparent; color:#7d93a6; font-size:11px; font-weight:bold;
+    padding:8px 4px; border-radius:9px; white-space:nowrap;
+  }
+  .achieveTabBtn.active{
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff;
+    box-shadow:0 2px 0 #234f7d;
   }
   .achieveRow{
     display:flex; gap:10px; margin-bottom:10px; padding:10px; border-radius:14px;
