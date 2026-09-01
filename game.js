@@ -140,7 +140,7 @@
       + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="6" ry="8" fill="#ffffff" opacity="0.85"/>'
       + '</svg>';
   }
-  const BELL_SPOTS = { 1:[50,45],2:[38,55],3:[62,55],4:[50,62] };
+  const BELL_SPOTS = { 1:[50,32],2:[30,52],3:[70,52],4:[50,66] };
   function svgBellAt(spotNum){
     const p = BELL_SPOTS[spotNum];
     return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
