@@ -12,6 +12,9 @@
     --navy:#1f2a44;
     --ink:#33475b;
     --cream:#f1ead8;
+    --ach-blue:#1469e5;
+    --ach-blue-dark:#0a3f9e;
+    --ach-cream:#fef8ec;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
   html,body{height:100%; margin:0; overflow:hidden;}
@@ -265,17 +268,26 @@
   .card .mascotPop{ width:90px; height:90px; object-fit:contain; margin-bottom:4px; }
   .card p{ font-size:13px; color:#7d93a6; margin:4px 0 16px; }
   .pageTitle{ text-align:center; margin:4px 0 6px; color:var(--ink); flex:0 0 auto; }
-  .achieveSummary{ text-align:center; font-size:12px; color:#7d93a6; font-weight:bold; margin-bottom:10px; flex:0 0 auto; }
+  .achieveRibbon{
+    display:block; width:64%; max-width:280px; min-width:180px; margin:0 auto -26px; position:relative; z-index:2; flex:0 0 auto;
+  }
+  .achieveFrame{
+    flex:1 1 auto; min-height:0; display:flex; flex-direction:column; position:relative;
+    background:var(--ach-cream); border:7px solid var(--ach-blue); border-radius:24px;
+    box-shadow: inset 0 -6px 0 var(--ach-blue-dark), 0 4px 10px rgba(20,40,80,0.18);
+    padding:34px 14px 14px;
+  }
+  .achieveSummary{ text-align:center; font-size:12px; color:#8a7350; font-weight:bold; margin-bottom:10px; flex:0 0 auto; }
   .achieveTabs{
-    display:flex; gap:4px; margin-bottom:10px; background:#eef3f8; border-radius:12px; padding:4px; flex:0 0 auto;
+    display:flex; gap:4px; margin-bottom:10px; background:#f2e6c8; border-radius:12px; padding:4px; flex:0 0 auto;
   }
   .achieveTabBtn{
-    flex:1 1 0; border:none; background:transparent; color:#7d93a6; font-size:11px; font-weight:bold;
+    flex:1 1 0; border:none; background:transparent; color:#9a8355; font-size:11px; font-weight:bold;
     padding:8px 4px; border-radius:9px; white-space:nowrap;
   }
   .achieveTabBtn.active{
-    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff;
-    box-shadow:0 2px 0 #234f7d;
+    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff;
+    box-shadow:0 2px 0 var(--ach-blue-dark);
   }
   .achieveList{ flex:1 1 auto; min-height:0; overflow-y:auto; }
   .achieveRow{
