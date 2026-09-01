@@ -28,37 +28,46 @@
     <div class="gearBtn" id="gearBtn"><img src="assets/images/icon_gear.png" alt="설정"></div>
   </div>
 
-  <div class="statsRow">
-    <div class="targetCard">
-      <div class="targetBadge">목표 점수</div>
-      <div class="targetBig" id="targetVal">0</div>
-      <div class="barTrack"><div class="barFill" id="progressFill"></div><div class="barStar" id="barStar">⭐</div></div>
+  <div class="mainScreen" id="mainScreen">
+    <div class="statsRow">
+      <div class="targetCard">
+        <div class="targetBadge">목표 점수</div>
+        <div class="targetBig" id="targetVal">0</div>
+        <div class="barTrack"><div class="barFill" id="progressFill"></div><div class="barStar" id="barStar">⭐</div></div>
+      </div>
+      <div class="stageBadgeMini">STAGE<br><span id="stageNum">01</span></div>
+      <div class="movesBadge">
+        <div class="circle" id="movesVal">-</div>
+        <div class="lbl">MOVES</div>
+        <div class="movesStars" id="movesStars">☆☆☆</div>
+        <div class="movesScore" id="movesScoreEcho">0</div>
+      </div>
     </div>
-    <div class="stageBadgeMini">STAGE<br><span id="stageNum">01</span></div>
-    <div class="movesBadge">
-      <div class="circle" id="movesVal">-</div>
-      <div class="lbl">MOVES</div>
-      <div class="movesStars" id="movesStars">☆☆☆</div>
-      <div class="movesScore" id="movesScoreEcho">0</div>
+    <span id="stageNameLbl" style="display:none;"></span>
+
+    <div id="boardWrap">
+      <div id="grid"></div>
+      <svg id="lineLayer"></svg>
+      <div id="boardFlash"></div>
+      <div class="popEffect" id="popEffect">
+        <div class="popParticles" id="popParticles"></div>
+        <div class="popText" id="popText"></div>
+      </div>
+    </div>
+
+    <div class="powerRow">
+      <div class="powerBtn" id="btnCandy"><img src="assets/images/powerup_candy.png" alt="사탕"><span class="cnt" id="cntCandy">3</span></div>
+      <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
+      <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
+      <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
     </div>
   </div>
-  <span id="stageNameLbl" style="display:none;"></span>
 
-  <div id="boardWrap">
-    <div id="grid"></div>
-    <svg id="lineLayer"></svg>
-    <div id="boardFlash"></div>
-    <div class="popEffect" id="popEffect">
-      <div class="popParticles" id="popParticles"></div>
-      <div class="popText" id="popText"></div>
-    </div>
-  </div>
-
-  <div class="powerRow">
-    <div class="powerBtn" id="btnCandy"><img src="assets/images/powerup_candy.png" alt="사탕"><span class="cnt" id="cntCandy">3</span></div>
-    <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
-    <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
-    <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
+  <div class="pageScreen" id="achievePage">
+    <h2 class="pageTitle">🏆 업적</h2>
+    <div class="achieveSummary" id="achieveSummary">0 / 25 달성</div>
+    <div class="achieveTabs" id="achieveTabs"></div>
+    <div class="achieveList" id="achieveList"></div>
   </div>
 
   <div class="bottomNav">
@@ -94,16 +103,6 @@
     <div class="failBarTrack"><div class="failBarFill" id="failBarFill"></div></div>
     <div class="failStageNum" id="failStageNum">01</div>
     <button class="failBtnHit" id="retryBtn"></button>
-  </div>
-</div>
-
-<div class="overlay" id="achieveOverlay">
-  <div class="card achieveCard">
-    <button class="achieveCloseBtn" id="achieveCloseBtn">✕</button>
-    <h2>🏆 업적</h2>
-    <div class="achieveSummary" id="achieveSummary">0 / 25 달성</div>
-    <div class="achieveTabs" id="achieveTabs"></div>
-    <div class="achieveList" id="achieveList"></div>
   </div>
 </div>
 

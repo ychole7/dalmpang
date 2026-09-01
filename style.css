@@ -31,6 +31,9 @@
     touch-action:none;
   }
   .app{ width:100%; max-width:420px; flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+  .mainScreen{ flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+  .pageScreen{ display:none; flex:1 1 auto; flex-direction:column; min-height:0; }
+  .pageScreen.show{ display:flex; }
 
   /* ---------- top bar ---------- */
   .topbar{ display:flex; align-items:center; gap:6px; margin-bottom:8px; flex:0 0 auto; }
@@ -261,16 +264,10 @@
   .card h2{ margin:0 0 6px; color:var(--ink); }
   .card .mascotPop{ width:90px; height:90px; object-fit:contain; margin-bottom:4px; }
   .card p{ font-size:13px; color:#7d93a6; margin:4px 0 16px; }
-  .achieveCard{ position:relative; width:340px; max-width:90vw; text-align:left; padding:22px 16px 16px; max-height:82vh; overflow-y:auto; }
-  .achieveCard h2{ text-align:center; margin-bottom:4px; }
-  .achieveSummary{ text-align:center; font-size:12px; color:#7d93a6; font-weight:bold; margin-bottom:14px; }
-  .achieveCloseBtn{
-    position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%;
-    background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff; border:2px solid #fff;
-    font-size:13px; font-weight:bold; box-shadow:0 2px 0 #234f7d; z-index:2;
-  }
+  .pageTitle{ text-align:center; margin:4px 0 6px; color:var(--ink); flex:0 0 auto; }
+  .achieveSummary{ text-align:center; font-size:12px; color:#7d93a6; font-weight:bold; margin-bottom:10px; flex:0 0 auto; }
   .achieveTabs{
-    display:flex; gap:4px; margin-bottom:12px; background:#eef3f8; border-radius:12px; padding:4px;
+    display:flex; gap:4px; margin-bottom:10px; background:#eef3f8; border-radius:12px; padding:4px; flex:0 0 auto;
   }
   .achieveTabBtn{
     flex:1 1 0; border:none; background:transparent; color:#7d93a6; font-size:11px; font-weight:bold;
@@ -280,6 +277,7 @@
     background:linear-gradient(180deg,var(--blue),var(--blue-dark)); color:#fff;
     box-shadow:0 2px 0 #234f7d;
   }
+  .achieveList{ flex:1 1 auto; min-height:0; overflow-y:auto; }
   .achieveRow{
     display:flex; gap:10px; margin-bottom:10px; padding:10px; border-radius:14px;
     background:#f7f3e6; border:1px solid #eadfc4;

@@ -800,7 +800,8 @@
     setActiveTab('shop');
   });
   document.getElementById('navHome').addEventListener('click', ()=>{
-    document.getElementById('achieveOverlay').classList.remove('show');
+    document.getElementById('achievePage').classList.remove('show');
+    document.getElementById('mainScreen').style.display = '';
     setActiveTab('home');
   });
 
@@ -937,12 +938,9 @@
 
   document.getElementById('navAchieve').addEventListener('click', ()=>{
     renderAchievements();
-    document.getElementById('achieveOverlay').classList.add('show');
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('achievePage').classList.add('show');
     setActiveTab('achieve');
-  });
-  document.getElementById('achieveCloseBtn').addEventListener('click', ()=>{
-    document.getElementById('achieveOverlay').classList.remove('show');
-    setActiveTab('home');
   });
 
   buildGrid();
