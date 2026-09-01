@@ -258,12 +258,15 @@
   // 목표점수 배율도 구간마다 같이 올려서, 뒤로 갈수록 이동 1회당 필요한 점수 부담이 커짐.
   const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){ return stageSize(a) - stageSize(b); });
   const DIFFICULTY_BANDS = [
-    { from:0,   unlock:6,                  targetMul:1.00 },
-    { from:50,  unlock:10,                 targetMul:1.10 },
-    { from:150, unlock:14,                 targetMul:1.25 },
-    { from:300, unlock:18,                 targetMul:1.45 },
-    { from:500, unlock:22,                 targetMul:1.70 },
-    { from:700, unlock:POOL_SORTED.length, targetMul:2.00 }
+    { from:0,   unlock:5,                  targetMul:1.00 },
+    { from:15,  unlock:7,                  targetMul:1.10 },
+    { from:30,  unlock:9,                  targetMul:1.20 },
+    { from:60,  unlock:12,                 targetMul:1.35 },
+    { from:100, unlock:15,                 targetMul:1.55 },
+    { from:150, unlock:18,                 targetMul:1.80 },
+    { from:250, unlock:21,                 targetMul:2.10 },
+    { from:400, unlock:24,                 targetMul:2.45 },
+    { from:600, unlock:POOL_SORTED.length, targetMul:2.90 }
   ];
   function bandFor(i){
     let band = DIFFICULTY_BANDS[0];
@@ -408,7 +411,7 @@
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
-  function movesBudget(){ return 16 + Math.min(24, Math.floor(stageIndex/20)); }
+  function movesBudget(){ return 16 + Math.min(16, Math.floor(stageIndex/25)); }
 
   function showToast(msg){
     toastEl.textContent = msg;
@@ -419,8 +422,9 @@
 
   function triggerPopEffect(count, gained){
     let tier = '';
-    if(count>=9) tier = '<div class="line0">AMAZING!</div>';
-    else if(count>=5) tier = '<div class="line0">GREAT!</div>';
+    let tierClass = '';
+    if(count>=9){ tier = '<div class="line0">AMAZING!</div>'; tierClass = 'tierAmazing'; }
+    else if(count>=5){ tier = '<div class="line0">GREAT!</div>'; tierClass = 'tierGreat'; }
     popTextEl.innerHTML = tier+'<div class="line1">연결 '+count+'개!</div><div class="line2">+'+fmt(gained)+'</div>';
     if(count>=5){
       const flash = document.getElementById('boardFlash');
@@ -430,18 +434,20 @@
     }
     popParticlesEl.innerHTML = '';
     const symbols = ['⭐','✨','🌟'];
-    const n = Math.min(18, 8 + count);
+    const cap = count>=9 ? 26 : 18;
+    const n = Math.min(cap, 8 + count);
     for(let i=0;i<n;i++){
       const s = document.createElement('span');
       s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
       const angle = Math.random()*Math.PI*2;
-      const dist = 50 + Math.random()*90;
+      const dist = (count>=9 ? 65 : 50) + Math.random()*90;
       s.style.setProperty('--dx', Math.cos(angle)*dist+'px');
       s.style.setProperty('--dy', Math.sin(angle)*dist+'px');
       s.style.animationDelay = Math.floor(Math.random()*120)+'ms';
       popParticlesEl.appendChild(s);
     }
-    popEffectEl.classList.remove('show');
+    popEffectEl.classList.remove('show','tierGreat','tierAmazing');
+    if(tierClass) popEffectEl.classList.add(tierClass);
     void popEffectEl.offsetWidth;
     popEffectEl.classList.add('show');
   }
@@ -588,7 +594,7 @@
 
   function shakeBoard(count){
     const el = document.getElementById('boardWrap');
-    const mag = count>=9 ? '10px' : count>=5 ? '6px' : '3px';
+    const mag = count>=9 ? '14px' : count>=5 ? '9px' : '4px';
     el.style.setProperty('--shakeMag', mag);
     el.classList.remove('shaking');
     void el.offsetWidth;

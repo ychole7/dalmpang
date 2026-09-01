@@ -166,8 +166,8 @@
     position:absolute; inset:0; pointer-events:none; z-index:12;
     opacity:0; border-radius:12px;
   }
-  #boardFlash.show.flashGreat{ animation:flashPulse 300ms ease; background:radial-gradient(circle, rgba(255,255,255,0.55), rgba(242,169,59,0.25) 70%, transparent 100%); }
-  #boardFlash.show.flashAmazing{ animation:flashPulse 380ms ease; background:radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,95,122,0.35) 70%, transparent 100%); }
+  #boardFlash.show.flashGreat{ animation:flashPulse 320ms ease; background:radial-gradient(circle, rgba(255,255,255,0.55), rgba(242,169,59,0.25) 70%, transparent 100%); }
+  #boardFlash.show.flashAmazing{ animation:flashPulse 420ms ease; background:radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,45,85,0.45) 65%, transparent 100%); }
   @keyframes flashPulse{
     0%{ opacity:0; }
     20%{ opacity:1; }
@@ -175,21 +175,44 @@
   }
   .popEffect{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    pointer-events:none; z-index:15; opacity:0;
+    pointer-events:none; z-index:15; opacity:0; --popPeak:1.08;
   }
+  .popEffect.tierGreat{ --popPeak:1.16; }
+  .popEffect.tierAmazing{ --popPeak:1.26; }
   .popEffect.show{ animation:popShow 900ms ease forwards; }
   @keyframes popShow{
     0%{ opacity:0; transform:scale(0.6); }
-    18%{ opacity:1; transform:scale(1.08); }
+    18%{ opacity:1; transform:scale(var(--popPeak)); }
     28%{ opacity:1; transform:scale(1); }
     78%{ opacity:1; }
-    100%{ opacity:0; transform:scale(1.08); }
+    100%{ opacity:0; transform:scale(var(--popPeak)); }
   }
   .popText{ position:relative; z-index:2; text-align:center; }
   .popText .line0{
-    font-size:20px; font-weight:900; color:#ff5f7a;
+    display:inline-block;
+    font-size:22px; font-weight:900; color:#ff5f7a;
     text-shadow:0 2px 0 #a01f34, 0 0 12px rgba(255,95,122,0.7);
     margin-bottom:2px;
+    animation: labelPunch 480ms cubic-bezier(.17,.89,.32,1.49);
+  }
+  .popEffect.tierAmazing .popText .line0{
+    font-size:36px; letter-spacing:1px; color:#fff;
+    -webkit-text-stroke:1.5px #ff2d55;
+    text-shadow:0 3px 0 #7a0e28, 0 0 10px #ff5f7a, 0 0 26px rgba(255,45,85,0.9);
+    animation: labelPunch 500ms cubic-bezier(.17,.89,.32,1.49), labelShake 500ms ease 500ms;
+  }
+  @keyframes labelPunch{
+    0%{ transform:scale(0.3) rotate(-8deg); opacity:0; }
+    55%{ transform:scale(1.3) rotate(4deg); opacity:1; }
+    75%{ transform:scale(0.94) rotate(-2deg); }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  @keyframes labelShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-3px) rotate(-1deg); }
+    40%{ transform:translateX(3px) rotate(1deg); }
+    60%{ transform:translateX(-2px); }
+    80%{ transform:translateX(2px); }
   }
   .popText .line1{
     font-size:16px; font-weight:bold; color:#fff;
@@ -199,11 +222,13 @@
     font-size:32px; font-weight:900; color:var(--gold);
     text-shadow:0 3px 0 #a9711b, 0 0 16px rgba(242,169,59,0.6);
   }
+  .popEffect.tierAmazing .popText .line2{ font-size:40px; }
   .popParticles{ position:absolute; inset:0; }
   .popParticles span{
     position:absolute; left:50%; top:50%; font-size:16px;
     animation:starBurst 750ms ease-out forwards;
   }
+  .popEffect.tierAmazing .popParticles span{ font-size:20px; }
   @keyframes starBurst{
     0%{ transform:translate(-50%,-50%) scale(0.3) rotate(0deg); opacity:1; }
     100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(200deg); opacity:0; }
