@@ -83,15 +83,6 @@
   // 풀을 순환시키면서 스테이지 번호가 올라갈수록 목표점수/이동횟수를 자동으로 늘려서
   // 총 TOTAL_STAGES개의 스테이지를 생성 (하나하나 손으로 안 만듦)
   const TOTAL_STAGES = 1000;
-  function buildStages(total){
-    const arr = [];
-    for(let i=0;i<total;i++){
-      const base = STAGE_POOL[i % STAGE_POOL.length];
-      arr.push(Object.assign({}, base, { target: 250 + Math.round(300*Math.sqrt(i)) }));
-    }
-    return arr;
-  }
-  const STAGES = buildStages(TOTAL_STAGES);
 
   function svgFaceCfg(cfg){
     return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
@@ -261,6 +252,38 @@
     }
   }
 
+  // 난이도 밴드: 패턴을 헷갈리는 정도(심볼 개수) 기준 오름차순 정렬해두고,
+  // 스테이지 구간이 올라갈수록 사용 가능한 패턴 개수를 늘려서
+  // "새로운 + 더 어려운" 패턴이 구간마다 순차적으로 등장하게 함.
+  // 목표점수 배율도 구간마다 같이 올려서, 뒤로 갈수록 이동 1회당 필요한 점수 부담이 커짐.
+  const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){ return stageSize(a) - stageSize(b); });
+  const DIFFICULTY_BANDS = [
+    { from:0,   unlock:6,                  targetMul:1.00 },
+    { from:50,  unlock:10,                 targetMul:1.10 },
+    { from:150, unlock:14,                 targetMul:1.25 },
+    { from:300, unlock:18,                 targetMul:1.45 },
+    { from:500, unlock:22,                 targetMul:1.70 },
+    { from:700, unlock:POOL_SORTED.length, targetMul:2.00 }
+  ];
+  function bandFor(i){
+    let band = DIFFICULTY_BANDS[0];
+    for(let k=0;k<DIFFICULTY_BANDS.length;k++){ if(i>=DIFFICULTY_BANDS[k].from) band = DIFFICULTY_BANDS[k]; }
+    return band;
+  }
+
+  function buildStages(total){
+    const arr = [];
+    for(let i=0;i<total;i++){
+      const band = bandFor(i);
+      const pool = POOL_SORTED.slice(0, band.unlock);
+      const base = pool[i % pool.length];
+      const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
+      arr.push(Object.assign({}, base, { target: target }));
+    }
+    return arr;
+  }
+  const STAGES = buildStages(TOTAL_STAGES);
+
   const gridEl = document.getElementById('grid');
   const lineLayer = document.getElementById('lineLayer');
   const targetValEl = document.getElementById('targetVal');
@@ -385,7 +408,7 @@
   function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
-  function movesBudget(){ return 16 + Math.min(30, Math.floor(stageIndex/15)); }
+  function movesBudget(){ return 16 + Math.min(24, Math.floor(stageIndex/20)); }
 
   function showToast(msg){
     toastEl.textContent = msg;
