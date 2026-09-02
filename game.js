@@ -456,6 +456,16 @@
     popEffectEl.classList.add('show');
   }
 
+  // 게임 화면을 벗어날 때(업적/상점 이동) 애니메이션이 중간에 멈췄다가
+  // 다시 돌아왔을 때 처음부터 재생되며 "그레잇" 등 이펙트가 반복 재생되는 걸 막기 위한 정리
+  function resetInFlightFX(){
+    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS);
+    const flash = document.getElementById('boardFlash');
+    flash.classList.remove('show');
+    const wrap = document.getElementById('boardWrap');
+    wrap.classList.remove('shaking');
+  }
+
   function buildGrid(){
     gridEl.innerHTML = '';
     cellEls = [];
@@ -849,6 +859,7 @@
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
   document.getElementById('navShop').addEventListener('click', ()=>{
+    resetInFlightFX();
     showToast('준비 중인 기능이에요');
     setActiveTab('shop');
   });
@@ -990,6 +1001,7 @@
   setActiveTab('home');
 
   document.getElementById('navAchieve').addEventListener('click', ()=>{
+    resetInFlightFX();
     renderAchievements();
     document.getElementById('mainScreen').style.display = 'none';
     document.getElementById('achievePage').classList.add('show');
