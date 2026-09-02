@@ -955,6 +955,14 @@
     });
   }
 
+  function rewardParts(reward){
+    const parts = [];
+    if(reward.coin) parts.push('🪙'+fmt(reward.coin));
+    if(reward.star) parts.push('⭐'+reward.star);
+    if(reward.heart) parts.push('❤️'+reward.heart);
+    return parts;
+  }
+
   function renderAchievements(){
     renderAchieveTabs();
     const list = document.getElementById('achieveList');
@@ -969,22 +977,24 @@
       const pct = Math.min(100, (val/a.target)*100);
       const claimed = achievementsClaimed.includes(a.id);
       const ready = !claimed && a.get()>=a.target;
-      let rightHtml;
+      let statusHtml;
       if(claimed){
-        rightHtml = '<div class="aStatus done">✓ 완료</div>';
+        statusHtml = '<div class="aStatus done">✓ 완료</div>';
       } else if(ready){
-        rightHtml = '<button class="aClaimBtn" data-id="'+a.id+'">보상 받기</button>';
+        statusHtml = '<button class="aClaimBtn" data-id="'+a.id+'">보상받기</button>';
       } else {
-        rightHtml = '<div class="aStatus">'+val+' / '+a.target+'</div>';
+        statusHtml = '<div class="aStatus">진행 중</div>';
       }
+      const rewardHtml = rewardParts(a.reward).map(function(p){ return '<div class="aRewardLine">'+p+'</div>'; }).join('');
+      const specialTag = a.special ? '<span class="aSpecialTag">SPECIAL</span>' : '';
       return '<div class="achieveRow'+(claimed?' done':'')+(a.special?' special':'')+'">'
         + '<div class="aBadge">'+a.icon+'</div>'
         + '<div class="aBody">'
-        +   '<div class="aTitle">'+a.name+'</div>'
+        +   '<div class="aTitleRow"><div class="aTitle">'+a.name+'</div>'+specialTag+'</div>'
         +   '<div class="aDesc">'+a.desc+'</div>'
-        +   '<div class="aBarTrack"><div class="aBarFill" style="width:'+pct+'%"></div></div>'
-        +   '<div class="aFoot"><span class="aReward">'+rewardText(a.reward)+'</span>'+rightHtml+'</div>'
+        +   '<div class="aBarTrack"><div class="aBarFill" style="width:'+pct+'%"></div><div class="aBarLabel">'+val+' / '+a.target+'</div></div>'
         + '</div>'
+        + '<div class="aSide">'+rewardHtml+statusHtml+'</div>'
         + '</div>';
     }).join('');
 
