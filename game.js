@@ -425,7 +425,7 @@
     let popHTML = '';
     let sub = '연결 '+count+'개!';
     if(t){
-      popHTML = '<div class="line0">'+t.label+'</div>';
+      popHTML = '<img class="line0" src="'+t.img+'" alt="'+t.key+'">';
       sub = t.sub+' '+count+'개 연속 터트렸어요!';
     }
     popTextEl.innerHTML = popHTML+'<div class="line1">'+sub+'</div><div class="line2">+'+fmt(gained)+'</div>';
@@ -597,12 +597,12 @@
   }
 
   const COMBO_TIERS = [
-    { min:30, key:'legendary',  label:'LEGENDARY!',  sub:'전설이에요!' },
-    { min:25, key:'incredible', label:'INCREDIBLE!', sub:'믿을 수 없어요!' },
-    { min:20, key:'superb',     label:'SUPERB!',     sub:'완벽해요!' },
-    { min:15, key:'awesome',    label:'AWESOME!',    sub:'놀라워요!' },
-    { min:9,  key:'amazing',    label:'AMAZING!',    sub:'대단해요!' },
-    { min:5,  key:'great',      label:'GREAT!',      sub:'좋아요!' }
+    { min:30, key:'legendary',  img:'assets/images/combo_legendary.png',  sub:'전설이에요!' },
+    { min:25, key:'incredible', img:'assets/images/combo_incredible.png', sub:'믿을 수 없어요!' },
+    { min:20, key:'superb',     img:'assets/images/combo_superb.png',     sub:'완벽해요!' },
+    { min:15, key:'awesome',    img:'assets/images/combo_awesome.png',    sub:'놀라워요!' },
+    { min:9,  key:'amazing',    img:'assets/images/combo_amazing.png',    sub:'대단해요!' },
+    { min:5,  key:'great',      img:'assets/images/combo_great.png',      sub:'좋아요!' }
   ];
   const COMBO_TIER_KEYS = COMBO_TIERS.map(t=>'tier-'+t.key);
   function comboTierFor(count){
