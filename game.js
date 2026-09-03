@@ -349,8 +349,15 @@
   let totalPops = parseInt(localStorage.getItem('sp_total_pops')||'0',10);
   let achievementsClaimed = JSON.parse(localStorage.getItem('sp_achievements_claimed')||'[]');
 
+  function localDateStr(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+d;
+  }
+
   (function trackDailyLogin(){
-    const today = new Date().toISOString().slice(0,10);
+    const today = localDateStr(new Date());
     const lastDate = localStorage.getItem('sp_last_login_date');
     if(lastDate === today) return; // 오늘 이미 기록됨
     if(lastDate){
@@ -889,35 +896,35 @@
   let currentAchieveTab = 'stage';
 
   const ACHIEVEMENTS = [
-    { id:'stage10',     tab:'stage', icon:'👣',  name:'첫 발자국',     desc:'스테이지 10개 클리어',                     target:10,     get:()=>totalStagesCleared, reward:{coin:30} },
-    { id:'stage50',     tab:'stage', icon:'🔍',  name:'꾸준한 탐정',   desc:'스테이지 50개 클리어',                     target:50,     get:()=>totalStagesCleared, reward:{coin:100} },
-    { id:'stage100',    tab:'stage', icon:'🧭',  name:'숙련된 탐험가', desc:'스테이지 100개 클리어',                    target:100,    get:()=>totalStagesCleared, reward:{coin:250} },
-    { id:'stage250',    tab:'stage', icon:'🗺️',  name:'대단한 여정',   desc:'스테이지 250개 클리어',                    target:250,    get:()=>totalStagesCleared, reward:{coin:500} },
-    { id:'stage500',    tab:'stage', icon:'🏆',  name:'닮팡 마스터',   desc:'스테이지 500개 클리어',                    target:500,    get:()=>totalStagesCleared, reward:{star:30}, special:true },
-    { id:'pattern10',   tab:'stage', icon:'🧩',  name:'패턴 수집가',   desc:'서로 다른 패턴 10개 클리어',              target:10,     get:()=>patternsCleared.length, reward:{coin:100} },
-    { id:'pattern27',   tab:'stage', icon:'🧩✨', name:'패턴 마스터',   desc:'서로 다른 패턴 '+STAGE_POOL.length+'개 모두 클리어', target:STAGE_POOL.length, get:()=>patternsCleared.length, reward:{coin:500,star:20} },
+    { id:'stage10',     tab:'stage', icon:'👣',  img:'assets/images/ach_stage10.png',    name:'첫 발자국',     desc:'스테이지 10개 클리어',                     target:10,     get:()=>totalStagesCleared, reward:{coin:30} },
+    { id:'stage50',     tab:'stage', icon:'🔍',  img:'assets/images/ach_stage50.png',    name:'꾸준한 탐정',   desc:'스테이지 50개 클리어',                     target:50,     get:()=>totalStagesCleared, reward:{coin:100} },
+    { id:'stage100',    tab:'stage', icon:'🧭',  img:'assets/images/ach_stage100.png',   name:'숙련된 탐험가', desc:'스테이지 100개 클리어',                    target:100,    get:()=>totalStagesCleared, reward:{coin:250} },
+    { id:'stage250',    tab:'stage', icon:'🗺️',  img:'assets/images/ach_stage250.png',   name:'대단한 여정',   desc:'스테이지 250개 클리어',                    target:250,    get:()=>totalStagesCleared, reward:{coin:500} },
+    { id:'stage500',    tab:'stage', icon:'🏆',  img:'assets/images/ach_stage500.png',   name:'닮팡 마스터',   desc:'스테이지 500개 클리어',                    target:500,    get:()=>totalStagesCleared, reward:{star:30}, special:true },
+    { id:'pattern10',   tab:'stage', icon:'🧩',  img:'assets/images/ach_pattern10.png',  name:'패턴 수집가',   desc:'서로 다른 패턴 10개 클리어',              target:10,     get:()=>patternsCleared.length, reward:{coin:100} },
+    { id:'pattern27',   tab:'stage', icon:'🧩✨', img:'assets/images/ach_pattern27.png',  name:'패턴 마스터',   desc:'서로 다른 패턴 '+STAGE_POOL.length+'개 모두 클리어', target:STAGE_POOL.length, get:()=>patternsCleared.length, reward:{coin:500,star:20} },
 
-    { id:'combo5',      tab:'tile', icon:'⭐',  name:'콤보 스타터',   desc:'한 번에 타일 5개 연결',                    target:5,      get:()=>maxCombo, reward:{coin:20} },
-    { id:'combo9',      tab:'tile', icon:'⚡',  name:'콤보 러너',     desc:'한 번에 타일 9개 연결',                    target:9,      get:()=>maxCombo, reward:{coin:50} },
-    { id:'combo15',     tab:'tile', icon:'🔥',  name:'콤보 마스터',   desc:'한 번에 타일 15개 연결',                   target:15,     get:()=>maxCombo, reward:{coin:100} },
-    { id:'tilebomb10',  tab:'tile', icon:'💥',  name:'타일 폭격',     desc:'한 번에 타일 10개 이상 제거',               target:10,     get:()=>maxCombo, reward:{coin:150} },
-    { id:'tile100',     tab:'tile', icon:'🧱',  name:'타일 수집가',   desc:'타일 100개 제거',                          target:100,    get:()=>totalTilesRemoved, reward:{coin:50} },
-    { id:'tile1000',    tab:'tile', icon:'💥',  name:'타일 파괴자',   desc:'타일 1,000개 제거',                        target:1000,   get:()=>totalTilesRemoved, reward:{coin:200} },
-    { id:'chain100',    tab:'tile', icon:'🔗',  name:'연쇄의 달인',   desc:'타일 연쇄 제거 100회',                     target:100,    get:()=>totalPops, reward:{coin:200} },
+    { id:'combo5',      tab:'tile', icon:'⭐',  img:'assets/images/ach_combo5.png',      name:'콤보 스타터',   desc:'한 번에 타일 5개 연결',                    target:5,      get:()=>maxCombo, reward:{coin:20} },
+    { id:'combo9',      tab:'tile', icon:'⚡',  img:'assets/images/ach_combo9.png',      name:'콤보 러너',     desc:'한 번에 타일 9개 연결',                    target:9,      get:()=>maxCombo, reward:{coin:50} },
+    { id:'combo15',     tab:'tile', icon:'🔥',  img:'assets/images/ach_combo15.png',     name:'콤보 마스터',   desc:'한 번에 타일 15개 연결',                   target:15,     get:()=>maxCombo, reward:{coin:100} },
+    { id:'tilebomb10',  tab:'tile', icon:'💥',  img:'assets/images/ach_tilebomb10.png',  name:'타일 폭격',     desc:'한 번에 타일 10개 이상 제거',               target:10,     get:()=>maxCombo, reward:{coin:150} },
+    { id:'tile100',     tab:'tile', icon:'🧱',  img:'assets/images/ach_tile100.png',     name:'타일 수집가',   desc:'타일 100개 제거',                          target:100,    get:()=>totalTilesRemoved, reward:{coin:50} },
+    { id:'tile1000',    tab:'tile', icon:'💥',  img:'assets/images/ach_tile1000.png',    name:'타일 파괴자',   desc:'타일 1,000개 제거',                        target:1000,   get:()=>totalTilesRemoved, reward:{coin:200} },
+    { id:'chain100',    tab:'tile', icon:'🔗',  img:'assets/images/ach_chain100.png',    name:'연쇄의 달인',   desc:'타일 연쇄 제거 100회',                     target:100,    get:()=>totalPops, reward:{coin:200} },
 
-    { id:'perfect10',   tab:'clear', icon:'💯',  name:'완벽주의자',    desc:'목표 점수의 200% 이상으로 클리어 10회',      target:10,     get:()=>perfectClears, reward:{coin:50} },
-    { id:'perfect50',   tab:'clear', icon:'👑',  name:'퍼펙트 플레이', desc:'목표 점수의 200% 이상으로 클리어 50회',      target:50,     get:()=>perfectClears, reward:{coin:150} },
-    { id:'perfect100',  tab:'clear', icon:'💎',  name:'완벽의 경지',   desc:'목표 점수의 200% 이상으로 클리어 100회',     target:100,    get:()=>perfectClears, reward:{coin:300} },
-    { id:'star3_10',    tab:'clear', icon:'⭐⭐⭐', name:'별 세 개!',   desc:'⭐⭐⭐ 10회 달성',                          target:10,     get:()=>perfectClears, reward:{coin:100} },
+    { id:'perfect10',   tab:'clear', icon:'💯',  img:'assets/images/ach_perfect10.png',  name:'완벽주의자',    desc:'목표 점수의 200% 이상으로 클리어 10회',      target:10,     get:()=>perfectClears, reward:{coin:50} },
+    { id:'perfect50',   tab:'clear', icon:'👑',  img:'assets/images/ach_perfect50.png',  name:'퍼펙트 플레이', desc:'목표 점수의 200% 이상으로 클리어 50회',      target:50,     get:()=>perfectClears, reward:{coin:150} },
+    { id:'perfect100',  tab:'clear', icon:'💎',  img:'assets/images/ach_perfect100.png', name:'완벽의 경지',   desc:'목표 점수의 200% 이상으로 클리어 100회',     target:100,    get:()=>perfectClears, reward:{coin:300} },
+    { id:'star3_10',    tab:'clear', icon:'⭐⭐⭐', img:'assets/images/ach_star3_10.png', name:'별 세 개!',   desc:'⭐⭐⭐ 10회 달성',                          target:10,     get:()=>perfectClears, reward:{coin:100} },
     { id:'star3_50',    tab:'clear', icon:'🌟',  name:'별빛 수집가',   desc:'⭐⭐⭐ 50회 달성',                          target:50,     get:()=>perfectClears, reward:{coin:300} },
 
-    { id:'coin1000',    tab:'coin', icon:'🪙',  name:'동전 한 닢',    desc:'누적 코인 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
-    { id:'coin10000',   tab:'coin', icon:'💰',  name:'알뜰 닮팡',     desc:'누적 코인 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
-    { id:'coin100000',  tab:'coin', icon:'💎',  name:'부자 닮팡',     desc:'누적 코인 100,000개 획득',                 target:100000, get:()=>totalCoinsEarned, reward:{star:40} },
+    { id:'coin1000',    tab:'coin', icon:'🪙',  img:'assets/images/ach_coin1000.png',    name:'동전 한 닢',    desc:'누적 코인 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
+    { id:'coin10000',   tab:'coin', icon:'💰',  img:'assets/images/ach_coin10000.png',  name:'알뜰 닮팡',     desc:'누적 코인 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
+    { id:'coin100000',  tab:'coin', icon:'💎',  img:'assets/images/ach_coin100000.png',  name:'부자 닮팡',     desc:'누적 코인 100,000개 획득',                 target:100000, get:()=>totalCoinsEarned, reward:{star:40} },
 
-    { id:'login3',      tab:'login', icon:'🌱',  name:'다시 만나요',   desc:'3일 연속 접속',                            target:3,      get:()=>loginStreak, reward:{coin:30,heart:1} },
-    { id:'login7',      tab:'login', icon:'🔥',  name:'매일 만나요',   desc:'7일 연속 접속',                            target:7,      get:()=>loginStreak, reward:{coin:100,heart:2} },
-    { id:'login30',     tab:'login', icon:'📅',  name:'한 달 개근',    desc:'30일 연속 접속',                           target:30,     get:()=>loginStreak, reward:{coin:500,heart:5} }
+    { id:'login3',      tab:'login', icon:'🌱',  img:'assets/images/ach_login3.png',  name:'다시 만나요',   desc:'3일 연속 접속',                            target:3,      get:()=>loginStreak, reward:{coin:30,heart:1} },
+    { id:'login7',      tab:'login', icon:'🔥',  img:'assets/images/ach_login7.png',  name:'매일 만나요',   desc:'7일 연속 접속',                            target:7,      get:()=>loginStreak, reward:{coin:100,heart:2} },
+    { id:'login30',     tab:'login', icon:'📅',  img:'assets/images/ach_login30.png', name:'한 달 개근',    desc:'30일 연속 접속',                           target:30,     get:()=>loginStreak, reward:{coin:500,heart:5} }
   ];
 
   function rewardText(reward){
@@ -988,7 +995,7 @@
       const rewardHtml = rewardParts(a.reward).map(function(p){ return '<div class="aRewardLine">'+p+'</div>'; }).join('');
       const specialTag = a.special ? '<span class="aSpecialTag">SPECIAL</span>' : '';
       return '<div class="achieveRow'+(claimed?' done':'')+(a.special?' special':'')+'">'
-        + '<div class="aBadge">'+a.icon+'</div>'
+        + '<div class="aBadge">'+(a.img ? '<img src="'+a.img+'" alt="">' : a.icon)+'</div>'
         + '<div class="aBody">'
         +   '<div class="aTitleRow"><div class="aTitle">'+a.name+'</div>'+specialTag+'</div>'
         +   '<div class="aDesc">'+a.desc+'</div>'
