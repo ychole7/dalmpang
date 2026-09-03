@@ -16,7 +16,7 @@
     --ach-blue-dark:#0a3f9e;
     --ach-cream:#fef8ec;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
   html,body{height:100%; margin:0; overflow:hidden;}
   #splashScreen{
     position:fixed; inset:0; z-index:200; background:#efe6d8;
