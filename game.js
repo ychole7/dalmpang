@@ -964,9 +964,9 @@
 
   function rewardParts(reward){
     const parts = [];
-    if(reward.coin) parts.push('🪙'+fmt(reward.coin));
-    if(reward.star) parts.push('⭐'+reward.star);
-    if(reward.heart) parts.push('❤️'+reward.heart);
+    if(reward.coin) parts.push('<img class="aRewardIcon" src="assets/images/icon_coin.png" alt="">'+fmt(reward.coin));
+    if(reward.star) parts.push('<img class="aRewardIcon" src="assets/images/icon_star.png" alt="">'+reward.star);
+    if(reward.heart) parts.push('<img class="aRewardIcon" src="assets/images/icon_heart.png" alt="">'+reward.heart);
     return parts;
   }
 

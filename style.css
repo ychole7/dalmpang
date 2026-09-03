@@ -363,7 +363,8 @@
   }
   .achieveRow.done .aSide{ border-left-color:#d7e8c8; }
   .aRewardRow{ display:flex; align-items:center; justify-content:center; gap:6px; }
-  .aRewardLine{ font-size:13px; font-weight:900; color:#3a3226; white-space:nowrap; }
+  .aRewardLine{ font-size:13px; font-weight:900; color:#3a3226; white-space:nowrap; display:inline-flex; align-items:center; gap:2px; }
+  .aRewardIcon{ width:15px; height:15px; object-fit:contain; }
   .aStatus{
     font-size:11px; font-weight:bold; color:#fff; white-space:nowrap; text-align:center;
     background:#b7bcc2; padding:6px 10px; border-radius:10px; box-shadow:0 2px 0 #868c93; width:100%;
