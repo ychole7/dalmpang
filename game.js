@@ -916,7 +916,7 @@
     { id:'perfect50',   tab:'clear', icon:'👑',  img:'assets/images/ach_perfect50.png',  name:'퍼펙트 플레이', desc:'목표 점수의 200% 이상으로 클리어 50회',      target:50,     get:()=>perfectClears, reward:{coin:150} },
     { id:'perfect100',  tab:'clear', icon:'💎',  img:'assets/images/ach_perfect100.png', name:'완벽의 경지',   desc:'목표 점수의 200% 이상으로 클리어 100회',     target:100,    get:()=>perfectClears, reward:{coin:300} },
     { id:'star3_10',    tab:'clear', icon:'⭐⭐⭐', img:'assets/images/ach_star3_10.png', name:'별 세 개!',   desc:'⭐⭐⭐ 10회 달성',                          target:10,     get:()=>perfectClears, reward:{coin:100} },
-    { id:'star3_50',    tab:'clear', icon:'🌟',  name:'별빛 수집가',   desc:'⭐⭐⭐ 50회 달성',                          target:50,     get:()=>perfectClears, reward:{coin:300} },
+    { id:'star3_50',    tab:'clear', icon:'🌟',  img:'assets/images/ach_star3_50.png', name:'별빛 수집가',   desc:'⭐⭐⭐ 50회 달성',                          target:50,     get:()=>perfectClears, reward:{coin:300} },
 
     { id:'coin1000',    tab:'coin', icon:'🪙',  img:'assets/images/ach_coin1000.png',    name:'동전 한 닢',    desc:'누적 코인 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
     { id:'coin10000',   tab:'coin', icon:'💰',  img:'assets/images/ach_coin10000.png',  name:'알뜰 닮팡',     desc:'누적 코인 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
