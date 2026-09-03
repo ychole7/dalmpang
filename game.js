@@ -992,7 +992,7 @@
       } else {
         statusHtml = '<div class="aStatus">진행 중</div>';
       }
-      const rewardHtml = rewardParts(a.reward).map(function(p){ return '<div class="aRewardLine">'+p+'</div>'; }).join('');
+      const rewardHtml = '<div class="aRewardRow">'+rewardParts(a.reward).map(function(p){ return '<span class="aRewardLine">'+p+'</span>'; }).join('')+'</div>';
       const specialTag = a.special ? '<span class="aSpecialTag">SPECIAL</span>' : '';
       return '<div class="achieveRow'+(claimed?' done':'')+(a.special?' special':'')+'">'
         + '<div class="aBadge">'+(a.img ? '<img src="'+a.img+'" alt="">' : a.icon)+'</div>'

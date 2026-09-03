@@ -358,11 +358,12 @@
     font-size:11px; font-weight:bold; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.5);
   }
   .aSide{
-    flex:0 0 auto; width:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-    padding-left:12px; border-left:1px solid #ecdfc0;
+    flex:0 0 auto; width:108px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding-left:10px; border-left:1px solid #ecdfc0;
   }
   .achieveRow.done .aSide{ border-left-color:#d7e8c8; }
-  .aRewardLine{ font-size:14px; font-weight:900; color:#3a3226; white-space:nowrap; }
+  .aRewardRow{ display:flex; align-items:center; justify-content:center; gap:6px; }
+  .aRewardLine{ font-size:13px; font-weight:900; color:#3a3226; white-space:nowrap; }
   .aStatus{
     font-size:11px; font-weight:bold; color:#fff; white-space:nowrap; text-align:center;
     background:#b7bcc2; padding:6px 10px; border-radius:10px; box-shadow:0 2px 0 #868c93; width:100%;
