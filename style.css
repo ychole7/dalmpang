@@ -333,16 +333,6 @@
     background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff;
     box-shadow:0 2px 0 var(--ach-blue-dark);
   }
-  .pageRibbon{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    margin:0 auto -26px; position:relative; z-index:2; flex:0 0 auto;
-    width:64%; min-width:180px; max-width:280px;
-    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark));
-    color:#fff; font-size:22px; font-weight:900; text-align:center;
-    padding:14px 18px; border-radius:40px;
-    box-shadow:0 4px 0 var(--ach-blue-dark), 0 6px 10px rgba(20,40,80,0.25);
-    border:3px solid rgba(255,255,255,0.28);
-  }
   .shopList{ display:flex; flex-direction:column; gap:12px; flex:1 1 auto; overflow-y:auto; }
   .shopRow{
     display:flex; align-items:center; gap:12px; padding:14px; border-radius:18px;
