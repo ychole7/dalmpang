@@ -468,3 +468,62 @@
     position:absolute; left:26%; width:48%; top:83%; height:9%;
     background:transparent; border:none; z-index:3;
   }
+
+  /* ---------- settings popup ---------- */
+  .settingsWrap{ position:relative; width:340px; max-width:88vw; }
+  .settingsRibbon{
+    position:relative; z-index:2; margin:0 auto -22px; width:70%; text-align:center;
+    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark));
+    color:#fff; font-size:20px; font-weight:900; padding:12px 16px; border-radius:36px;
+    box-shadow:0 4px 0 var(--ach-blue-dark), 0 6px 10px rgba(20,40,80,0.25);
+    border:3px solid rgba(255,255,255,0.28);
+  }
+  .settingsCloseBtn{
+    position:absolute; top:-6px; right:-6px; z-index:3; width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff; border:2px solid #fff;
+    font-size:14px; font-weight:bold; box-shadow:0 2px 0 var(--ach-blue-dark);
+  }
+  .settingsCard{
+    position:relative; background:var(--ach-cream); border:6px solid var(--ach-blue); border-radius:22px;
+    box-shadow: inset 0 -5px 0 var(--ach-blue-dark), 0 8px 18px rgba(0,0,0,0.25);
+    padding:30px 16px 16px; max-height:78vh; overflow-y:auto; text-align:left;
+  }
+  .sSectionLabel{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:13px; font-weight:bold; color:#8a7350; margin:4px 0 8px;
+  }
+  .sSectionLabel span{ width:5px; height:5px; border-radius:50%; background:#c8a35a; }
+  .sGroup{
+    background:#fffaf0; border:1px solid #ecdfc0; border-radius:14px; margin-bottom:14px; overflow:hidden;
+  }
+  .sRow{
+    display:flex; align-items:center; gap:10px; padding:12px 14px;
+    border-bottom:1px solid #f0e6cc;
+  }
+  .sGroup .sRow:last-child{ border-bottom:none; }
+  .sRow .sIcon{ font-size:18px; flex:0 0 auto; width:22px; text-align:center; }
+  .sRow .sLabel{ flex:1 1 auto; font-size:14px; font-weight:bold; color:var(--ink); }
+  .sToggle{
+    flex:0 0 auto; width:56px; height:28px; border-radius:16px; border:none; position:relative;
+    background:#cfd6dd; transition:background 0.18s ease;
+  }
+  .sToggle.on{ background:linear-gradient(180deg,#8ee066,#4fae2f); }
+  .sToggleKnob{
+    position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.3); transition:left 0.18s ease;
+  }
+  .sToggle.on .sToggleKnob{ left:31px; }
+  .sActionBtn{
+    flex:0 0 auto; background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff; border:none;
+    font-size:13px; font-weight:bold; padding:8px 16px; border-radius:12px;
+    box-shadow:0 2px 0 var(--ach-blue-dark); white-space:nowrap;
+  }
+  .sFooterRow{ display:flex; gap:8px; margin-bottom:10px; }
+  .sFooterBtn{
+    flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:#fffaf0; border:1px solid #ecdfc0; border-radius:12px; padding:10px 4px;
+    font-size:11px; font-weight:bold; color:#8a7350;
+  }
+  .sFooterBtn .sIcon{ font-size:18px; width:auto; }
+  .sVersion{ text-align:center; font-size:11px; color:#b0a58c; }
+

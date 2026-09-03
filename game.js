@@ -890,7 +890,18 @@
   // ---- top bar / bottom nav stubs ----
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
-  document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
+  document.getElementById('gearBtn').addEventListener('click', ()=>{
+    document.getElementById('settingsOverlay').classList.add('show');
+  });
+  document.getElementById('settingsCloseBtn').addEventListener('click', ()=>{
+    document.getElementById('settingsOverlay').classList.remove('show');
+  });
+  document.querySelectorAll('.sToggle').forEach(function(btn){
+    btn.addEventListener('click', function(){ btn.classList.toggle('on'); });
+  });
+  document.querySelectorAll('.sActionBtn, .sFooterBtn').forEach(function(btn){
+    btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+  });
   document.getElementById('navShop').addEventListener('click', ()=>{
     resetInFlightFX();
     renderShop();

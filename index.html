@@ -116,6 +116,50 @@
   </div>
 </div>
 
+<div class="overlay" id="settingsOverlay">
+  <div class="settingsWrap">
+    <div class="settingsRibbon">설정</div>
+    <button class="settingsCloseBtn" id="settingsCloseBtn">✕</button>
+    <div class="settingsCard">
+
+      <div class="sSectionLabel"><span></span>사운드<span></span></div>
+      <div class="sGroup">
+        <div class="sRow">
+          <span class="sIcon">🔊</span><span class="sLabel">배경 음악</span>
+          <button class="sToggle on" data-key="bgm"><span class="sToggleKnob"></span></button>
+        </div>
+        <div class="sRow">
+          <span class="sIcon">🔊</span><span class="sLabel">효과음</span>
+          <button class="sToggle on" data-key="sfx"><span class="sToggleKnob"></span></button>
+        </div>
+        <div class="sRow">
+          <span class="sIcon">📳</span><span class="sLabel">진동</span>
+          <button class="sToggle on" data-key="vibrate"><span class="sToggleKnob"></span></button>
+        </div>
+      </div>
+
+      <div class="sSectionLabel"><span></span>게임<span></span></div>
+      <div class="sGroup">
+        <div class="sRow">
+          <span class="sIcon">🎨</span><span class="sLabel">테마 색상</span>
+          <button class="sActionBtn" data-action="theme">기본</button>
+        </div>
+        <div class="sRow">
+          <span class="sIcon">☁️</span><span class="sLabel">데이터 백업</span>
+          <button class="sActionBtn" data-action="backup">백업하기</button>
+        </div>
+      </div>
+
+      <div class="sFooterRow">
+        <button class="sFooterBtn" data-action="help"><span class="sIcon">ℹ️</span>고객센터</button>
+        <button class="sFooterBtn" data-action="terms"><span class="sIcon">📄</span>이용약관</button>
+        <button class="sFooterBtn" data-action="privacy"><span class="sIcon">🔒</span>개인정보 방침</button>
+      </div>
+      <div class="sVersion">버전 1.0.0</div>
+    </div>
+  </div>
+</div>
+
 <script src="game.js"></script>
 
 </body>
