@@ -900,7 +900,15 @@
     btn.addEventListener('click', function(){ btn.classList.toggle('on'); });
   });
   document.querySelectorAll('.sActionBtn, .sFooterBtn').forEach(function(btn){
+    if(btn.id === 'resetDataBtn') return;
     btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+  });
+  document.getElementById('resetDataBtn').addEventListener('click', function(){
+    if(!confirm('모든 게임 데이터를 초기화할까요? 되돌릴 수 없어요.')) return;
+    Object.keys(localStorage).forEach(function(k){
+      if(k.indexOf('sp_') === 0) localStorage.removeItem(k);
+    });
+    location.reload();
   });
   document.getElementById('navShop').addEventListener('click', ()=>{
     resetInFlightFX();
