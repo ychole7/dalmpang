@@ -333,6 +333,33 @@
     background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff;
     box-shadow:0 2px 0 var(--ach-blue-dark);
   }
+  .pageRibbon{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:0 auto -26px; position:relative; z-index:2; flex:0 0 auto;
+    width:64%; min-width:180px; max-width:280px;
+    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark));
+    color:#fff; font-size:22px; font-weight:900; text-align:center;
+    padding:14px 18px; border-radius:40px;
+    box-shadow:0 4px 0 var(--ach-blue-dark), 0 6px 10px rgba(20,40,80,0.25);
+    border:3px solid rgba(255,255,255,0.28);
+  }
+  .shopList{ display:flex; flex-direction:column; gap:12px; flex:1 1 auto; overflow-y:auto; }
+  .shopRow{
+    display:flex; align-items:center; gap:12px; padding:14px; border-radius:18px;
+    background:#eef4fb; border:1px solid #cfe0f2;
+  }
+  .shopRow.power{ background:#fdf6e3; border-color:#f0dfa8; }
+  .shopRow.coin{ background:#fbeedd; border-color:#f0d3a8; }
+  .shopIcon{ flex:0 0 auto; width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size:34px; }
+  .shopBody{ flex:1 1 auto; min-width:0; }
+  .shopBody .sTitle{ font-size:15px; font-weight:900; color:#2b4a8c; }
+  .shopBody .sDesc{ font-size:11px; color:#8a8375; margin-top:2px; line-height:1.4; }
+  .shopBuyBtn{
+    flex:0 0 auto; background:linear-gradient(180deg,#8ee066,#4fae2f); color:#fff; border:none;
+    font-size:14px; font-weight:900; padding:10px 16px; border-radius:12px;
+    box-shadow:0 3px 0 #2f7a1a; white-space:nowrap;
+  }
+  .shopNote{ text-align:center; font-size:11px; color:#9a8a6a; margin-top:10px; flex:0 0 auto; }
   .achieveList{ flex:1 1 auto; min-height:0; overflow-y:auto; }
   .achieveRow{
     display:flex; align-items:stretch; gap:12px; margin-bottom:12px; padding:12px; border-radius:18px;

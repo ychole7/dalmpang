@@ -861,17 +861,46 @@
     popCells(cells, true);
   });
 
+  const SHOP_ITEMS = [
+    { key:'noads', cls:'', icon:'🚫', name:'광고 제거', desc:'모든 광고를 제거하고\n쾌적하게 플레이하세요!', price:'₩5,500' },
+    { key:'power', cls:'power', icon:'🎁', name:'파워팩', desc:'게임에 도움이 되는\n아이템을 듬뿍 담았어요!', price:'₩4,400' },
+    { key:'coin', cls:'coin', icon:'💰', name:'코인 구매', desc:'더 많은 코인으로\n게임을 즐겨보세요!', price:'₩3,300' }
+  ];
+
+  function renderShop(){
+    const list = document.getElementById('shopList');
+    list.innerHTML = SHOP_ITEMS.map(function(it){
+      return '<div class="shopRow'+(it.cls?' '+it.cls:'')+'">'
+        + '<div class="shopIcon">'+it.icon+'</div>'
+        + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc.replace('\n','<br>')+'</div></div>'
+        + '<button class="shopBuyBtn" data-key="'+it.key+'">'+it.price+'</button>'
+        + '</div>';
+    }).join('');
+    list.querySelectorAll('.shopBuyBtn').forEach(function(btn){
+      btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+    });
+  }
+
+  function hideAllPages(){
+    document.getElementById('achievePage').classList.remove('show');
+    document.getElementById('shopPage').classList.remove('show');
+    document.getElementById('mainScreen').style.display = 'none';
+  }
+
   // ---- top bar / bottom nav stubs ----
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=> showToast('설정은 준비 중이에요'));
   document.getElementById('navShop').addEventListener('click', ()=>{
     resetInFlightFX();
-    showToast('준비 중인 기능이에요');
+    renderShop();
+    hideAllPages();
+    document.getElementById('shopPage').classList.add('show');
     setActiveTab('shop');
   });
   document.getElementById('navHome').addEventListener('click', ()=>{
     document.getElementById('achievePage').classList.remove('show');
+    document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = '';
     setActiveTab('home');
   });
@@ -1020,7 +1049,7 @@
   document.getElementById('navAchieve').addEventListener('click', ()=>{
     resetInFlightFX();
     renderAchievements();
-    document.getElementById('mainScreen').style.display = 'none';
+    hideAllPages();
     document.getElementById('achievePage').classList.add('show');
     setActiveTab('achieve');
   });
