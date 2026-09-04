@@ -473,11 +473,8 @@
   /* ---------- settings popup ---------- */
   .settingsWrap{ position:relative; width:340px; max-width:88vw; }
   .settingsRibbon{
-    position:relative; z-index:2; margin:0 auto -22px; width:70%; text-align:center;
-    background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark));
-    color:#fff; font-size:20px; font-weight:900; padding:12px 16px; border-radius:36px;
-    box-shadow:0 4px 0 var(--ach-blue-dark), 0 6px 10px rgba(20,40,80,0.25);
-    border:3px solid rgba(255,255,255,0.28);
+    display:block; position:relative; z-index:2; margin:0 auto -22px;
+    width:64%; min-width:180px; max-width:280px; height:auto;
   }
   .settingsCloseBtn{
     position:absolute; top:-6px; right:-6px; z-index:3; width:34px; height:34px; border-radius:50%;
