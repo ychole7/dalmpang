@@ -258,15 +258,16 @@
   // 목표점수 배율도 구간마다 같이 올려서, 뒤로 갈수록 이동 1회당 필요한 점수 부담이 커짐.
   const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){ return stageSize(a) - stageSize(b); });
   const DIFFICULTY_BANDS = [
-    { from:0,   unlock:5,                  targetMul:1.00 },
-    { from:15,  unlock:7,                  targetMul:1.10 },
-    { from:30,  unlock:9,                  targetMul:1.20 },
-    { from:60,  unlock:12,                 targetMul:1.35 },
-    { from:100, unlock:15,                 targetMul:1.55 },
-    { from:150, unlock:18,                 targetMul:1.80 },
-    { from:250, unlock:21,                 targetMul:2.10 },
-    { from:400, unlock:24,                 targetMul:2.45 },
-    { from:600, unlock:POOL_SORTED.length, targetMul:2.90 }
+    { from:0,   unlock:6,                  targetMul:1.00 },
+    { from:10,  unlock:10,                 targetMul:1.10 },
+    { from:20,  unlock:14,                 targetMul:1.25 },
+    { from:35,  unlock:18,                 targetMul:1.45 },
+    { from:60,  unlock:21,                 targetMul:1.70 },
+    { from:90,  unlock:24,                 targetMul:2.00 },
+    { from:130, unlock:POOL_SORTED.length, targetMul:2.35 },
+    { from:220, unlock:POOL_SORTED.length, targetMul:2.80 },
+    { from:350, unlock:POOL_SORTED.length, targetMul:3.30 },
+    { from:550, unlock:POOL_SORTED.length, targetMul:3.90 }
   ];
   function bandFor(i){
     let band = DIFFICULTY_BANDS[0];
