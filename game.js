@@ -888,6 +888,12 @@
     document.getElementById('mainScreen').style.display = 'none';
   }
 
+  // ---- background music ----
+  const bgmAudio = new Audio('assets/sounds/bgm.mp3');
+  bgmAudio.loop = true;
+  bgmAudio.volume = 0.5;
+  let bgmOn = localStorage.getItem('sp_bgm_on') !== '0';
+
   // ---- top bar / bottom nav stubs ----
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
@@ -897,12 +903,28 @@
   document.getElementById('settingsCloseBtn').addEventListener('click', ()=>{
     document.getElementById('settingsOverlay').classList.remove('show');
   });
+  const bgmToggleBtn = document.querySelector('.sToggle[data-key="bgm"]');
+  if(bgmToggleBtn) bgmToggleBtn.classList.toggle('on', bgmOn);
   document.querySelectorAll('.sToggle').forEach(function(btn){
-    btn.addEventListener('click', function(){ btn.classList.toggle('on'); });
+    btn.addEventListener('click', function(){
+      const isOn = btn.classList.toggle('on');
+      if(btn.dataset.key === 'bgm'){
+        bgmOn = isOn;
+        localStorage.setItem('sp_bgm_on', bgmOn ? '1' : '0');
+        if(bgmOn) bgmAudio.play().catch(()=>{});
+        else bgmAudio.pause();
+      }
+    });
   });
   document.querySelectorAll('.sActionBtn, .sFooterBtn').forEach(function(btn){
-    if(btn.id === 'resetDataBtn') return;
+    if(btn.id === 'resetDataBtn' || btn.id === 'licenseBtn') return;
     btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+  });
+  document.getElementById('licenseBtn').addEventListener('click', function(){
+    document.getElementById('licenseOverlay').classList.add('show');
+  });
+  document.getElementById('licenseCloseBtn').addEventListener('click', function(){
+    document.getElementById('licenseOverlay').classList.remove('show');
   });
   document.getElementById('resetDataBtn').addEventListener('click', function(){
     if(!confirm('모든 게임 데이터를 초기화할까요? 되돌릴 수 없어요.')) return;
@@ -1082,6 +1104,9 @@
 
   const splashEl = document.getElementById('splashScreen');
   if(splashEl){
-    splashEl.addEventListener('click', ()=> splashEl.classList.add('hide'), { once:true });
+    splashEl.addEventListener('click', ()=>{
+      splashEl.classList.add('hide');
+      if(bgmOn) bgmAudio.play().catch(()=>{});
+    }, { once:true });
   }
 })();
