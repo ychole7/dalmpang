@@ -660,6 +660,7 @@
     localStorage.setItem('sp_total_pops', totalPops);
     triggerPopEffect(cells.length, gained);
     shakeBoard(cells.length);
+    vibrateForCombo(cells.length);
     cells.forEach(({r,c})=>{
       cellEls[r][c].classList.add('popping');
       board[r][c] = null;
@@ -766,6 +767,7 @@
     }
 
     clearOverlay.classList.add('show');
+    vibrate([40,40,40,40,80]);
   }
 
   function showStageFail(){
@@ -774,6 +776,7 @@
     failStageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     failBarFillEl.style.width = Math.min(100, (stageScore/st.target)*100)+'%';
     failOverlay.classList.add('show');
+    vibrate(200);
   }
 
   document.getElementById('nextStageBtn').addEventListener('click', ()=>{
@@ -894,6 +897,19 @@
   bgmAudio.volume = 0.5;
   let bgmOn = localStorage.getItem('sp_bgm_on') !== '0';
 
+  // ---- vibration (haptics) ----
+  let vibrateOn = localStorage.getItem('sp_vibrate_on') !== '0';
+  function vibrate(pattern){
+    if(!vibrateOn) return;
+    if(navigator.vibrate) navigator.vibrate(pattern);
+  }
+  function vibrateForCombo(count){
+    if(count>=15) vibrate([30,30,60]);
+    else if(count>=9) vibrate([20,20,40]);
+    else if(count>=5) vibrate(30);
+    else vibrate(15);
+  }
+
   // ---- top bar / bottom nav stubs ----
   document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
@@ -905,6 +921,8 @@
   });
   const bgmToggleBtn = document.querySelector('.sToggle[data-key="bgm"]');
   if(bgmToggleBtn) bgmToggleBtn.classList.toggle('on', bgmOn);
+  const vibrateToggleBtn = document.querySelector('.sToggle[data-key="vibrate"]');
+  if(vibrateToggleBtn) vibrateToggleBtn.classList.toggle('on', vibrateOn);
   document.querySelectorAll('.sToggle').forEach(function(btn){
     btn.addEventListener('click', function(){
       const isOn = btn.classList.toggle('on');
@@ -913,6 +931,10 @@
         localStorage.setItem('sp_bgm_on', bgmOn ? '1' : '0');
         if(bgmOn) bgmAudio.play().catch(()=>{});
         else bgmAudio.pause();
+      } else if(btn.dataset.key === 'vibrate'){
+        vibrateOn = isOn;
+        localStorage.setItem('sp_vibrate_on', vibrateOn ? '1' : '0');
+        if(vibrateOn) vibrate(20);
       }
     });
   });
