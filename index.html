@@ -36,14 +36,14 @@
   <div class="mainScreen" id="mainScreen">
     <div class="statsRow">
       <div class="targetCard">
-        <div class="targetBadge">목표 점수</div>
+        <div class="targetBadge" id="targetBadgeLbl">목표 점수</div>
         <div class="targetBig" id="targetVal">0</div>
         <div class="barTrack"><div class="barFill" id="progressFill"></div><div class="barStar" id="barStar">⭐</div></div>
       </div>
-      <div class="stageBadgeMini">STAGE<br><span id="stageNum">01</span></div>
+      <div class="stageBadgeMini"><span id="stageBadgeLbl">STAGE</span><br><span id="stageNum">01</span></div>
       <div class="movesBadge">
         <div class="circle" id="movesVal">-</div>
-        <div class="lbl">MOVES</div>
+        <div class="lbl" id="movesLbl">MOVES</div>
         <div class="movesStars" id="movesStars">☆☆☆</div>
         <div class="movesScore" id="movesScoreEcho">0</div>
       </div>
@@ -90,6 +90,7 @@
 
   <div class="bottomNav">
     <div class="navBtn" id="navAchieve"><div class="ico"><img src="assets/images/icon_achievement.png" alt=""></div><span class="navLabel">업적</span></div>
+    <div class="navBtn" id="navTimeAttack"><div class="ico">⏱️</div><span class="navLabel">타임어택</span></div>
     <div class="navBtn home" id="navHome"><div class="ico"><img src="assets/images/icon_home.png" alt=""></div><span class="navLabel">홈</span></div>
     <div class="navBtn" id="navShop"><div class="ico"><img src="assets/images/icon_shop.png" alt=""></div><span class="navLabel">상점</span></div>
   </div>
@@ -124,6 +125,17 @@
       <button class="failBtnHit" id="retryBtn"></button>
     </div>
     <button class="btn gold" id="continueBtn">🪙 <span id="continueCostLabel">50</span>으로 5무브 추가</button>
+  </div>
+</div>
+
+<div class="overlay" id="taResultOverlay">
+  <div class="card">
+    <h2>⏱️ 타임어택 결과</h2>
+    <p style="font-size:28px; font-weight:900; color:var(--ink); margin:6px 0;" id="taFinalScore">0</p>
+    <p class="bestLine" id="taBestLine">최고기록 0</p>
+    <p id="taRewardLine"></p>
+    <button class="btn secondary" id="taHomeBtn">홈으로</button>
+    <button class="btn gold" id="taRetryBtn">다시하기</button>
   </div>
 </div>
 

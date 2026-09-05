@@ -328,6 +328,18 @@
   if(isNaN(stageIndex)) stageIndex = 0;
   let stageScore = 0;
   let movesLeft = 0;
+
+  // ---- 타임어택 모드 ----
+  const TA_DURATION = 60;
+  let gameMode = 'stage';
+  let timeLeft = 0;
+  let taTimerHandle = null;
+  let taBestScore = parseInt(localStorage.getItem('sp_ta_best')||'0',10);
+  let taSavedState = null;
+  function formatTime(sec){
+    const m = Math.floor(sec/60), s = sec%60;
+    return m+':'+String(s).padStart(2,'0');
+  }
   let hearts = parseInt(localStorage.getItem('sp_hearts'), 10);
   if(isNaN(hearts)) hearts = HEART_MAX;
   let heartRegenAt = parseInt(localStorage.getItem('sp_heart_regen_at'), 10);
@@ -490,21 +502,38 @@
     }
   }
 
-  function newStageBoard(){
-    stageScore = 0;
-    movesLeft = movesBudget();
-    board = [];
+  function fillRandomBoard(){
+    const b = [];
     for(let r=0;r<ROWS;r++){
       const row=[];
       for(let c=0;c<COLS;c++) row.push(randSymbolIdx());
-      board.push(row);
+      b.push(row);
     }
+    return b;
+  }
+
+  function newStageBoard(){
+    stageScore = 0;
+    movesLeft = movesBudget();
+    board = fillRandomBoard();
     updateHud();
     render();
     checkNoMoves();
   }
 
   function updateHud(){
+    if(gameMode === 'timeattack'){
+      targetValEl.textContent = formatTime(timeLeft);
+      const pct = Math.max(0, Math.min(100, (timeLeft/TA_DURATION)*100));
+      progressFillEl.style.width = pct+'%';
+      barStarEl.style.left = pct+'%';
+      movesValEl.textContent = fmt(stageScore);
+      movesStarsEl.textContent = '최고 '+fmt(taBestScore);
+      movesScoreEchoEl.textContent = '';
+      heartsValEl.textContent = hearts;
+      updateHeartTimerDisplay();
+      return;
+    }
     const st = currentStage();
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
@@ -574,7 +603,7 @@
   }
 
   function startChain(r,c){
-    if(movesLeft<=0) return;
+    if(gameMode !== 'timeattack' && movesLeft<=0) return;
     chain = [{r,c}];
     cellEls[r][c].classList.add('selected');
     drawChainLine();
@@ -670,14 +699,15 @@
       applyGravity();
       render();
       updateHud();
-      if(stageScore >= currentStage().target){ showStageClear(); }
+      if(gameMode === 'timeattack'){ checkNoMoves(); }
+      else if(stageScore >= currentStage().target){ showStageClear(); }
       else if(movesLeft<=0){ showStageFail(); }
       else { checkNoMoves(); }
     }, 260);
   }
 
   function popChain(cells){
-    movesLeft = Math.max(0, movesLeft-1);
+    if(gameMode !== 'timeattack') movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
   }
 
@@ -937,9 +967,77 @@
   }
 
   function hideAllPages(){
+    if(gameMode === 'timeattack') exitTimeAttack();
     document.getElementById('achievePage').classList.remove('show');
     document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = 'none';
+  }
+
+  function setHudLabelsForMode(mode){
+    document.getElementById('targetBadgeLbl').textContent = mode==='timeattack' ? '남은 시간' : '목표 점수';
+    document.getElementById('stageBadgeLbl').textContent = mode==='timeattack' ? 'TIME' : 'STAGE';
+    document.getElementById('stageNum').textContent = mode==='timeattack' ? 'ATTACK' : String(stageSlot()+1).padStart(2,'0');
+    document.getElementById('movesLbl').textContent = mode==='timeattack' ? 'SCORE' : 'MOVES';
+    document.querySelector('.powerRow').style.display = mode==='timeattack' ? 'none' : '';
+  }
+
+  function taRewardFor(score, target){
+    if(score >= target*1.5) return { coin:80, star:5 };
+    if(score >= target*1.0) return { coin:50, star:2 };
+    if(score >= target*0.5) return { coin:20, star:0 };
+    return { coin:5, star:0 };
+  }
+
+  function enterTimeAttack(){
+    resetInFlightFX();
+    if(!taSavedState){
+      taSavedState = { board: board.map(function(r){return r.slice();}), stageScore, movesLeft };
+    }
+    gameMode = 'timeattack';
+    stageScore = 0;
+    timeLeft = TA_DURATION;
+    board = fillRandomBoard();
+    setHudLabelsForMode('timeattack');
+    render();
+    updateHud();
+    clearInterval(taTimerHandle);
+    taTimerHandle = setInterval(function(){
+      timeLeft--;
+      updateHud();
+      if(timeLeft<=0){ clearInterval(taTimerHandle); endTimeAttack(); }
+    }, 1000);
+  }
+
+  function endTimeAttack(){
+    const st = currentStage();
+    const isNewBest = stageScore > taBestScore;
+    if(isNewBest){ taBestScore = stageScore; localStorage.setItem('sp_ta_best', taBestScore); }
+    const reward = taRewardFor(stageScore, st.target);
+    awardCoins(reward.coin);
+    if(reward.star){
+      totalStars += reward.star;
+      localStorage.setItem('sp_stars', totalStars);
+      starsValEl.textContent = totalStars;
+    }
+    document.getElementById('taFinalScore').textContent = fmt(stageScore)+'점';
+    document.getElementById('taBestLine').textContent = (isNewBest?'🎉 신기록! ':'최고기록 ')+fmt(taBestScore);
+    document.getElementById('taRewardLine').textContent = '🪙 '+reward.coin+(reward.star?'  ⭐ '+reward.star:'');
+    document.getElementById('taResultOverlay').classList.add('show');
+    vibrate([40,40,40]);
+  }
+
+  function exitTimeAttack(){
+    clearInterval(taTimerHandle);
+    gameMode = 'stage';
+    if(taSavedState){
+      board = taSavedState.board;
+      stageScore = taSavedState.stageScore;
+      movesLeft = taSavedState.movesLeft;
+      taSavedState = null;
+    }
+    setHudLabelsForMode('stage');
+    render();
+    updateHud();
   }
 
   // ---- background music ----
@@ -1025,7 +1123,24 @@
     document.getElementById('shopPage').classList.add('show');
     setActiveTab('shop');
   });
+  document.getElementById('navTimeAttack').addEventListener('click', ()=>{
+    document.getElementById('achievePage').classList.remove('show');
+    document.getElementById('shopPage').classList.remove('show');
+    document.getElementById('mainScreen').style.display = '';
+    if(gameMode !== 'timeattack') enterTimeAttack();
+    setActiveTab('timeattack');
+  });
+  document.getElementById('taHomeBtn').addEventListener('click', ()=>{
+    document.getElementById('taResultOverlay').classList.remove('show');
+    exitTimeAttack();
+    setActiveTab('home');
+  });
+  document.getElementById('taRetryBtn').addEventListener('click', ()=>{
+    document.getElementById('taResultOverlay').classList.remove('show');
+    enterTimeAttack();
+  });
   document.getElementById('navHome').addEventListener('click', ()=>{
+    if(gameMode === 'timeattack') exitTimeAttack();
     document.getElementById('achievePage').classList.remove('show');
     document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = '';
@@ -1168,7 +1283,7 @@
 
   function setActiveTab(tab){
     document.querySelectorAll('.navBtn').forEach(function(btn){ btn.classList.remove('selected'); });
-    const map = { achieve:'navAchieve', home:'navHome', shop:'navShop' };
+    const map = { achieve:'navAchieve', home:'navHome', shop:'navShop', timeattack:'navTimeAttack' };
     document.getElementById(map[tab]).classList.add('selected');
   }
   setActiveTab('home');
