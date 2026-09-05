@@ -80,6 +80,9 @@
   <div class="pageScreen" id="shopPage">
     <img class="achieveRibbon" src="assets/images/shop_ribbon.png" alt="상점">
     <div class="achieveFrame">
+      <div class="shopSectionLabel">⭐ 별 상점</div>
+      <div class="shopList" id="starShopList"></div>
+      <div class="shopSectionLabel">🛍️ 상점</div>
       <div class="shopList" id="shopList"></div>
       <div class="shopNote">✨ 구매한 상품은 즉시 적용됩니다. ✨</div>
     </div>
@@ -112,12 +115,15 @@
 </div>
 
 <div class="overlay" id="failOverlay">
-  <div class="failCardImg">
-    <img src="assets/images/fail_card.png" alt="">
-    <div class="failTargetVal" id="failTargetVal">0</div>
-    <div class="failBarTrack"><div class="failBarFill" id="failBarFill"></div></div>
-    <div class="failStageNum" id="failStageNum">01</div>
-    <button class="failBtnHit" id="retryBtn"></button>
+  <div class="failWrap">
+    <div class="failCardImg">
+      <img src="assets/images/fail_card.png" alt="">
+      <div class="failTargetVal" id="failTargetVal">0</div>
+      <div class="failBarTrack"><div class="failBarFill" id="failBarFill"></div></div>
+      <div class="failStageNum" id="failStageNum">01</div>
+      <button class="failBtnHit" id="retryBtn"></button>
+    </div>
+    <button class="btn gold" id="continueBtn">🪙 <span id="continueCostLabel">50</span>으로 5무브 추가</button>
   </div>
 </div>
 

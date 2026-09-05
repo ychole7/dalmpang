@@ -319,7 +319,7 @@
     flex:1 1 auto; min-height:0; display:flex; flex-direction:column; position:relative;
     background:var(--ach-cream); border:7px solid var(--ach-blue); border-radius:24px;
     box-shadow: inset 0 -6px 0 var(--ach-blue-dark), 0 4px 10px rgba(20,40,80,0.18);
-    padding:34px 14px 14px;
+    padding:34px 14px 14px; overflow-y:auto;
   }
   .achieveSummary{ text-align:center; font-size:12px; color:#8a7350; font-weight:bold; margin-bottom:10px; flex:0 0 auto; }
   .achieveTabs{
@@ -333,7 +333,17 @@
     background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff;
     box-shadow:0 2px 0 var(--ach-blue-dark);
   }
-  .shopList{ display:flex; flex-direction:column; gap:12px; flex:1 1 auto; overflow-y:auto; }
+  .shopSectionLabel{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:13px; font-weight:bold; color:#8a7350; margin:2px 0 8px;
+  }
+  .shopList{ display:flex; flex-direction:column; gap:12px; flex:0 0 auto; margin-bottom:16px; }
+  .shopList:last-of-type{ margin-bottom:0; }
+  .shopRow.star{ background:#fff8e6; border-color:#f0dfa0; }
+  .shopRow.star.disabled{ opacity:0.55; }
+  .shopBuyBtn.star{
+    background:linear-gradient(180deg,#ffd76b,#e8a622); box-shadow:0 3px 0 #a3711a;
+  }
   .shopRow{
     display:flex; align-items:center; gap:12px; padding:14px; border-radius:18px;
     background:#eef4fb; border:1px solid #cfe0f2;
@@ -404,6 +414,8 @@
     padding:10px 20px; border-radius:12px; font-size:14px; font-weight:bold; box-shadow:0 3px 0 #234f7d;
   }
   .btn.secondary{ background:linear-gradient(180deg,#b9c6d3,#8fa2b3); box-shadow:0 3px 0 #5f7284; margin-right:8px;}
+  .btn.gold{ background:linear-gradient(180deg,#ffd76b,#e8a622); box-shadow:0 3px 0 #a3711a; }
+  .failWrap{ display:flex; flex-direction:column; align-items:center; gap:12px; }
 
   /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
   .clearCardImg{

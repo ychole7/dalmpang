@@ -337,7 +337,8 @@
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
   let dragging = false;
-  let powerCounts = { candy:3, bomb:2, shuffle:2, rainbow:2 };
+  let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
+  function savePowerCounts(){ localStorage.setItem('sp_power_counts', JSON.stringify(powerCounts)); }
 
   // ---- 업적 추적용 데이터 ----
   let patternsCleared = JSON.parse(localStorage.getItem('sp_patterns_cleared')||'[]');
@@ -770,11 +771,13 @@
     vibrate([40,40,40,40,80]);
   }
 
+  const CONTINUE_COST = 50;
   function showStageFail(){
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
     failStageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     failBarFillEl.style.width = Math.min(100, (stageScore/st.target)*100)+'%';
+    document.getElementById('continueCostLabel').textContent = CONTINUE_COST;
     failOverlay.classList.add('show');
     vibrate(200);
   }
@@ -795,6 +798,18 @@
     updateHud();
     failOverlay.classList.remove('show');
     newStageBoard();
+  });
+  document.getElementById('continueBtn').addEventListener('click', ()=>{
+    if(coins < CONTINUE_COST){ showToast('코인이 부족해요'); return; }
+    coins -= CONTINUE_COST;
+    localStorage.setItem('sp_coins', coins);
+    coinsValEl.textContent = fmt(coins);
+    movesLeft += 5;
+    failOverlay.classList.remove('show');
+    updateHud();
+    render();
+    checkNoMoves();
+    showToast('🪙 '+CONTINUE_COST+'으로 5무브 추가!');
   });
 
   gridEl.addEventListener('pointerdown', (e)=>{
@@ -819,6 +834,7 @@
   document.getElementById('btnCandy').addEventListener('click', ()=>{
     if(powerCounts.candy<=0){ showToast('사탕 개수가 없어요'); return; }
     powerCounts.candy--;
+    savePowerCounts();
     movesLeft += 3;
     updateHud();
     showToast('사탕 사용! 이동 횟수 +3');
@@ -836,6 +852,7 @@
       if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null) cells.push({r,c});
     }
     powerCounts.bomb--;
+    savePowerCounts();
     movesLeft = Math.max(0, movesLeft-1);
     updateHud();
     popCells(cells, true);
@@ -843,6 +860,7 @@
   document.getElementById('btnShuffle').addEventListener('click', ()=>{
     if(powerCounts.shuffle<=0){ showToast('셔플 개수가 없어요'); return; }
     powerCounts.shuffle--;
+    savePowerCounts();
     updateHud();
     reshuffleInPlace();
     render();
@@ -860,6 +878,7 @@
     const cells=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===value) cells.push({r,c});
     powerCounts.rainbow--;
+    savePowerCounts();
     movesLeft = Math.max(0, movesLeft-1);
     updateHud();
     popCells(cells, true);
@@ -871,7 +890,39 @@
     { key:'coin', cls:'coin', icon:'💰', name:'코인 구매', desc:'더 많은 코인으로\n게임을 즐겨보세요!', price:'₩3,300' }
   ];
 
+  const STAR_SHOP_ITEMS = [
+    { key:'candy',   icon:'🍬', name:'사탕 +1',   desc:'이동 횟수 3회 추가', star:5 },
+    { key:'shuffle', icon:'🔀', name:'셔플 +1',   desc:'보드를 다시 섞어요', star:6 },
+    { key:'bomb',    icon:'💣', name:'폭탄 +1',   desc:'주변 타일을 한번에 제거', star:8 },
+    { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
+  ];
+
   function renderShop(){
+    const starList = document.getElementById('starShopList');
+    starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
+      const affordable = totalStars >= it.star;
+      return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
+        + '<div class="shopIcon">'+it.icon+'</div>'
+        + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
+        + '<button class="shopBuyBtn star" data-key="'+it.key+'" data-star="'+it.star+'">⭐ '+it.star+'</button>'
+        + '</div>';
+    }).join('');
+    starList.querySelectorAll('.shopBuyBtn.star').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const cost = parseInt(btn.dataset.star, 10);
+        const key = btn.dataset.key;
+        if(totalStars < cost){ showToast('별이 부족해요'); return; }
+        totalStars -= cost;
+        localStorage.setItem('sp_stars', totalStars);
+        starsValEl.textContent = totalStars;
+        powerCounts[key] = (powerCounts[key]||0) + 1;
+        savePowerCounts();
+        updateHud();
+        showToast(STAR_SHOP_ITEMS.find(i=>i.key===key).name+' 구매 완료!');
+        renderShop();
+      });
+    });
+
     const list = document.getElementById('shopList');
     list.innerHTML = SHOP_ITEMS.map(function(it){
       return '<div class="shopRow'+(it.cls?' '+it.cls:'')+'">'
@@ -880,7 +931,7 @@
         + '<button class="shopBuyBtn" data-key="'+it.key+'">'+it.price+'</button>'
         + '</div>';
     }).join('');
-    list.querySelectorAll('.shopBuyBtn').forEach(function(btn){
+    list.querySelectorAll('.shopBuyBtn:not(.star)').forEach(function(btn){
       btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
     });
   }
@@ -911,7 +962,19 @@
   }
 
   // ---- top bar / bottom nav stubs ----
-  document.getElementById('heartPlus').addEventListener('click', ()=>{ hearts=HEART_MAX; heartRegenAt=0; saveHearts(); updateHud(); showToast('하트를 채웠습니다 (데모)'); });
+  const HEART_REFILL_COST = 30;
+  document.getElementById('heartPlus').addEventListener('click', ()=>{
+    if(hearts >= HEART_MAX){ showToast('하트가 이미 가득 찼어요'); return; }
+    if(coins < HEART_REFILL_COST){ showToast('코인이 부족해요'); return; }
+    coins -= HEART_REFILL_COST;
+    localStorage.setItem('sp_coins', coins);
+    coinsValEl.textContent = fmt(coins);
+    hearts = HEART_MAX;
+    heartRegenAt = 0;
+    saveHearts();
+    updateHud();
+    showToast('🪙 '+HEART_REFILL_COST+'으로 하트를 채웠습니다');
+  });
   document.getElementById('coinPlus').addEventListener('click', ()=> showToast('상점은 준비 중이에요'));
   document.getElementById('gearBtn').addEventListener('click', ()=>{
     document.getElementById('settingsOverlay').classList.add('show');
