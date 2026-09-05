@@ -258,16 +258,16 @@
   // 목표점수 배율도 구간마다 같이 올려서, 뒤로 갈수록 이동 1회당 필요한 점수 부담이 커짐.
   const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){ return stageSize(a) - stageSize(b); });
   const DIFFICULTY_BANDS = [
-    { from:0,   unlock:6,                  targetMul:1.00 },
-    { from:10,  unlock:10,                 targetMul:1.10 },
-    { from:20,  unlock:14,                 targetMul:1.25 },
-    { from:35,  unlock:18,                 targetMul:1.45 },
-    { from:60,  unlock:21,                 targetMul:1.70 },
-    { from:90,  unlock:24,                 targetMul:2.00 },
-    { from:130, unlock:POOL_SORTED.length, targetMul:2.35 },
-    { from:220, unlock:POOL_SORTED.length, targetMul:2.80 },
-    { from:350, unlock:POOL_SORTED.length, targetMul:3.30 },
-    { from:550, unlock:POOL_SORTED.length, targetMul:3.90 }
+    { from:0,   unlock:6,                  targetMul:1.00, timeLimit:null },
+    { from:10,  unlock:10,                 targetMul:1.10, timeLimit:null },
+    { from:20,  unlock:14,                 targetMul:1.25, timeLimit:90 },
+    { from:35,  unlock:18,                 targetMul:1.45, timeLimit:80 },
+    { from:60,  unlock:21,                 targetMul:1.70, timeLimit:70 },
+    { from:90,  unlock:24,                 targetMul:2.00, timeLimit:65 },
+    { from:130, unlock:POOL_SORTED.length, targetMul:2.35, timeLimit:60 },
+    { from:220, unlock:POOL_SORTED.length, targetMul:2.80, timeLimit:55 },
+    { from:350, unlock:POOL_SORTED.length, targetMul:3.30, timeLimit:50 },
+    { from:550, unlock:POOL_SORTED.length, targetMul:3.90, timeLimit:45 }
   ];
   function bandFor(i){
     let band = DIFFICULTY_BANDS[0];
@@ -282,7 +282,7 @@
       const pool = POOL_SORTED.slice(0, band.unlock);
       const base = pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
-      arr.push(Object.assign({}, base, { target: target }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: band.timeLimit }));
     }
     return arr;
   }
@@ -329,17 +329,9 @@
   let stageScore = 0;
   let movesLeft = 0;
 
-  // ---- 타임어택 모드 ----
-  const TA_DURATION = 60;
-  let gameMode = 'stage';
-  let timeLeft = 0;
-  let taTimerHandle = null;
-  let taBestScore = parseInt(localStorage.getItem('sp_ta_best')||'0',10);
-  let taSavedState = null;
-  function formatTime(sec){
-    const m = Math.floor(sec/60), s = sec%60;
-    return m+':'+String(s).padStart(2,'0');
-  }
+  // ---- 스테이지 시간제한 (구간이 올라갈수록 도입) ----
+  let stageTimeLeft = 0;
+  let stageTimerHandle = null;
   let hearts = parseInt(localStorage.getItem('sp_hearts'), 10);
   if(isNaN(hearts)) hearts = HEART_MAX;
   let heartRegenAt = parseInt(localStorage.getItem('sp_heart_regen_at'), 10);
@@ -516,24 +508,18 @@
     stageScore = 0;
     movesLeft = movesBudget();
     board = fillRandomBoard();
+    startNewStageTimer();
     updateHud();
     render();
     checkNoMoves();
   }
 
+  function formatTime(sec){
+    const m = Math.floor(sec/60), s = sec%60;
+    return m+':'+String(s).padStart(2,'0');
+  }
+
   function updateHud(){
-    if(gameMode === 'timeattack'){
-      targetValEl.textContent = formatTime(timeLeft);
-      const pct = Math.max(0, Math.min(100, (timeLeft/TA_DURATION)*100));
-      progressFillEl.style.width = pct+'%';
-      barStarEl.style.left = pct+'%';
-      movesValEl.textContent = fmt(stageScore);
-      movesStarsEl.textContent = '최고 '+fmt(taBestScore);
-      movesScoreEchoEl.textContent = '';
-      heartsValEl.textContent = hearts;
-      updateHeartTimerDisplay();
-      return;
-    }
     const st = currentStage();
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
@@ -552,6 +538,14 @@
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
     document.getElementById('cntShuffle').textContent = powerCounts.shuffle;
     document.getElementById('cntRainbow').textContent = powerCounts.rainbow;
+    const timerEl = document.getElementById('stageTimerVal');
+    if(st.timeLimit){
+      timerEl.style.display = '';
+      timerEl.textContent = '⏱ '+formatTime(stageTimeLeft);
+      timerEl.classList.toggle('warn', stageTimeLeft<=10);
+    } else {
+      timerEl.style.display = 'none';
+    }
   }
 
   function render(){
@@ -603,7 +597,7 @@
   }
 
   function startChain(r,c){
-    if(gameMode !== 'timeattack' && movesLeft<=0) return;
+    if(movesLeft<=0) return;
     chain = [{r,c}];
     cellEls[r][c].classList.add('selected');
     drawChainLine();
@@ -699,15 +693,14 @@
       applyGravity();
       render();
       updateHud();
-      if(gameMode === 'timeattack'){ checkNoMoves(); }
-      else if(stageScore >= currentStage().target){ showStageClear(); }
+      if(stageScore >= currentStage().target){ showStageClear(); }
       else if(movesLeft<=0){ showStageFail(); }
       else { checkNoMoves(); }
     }, 260);
   }
 
   function popChain(cells){
-    if(gameMode !== 'timeattack') movesLeft = Math.max(0, movesLeft-1);
+    movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
   }
 
@@ -758,6 +751,7 @@
   }
 
   function showStageClear(){
+    pauseStageTimer();
     const st = currentStage();
     const ratio = stageScore / st.target;
     const stars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : 1);
@@ -803,6 +797,7 @@
 
   const CONTINUE_COST = 50;
   function showStageFail(){
+    pauseStageTimer();
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
     failStageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
@@ -835,6 +830,8 @@
     localStorage.setItem('sp_coins', coins);
     coinsValEl.textContent = fmt(coins);
     movesLeft += 5;
+    const st = currentStage();
+    if(st.timeLimit){ stageTimeLeft += 20; resumeStageTimer(); }
     failOverlay.classList.remove('show');
     updateHud();
     render();
@@ -967,77 +964,27 @@
   }
 
   function hideAllPages(){
-    if(gameMode === 'timeattack') exitTimeAttack();
+    pauseStageTimer();
     document.getElementById('achievePage').classList.remove('show');
     document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = 'none';
   }
 
-  function setHudLabelsForMode(mode){
-    document.getElementById('targetBadgeLbl').textContent = mode==='timeattack' ? '남은 시간' : '목표 점수';
-    document.getElementById('stageBadgeLbl').textContent = mode==='timeattack' ? 'TIME' : 'STAGE';
-    document.getElementById('stageNum').textContent = mode==='timeattack' ? 'ATTACK' : String(stageSlot()+1).padStart(2,'0');
-    document.getElementById('movesLbl').textContent = mode==='timeattack' ? 'SCORE' : 'MOVES';
-    document.querySelector('.powerRow').style.display = mode==='timeattack' ? 'none' : '';
-  }
-
-  function taRewardFor(score, target){
-    if(score >= target*1.5) return { coin:80, star:5 };
-    if(score >= target*1.0) return { coin:50, star:2 };
-    if(score >= target*0.5) return { coin:20, star:0 };
-    return { coin:5, star:0 };
-  }
-
-  function enterTimeAttack(){
-    resetInFlightFX();
-    if(!taSavedState){
-      taSavedState = { board: board.map(function(r){return r.slice();}), stageScore, movesLeft };
-    }
-    gameMode = 'timeattack';
-    stageScore = 0;
-    timeLeft = TA_DURATION;
-    board = fillRandomBoard();
-    setHudLabelsForMode('timeattack');
-    render();
-    updateHud();
-    clearInterval(taTimerHandle);
-    taTimerHandle = setInterval(function(){
-      timeLeft--;
+  function pauseStageTimer(){ clearInterval(stageTimerHandle); }
+  function resumeStageTimer(){
+    clearInterval(stageTimerHandle);
+    const st = currentStage();
+    if(!st.timeLimit || stageTimeLeft<=0) return;
+    stageTimerHandle = setInterval(function(){
+      stageTimeLeft--;
       updateHud();
-      if(timeLeft<=0){ clearInterval(taTimerHandle); endTimeAttack(); }
+      if(stageTimeLeft<=0){ clearInterval(stageTimerHandle); showStageFail(); }
     }, 1000);
   }
-
-  function endTimeAttack(){
+  function startNewStageTimer(){
     const st = currentStage();
-    const isNewBest = stageScore > taBestScore;
-    if(isNewBest){ taBestScore = stageScore; localStorage.setItem('sp_ta_best', taBestScore); }
-    const reward = taRewardFor(stageScore, st.target);
-    awardCoins(reward.coin);
-    if(reward.star){
-      totalStars += reward.star;
-      localStorage.setItem('sp_stars', totalStars);
-      starsValEl.textContent = totalStars;
-    }
-    document.getElementById('taFinalScore').textContent = fmt(stageScore)+'점';
-    document.getElementById('taBestLine').textContent = (isNewBest?'🎉 신기록! ':'최고기록 ')+fmt(taBestScore);
-    document.getElementById('taRewardLine').textContent = '🪙 '+reward.coin+(reward.star?'  ⭐ '+reward.star:'');
-    document.getElementById('taResultOverlay').classList.add('show');
-    vibrate([40,40,40]);
-  }
-
-  function exitTimeAttack(){
-    clearInterval(taTimerHandle);
-    gameMode = 'stage';
-    if(taSavedState){
-      board = taSavedState.board;
-      stageScore = taSavedState.stageScore;
-      movesLeft = taSavedState.movesLeft;
-      taSavedState = null;
-    }
-    setHudLabelsForMode('stage');
-    render();
-    updateHud();
+    stageTimeLeft = st.timeLimit || 0;
+    resumeStageTimer();
   }
 
   // ---- background music ----
@@ -1123,27 +1070,11 @@
     document.getElementById('shopPage').classList.add('show');
     setActiveTab('shop');
   });
-  document.getElementById('navTimeAttack').addEventListener('click', ()=>{
-    document.getElementById('achievePage').classList.remove('show');
-    document.getElementById('shopPage').classList.remove('show');
-    document.getElementById('mainScreen').style.display = '';
-    if(gameMode !== 'timeattack') enterTimeAttack();
-    setActiveTab('timeattack');
-  });
-  document.getElementById('taHomeBtn').addEventListener('click', ()=>{
-    document.getElementById('taResultOverlay').classList.remove('show');
-    exitTimeAttack();
-    setActiveTab('home');
-  });
-  document.getElementById('taRetryBtn').addEventListener('click', ()=>{
-    document.getElementById('taResultOverlay').classList.remove('show');
-    enterTimeAttack();
-  });
   document.getElementById('navHome').addEventListener('click', ()=>{
-    if(gameMode === 'timeattack') exitTimeAttack();
     document.getElementById('achievePage').classList.remove('show');
     document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = '';
+    resumeStageTimer();
     setActiveTab('home');
   });
 
@@ -1283,7 +1214,7 @@
 
   function setActiveTab(tab){
     document.querySelectorAll('.navBtn').forEach(function(btn){ btn.classList.remove('selected'); });
-    const map = { achieve:'navAchieve', home:'navHome', shop:'navShop', timeattack:'navTimeAttack' };
+    const map = { achieve:'navAchieve', home:'navHome', shop:'navShop' };
     document.getElementById(map[tab]).classList.add('selected');
   }
   setActiveTab('home');
