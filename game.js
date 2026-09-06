@@ -52,32 +52,33 @@
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
   const STAGE_POOL = [
-    { name:'표준 주사위',      type:'dice-std' },
-    { name:'색깔 풍선',        type:'balloon' },
-    { name:'점 하나',          type:'dot',     positions:DOT_WIDE },
-    { name:'화살표 4방향',      type:'arrow',   dirs:DIR4 },
-    { name:'씨앗 위치',        type:'seed',    positions:[1,3,5,6,7,8] },
-    { name:'건곤감리',          type:'trigram', set:TRIGRAM4 },
-    { name:'표정 (뚜렷하게)',   type:'face',    set:FACE_EASY },
-    { name:'클로버',            type:'clover' },
-    { name:'물방울',            type:'drop',    positions:[1,2,3,4,5,6] },
-    { name:'점 4개 배치 A',     type:'pips',    combos:PIP4_A },
-    { name:'화살표 6방향',      type:'arrow',   dirs:DIR6 },
-    { name:'종',                type:'bell',    positions:[1,2,3,4] },
-    { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8 },
-    { name:'씨앗 위치 (좁게)',   type:'seed',    positions:[1,2,3,4] },
-    { name:'퍼즐 조각',         type:'puzzle',  positions:[1,2,3,4] },
-    { name:'점 3개 배치',       type:'pips',    combos:PIP3 },
-    { name:'점 5개 배치',       type:'pips',    combos:PIP5 },
-    { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE },
-    { name:'화살표 8방향',      type:'arrow',   dirs:DIR8 },
-    { name:'점 4개 배치 B',     type:'pips',    combos:PIP4_B },
-    { name:'점 위치 (9칸 전체)', type:'dot',    positions:DOT_ALL9 },
-    { name:'표정 (섞어서)',     type:'face',    set:FACE_MIXED },
-    { name:'시계 바늘',         type:'clock',   dirs:DIR6 },
-    { name:'카드 무늬',         type:'trigram', set:SUIT_SET },
-    { name:'단추 구멍',         type:'button',  positions:[1,2,3,4] },
-    { name:'신호등',            type:'traffic' }
+    // difficulty: 1(가장 쉬움, 색깔/한눈에 구분) ~ 6(가장 어려움, 개수를 세거나 자세히 봐야 함)
+    { name:'신호등',            type:'traffic', difficulty:1 },
+    { name:'색깔 풍선',        type:'balloon', difficulty:1 },
+    { name:'카드 무늬',         type:'trigram', set:SUIT_SET, difficulty:2 },
+    { name:'건곤감리',          type:'trigram', set:TRIGRAM4, difficulty:2 },
+    { name:'클로버',            type:'clover', difficulty:2 },
+    { name:'표정 (뚜렷하게)',   type:'face',    set:FACE_EASY, difficulty:2 },
+    { name:'점 하나',          type:'dot',     positions:DOT_WIDE, difficulty:3 },
+    { name:'물방울',            type:'drop',    positions:[1,2,3,4,5,6], difficulty:3 },
+    { name:'종',                type:'bell',    positions:[1,2,3,4], difficulty:3 },
+    { name:'씨앗 위치',        type:'seed',    positions:[1,3,5,6,7,8], difficulty:3 },
+    { name:'화살표 4방향',      type:'arrow',   dirs:DIR4, difficulty:4 },
+    { name:'씨앗 위치 (좁게)',   type:'seed',    positions:[1,2,3,4], difficulty:4 },
+    { name:'퍼즐 조각',         type:'puzzle',  positions:[1,2,3,4], difficulty:4 },
+    { name:'단추 구멍',         type:'button',  positions:[1,2,3,4], difficulty:4 },
+    { name:'점 하나 (좁게)',    type:'dot',     positions:DOT_CLOSE, difficulty:4 },
+    { name:'화살표 6방향',      type:'arrow',   dirs:DIR6, difficulty:5 },
+    { name:'시계 바늘',         type:'clock',   dirs:DIR6, difficulty:5 },
+    { name:'팔괘 전체',         type:'trigram', set:TRIGRAM8, difficulty:5 },
+    { name:'점 4개 배치 A',     type:'pips',    combos:PIP4_A, difficulty:5 },
+    { name:'점 4개 배치 B',     type:'pips',    combos:PIP4_B, difficulty:5 },
+    { name:'점 3개 배치',       type:'pips',    combos:PIP3, difficulty:5 },
+    { name:'표준 주사위',      type:'dice-std', difficulty:6 },
+    { name:'점 5개 배치',       type:'pips',    combos:PIP5, difficulty:6 },
+    { name:'화살표 8방향',      type:'arrow',   dirs:DIR8, difficulty:6 },
+    { name:'점 위치 (9칸 전체)', type:'dot',    positions:DOT_ALL9, difficulty:6 },
+    { name:'표정 (섞어서)',     type:'face',    set:FACE_MIXED, difficulty:6 }
   ];
 
   // 풀을 순환시키면서 스테이지 번호가 올라갈수록 목표점수/이동횟수를 자동으로 늘려서
@@ -256,7 +257,10 @@
   // 스테이지 구간이 올라갈수록 사용 가능한 패턴 개수를 늘려서
   // "새로운 + 더 어려운" 패턴이 구간마다 순차적으로 등장하게 함.
   // 목표점수 배율도 구간마다 같이 올려서, 뒤로 갈수록 이동 1회당 필요한 점수 부담이 커짐.
-  const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){ return stageSize(a) - stageSize(b); });
+  const POOL_SORTED = STAGE_POOL.slice().sort(function(a,b){
+    if(a.difficulty !== b.difficulty) return a.difficulty - b.difficulty;
+    return stageSize(a) - stageSize(b); // 같은 난이도면 심볼 개수로 세부 정렬
+  });
   const DIFFICULTY_BANDS = [
     { from:0,   unlock:6,                  targetMul:1.00, timeLimit:null },
     { from:10,  unlock:10,                 targetMul:1.10, timeLimit:null },
