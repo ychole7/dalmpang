@@ -320,7 +320,7 @@
   function fmt(n){ return n.toLocaleString('ko-KR'); }
 
   const HEART_MAX = 5;
-  const HEART_REGEN_MS = 60*1000; // 1분당 1개
+  const HEART_REGEN_MS = 2*60*1000; // 2분당 1개
 
   let board = [];
   let cellEls = [];
@@ -803,6 +803,9 @@
     failStageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     failBarFillEl.style.width = Math.min(100, (stageScore/st.target)*100)+'%';
     document.getElementById('continueCostLabel').textContent = CONTINUE_COST;
+    document.getElementById('continueLabelSuffix').textContent = st.timeLimit
+      ? '5무브 + '+Math.round(st.timeLimit/2)+'초 추가'
+      : '5무브 추가';
     failOverlay.classList.add('show');
     vibrate(200);
   }
@@ -814,6 +817,9 @@
     newStageBoard();
   });
   document.getElementById('retryClearBtn').addEventListener('click', ()=>{
+    if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
+    spendHeart();
+    updateHud();
     clearOverlay.classList.remove('show');
     newStageBoard();
   });
@@ -831,7 +837,7 @@
     coinsValEl.textContent = fmt(coins);
     movesLeft += 5;
     const st = currentStage();
-    if(st.timeLimit){ stageTimeLeft += 20; resumeStageTimer(); }
+    if(st.timeLimit){ stageTimeLeft += Math.round(st.timeLimit/2); resumeStageTimer(); }
     failOverlay.classList.remove('show');
     updateHud();
     render();
