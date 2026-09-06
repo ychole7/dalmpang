@@ -124,10 +124,12 @@
   }
   .stageBadgeMini span{ font-size:15px; }
   .stageTimerVal{
-    margin-top:3px; font-size:11px; font-weight:900; letter-spacing:0;
-    background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:8px;
+    position:absolute; top:-9px; right:8px; z-index:1;
+    font-size:11px; font-weight:900; letter-spacing:0; color:#fff;
+    background:linear-gradient(180deg,#ff8a5b,#e2532e); padding:3px 10px; border-radius:12px;
+    box-shadow:0 2px 0 #a3341a;
   }
-  .stageTimerVal.warn{ background:#ff5f5f; animation:timerPulse 500ms ease infinite alternate; }
+  .stageTimerVal.warn{ background:linear-gradient(180deg,#ff5f5f,#c62828); animation:timerPulse 500ms ease infinite alternate; }
   @keyframes timerPulse{ from{ opacity:1; } to{ opacity:0.5; } }
   #boardWrap{
     position:relative; width:100%;
