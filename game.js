@@ -918,6 +918,8 @@
   });
 
   const SHOP_ITEMS = [
+    { key:'starter', cls:'starter', icon:'🌟', tag:'첫 구매 한정', name:'스타터팩', desc:'처음 한 번만!\n코인+파워업+하트 듬뿍', price:'₩1,200' },
+    { key:'heartpass', cls:'heartpass', icon:'❤️', name:'하트 무제한 패스', desc:'7일 동안 하트가\n무제한이에요!', price:'₩5,500' },
     { key:'noads', cls:'', icon:'🚫', name:'광고 제거', desc:'모든 광고를 제거하고\n쾌적하게 플레이하세요!', price:'₩5,500' },
     { key:'power', cls:'power', icon:'🎁', name:'파워팩', desc:'게임에 도움이 되는\n아이템을 듬뿍 담았어요!', price:'₩4,400' },
     { key:'coin', cls:'coin', icon:'💰', name:'코인 구매', desc:'더 많은 코인으로\n게임을 즐겨보세요!', price:'₩3,300' }
@@ -958,9 +960,10 @@
 
     const list = document.getElementById('shopList');
     list.innerHTML = SHOP_ITEMS.map(function(it){
+      const tagHtml = it.tag ? '<span class="shopTag">'+it.tag+'</span>' : '';
       return '<div class="shopRow'+(it.cls?' '+it.cls:'')+'">'
         + '<div class="shopIcon">'+it.icon+'</div>'
-        + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc.replace('\n','<br>')+'</div></div>'
+        + '<div class="shopBody"><div class="sTitle">'+it.name+tagHtml+'</div><div class="sDesc">'+it.desc.replace('\n','<br>')+'</div></div>'
         + '<button class="shopBuyBtn" data-key="'+it.key+'">'+it.price+'</button>'
         + '</div>';
     }).join('');

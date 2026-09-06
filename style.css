@@ -358,6 +358,13 @@
   }
   .shopRow.power{ background:#fdf6e3; border-color:#f0dfa8; }
   .shopRow.coin{ background:#fbeedd; border-color:#f0d3a8; }
+  .shopRow.starter{ background:linear-gradient(180deg,#fff6d9,#fce8b0); border-color:#e8c86a; }
+  .shopRow.heartpass{ background:#ffeef1; border-color:#f5c2cc; }
+  .shopTag{
+    display:inline-block; margin-left:6px; vertical-align:middle;
+    background:linear-gradient(180deg,#ff6fa8,#e83e8c); color:#fff; font-size:9px; font-weight:900;
+    padding:2px 7px; border-radius:8px; box-shadow:0 1px 0 #b02368; white-space:nowrap;
+  }
   .shopIcon{ flex:0 0 auto; width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size:34px; }
   .shopBody{ flex:1 1 auto; min-width:0; }
   .shopBody .sTitle{ font-size:15px; font-weight:900; color:#2b4a8c; }
