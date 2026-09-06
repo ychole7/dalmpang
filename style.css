@@ -430,7 +430,7 @@
   }
   .btn.secondary{ background:linear-gradient(180deg,#b9c6d3,#8fa2b3); box-shadow:0 3px 0 #5f7284; margin-right:8px;}
   .btn.gold{ background:linear-gradient(180deg,#ffd76b,#e8a622); box-shadow:0 3px 0 #a3711a; }
-  .failWrap{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .failWrap{ display:flex; flex-direction:column; align-items:center; gap:18px; }
 
   /* ---------- stage clear card (통짜 이미지 + 좌표 오버레이) ---------- */
   .clearCardImg{
@@ -474,7 +474,7 @@
   /* ---------- stage fail card ---------- */
   .failCardImg{
     position:relative; width:380px; max-width:94vw;
-    aspect-ratio:1254/1254;
+    aspect-ratio:1086/1448;
   }
   .failCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .failTargetVal{
