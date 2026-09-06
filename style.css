@@ -474,7 +474,7 @@
   /* ---------- stage fail card ---------- */
   .failCardImg{
     position:relative; width:380px; max-width:94vw;
-    aspect-ratio:1086/1448;
+    aspect-ratio:1086/1448; overflow:hidden;
   }
   .failCardImg > img{ width:100%; height:100%; object-fit:contain; display:block; }
   .failTargetVal{
@@ -491,10 +491,6 @@
   }
   .failBarFill{
     height:100%; border-radius:8px; background:linear-gradient(90deg,var(--gold),#ffd98a);
-  }
-  .failBtnHit{
-    position:absolute; left:26%; width:48%; top:83%; height:9%;
-    background:transparent; border:none; z-index:3;
   }
 
   /* ---------- settings popup ---------- */
