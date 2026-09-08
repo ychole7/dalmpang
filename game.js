@@ -342,6 +342,8 @@
   if(isNaN(heartRegenAt)) heartRegenAt = 0;
   let coins = parseInt(localStorage.getItem('sp_coins')||'0',10);
   let totalStars = parseInt(localStorage.getItem('sp_stars')||'0',10);
+  let noAdsOwned = localStorage.getItem('sp_no_ads') === '1';
+  let heartPassUntil = parseInt(localStorage.getItem('sp_heart_pass_until')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
   let dragging = false;
@@ -391,6 +393,7 @@
   }
 
   function spendHeart(){
+    if(Date.now() < heartPassUntil) return; // 하트 무제한 패스 활성 중
     if(hearts>=HEART_MAX && !heartRegenAt){
       heartRegenAt = Date.now() + HEART_REGEN_MS;
     }
@@ -411,9 +414,17 @@
     updateHeartTimerDisplay();
   }
 
+  function renderHeartsVal(){
+    heartsValEl.textContent = Date.now() < heartPassUntil ? '∞' : hearts;
+  }
+
   function updateHeartTimerDisplay(){
     const timerEl = document.getElementById('heartTimer');
     if(!timerEl) return;
+    if(Date.now() < heartPassUntil){
+      timerEl.textContent = '무제한';
+      return;
+    }
     if(hearts>=HEART_MAX || !heartRegenAt){
       timerEl.textContent = 'MAX';
     } else {
@@ -536,7 +547,7 @@
     const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
     movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
     movesScoreEchoEl.textContent = fmt(stageScore);
-    heartsValEl.textContent = hearts;
+    renderHeartsVal();
     updateHeartTimerDisplay();
     document.getElementById('cntCandy').textContent = powerCounts.candy;
     document.getElementById('cntBomb').textContent = powerCounts.bomb;
@@ -821,14 +832,14 @@
     newStageBoard();
   });
   document.getElementById('retryClearBtn').addEventListener('click', ()=>{
-    if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
+    if(hearts<=0 && Date.now()>=heartPassUntil){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
     spendHeart();
     updateHud();
     clearOverlay.classList.remove('show');
     newStageBoard();
   });
   document.getElementById('retryBtn').addEventListener('click', ()=>{
-    if(hearts<=0){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
+    if(hearts<=0 && Date.now()>=heartPassUntil){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
     spendHeart();
     updateHud();
     failOverlay.classList.remove('show');
@@ -922,11 +933,26 @@
   });
 
   const SHOP_ITEMS = [
-    { key:'starter', cls:'starter', icon:'🌟', tag:'첫 구매 한정', name:'스타터팩', desc:'처음 한 번만!\n코인+파워업+하트 듬뿍', price:'₩1,200' },
-    { key:'heartpass', cls:'heartpass', icon:'❤️', name:'하트 무제한 패스', desc:'7일 동안 하트가\n무제한이에요!', price:'₩5,500' },
-    { key:'noads', cls:'', icon:'🚫', name:'광고 제거', desc:'모든 광고를 제거하고\n쾌적하게 플레이하세요!', price:'₩5,500' },
-    { key:'power', cls:'power', icon:'🎁', name:'파워팩', desc:'게임에 도움이 되는\n아이템을 듬뿍 담았어요!', price:'₩4,400' },
-    { key:'coin', cls:'coin', icon:'💰', name:'코인 구매', desc:'더 많은 코인으로\n게임을 즐겨보세요!', price:'₩3,300' }
+    { key:'starter',   cls:'starter',   icon:'🌟', tag:'첫 구매 한정', name:'스타터팩',
+      desc:'코인 1,000 + 사탕2·폭탄2·셔플2·무지개2\n+ 하트 즉시 충전', price:'₩1,200',
+      grant:{ coin:1000, candy:2, bomb:2, shuffle:2, rainbow:2, fillHearts:true } },
+    { key:'heartpass', cls:'heartpass', icon:'❤️', name:'하트 무제한 패스',
+      desc:'7일 동안 하트가 무제한이에요!\n(구매 즉시 적용, 남은 기간 연장)', price:'₩5,500',
+      grant:{ heartPassDays:7 } },
+    { key:'noads',     cls:'',          icon:'🚫', name:'광고 제거',
+      desc:'모든 광고를 영구히 제거하고\n쾌적하게 플레이하세요!', price:'₩5,500',
+      grant:{ noAds:true } },
+    { key:'power',     cls:'power',     icon:'🎁', name:'파워팩',
+      desc:'사탕5 · 폭탄3 · 셔플3 · 무지개2\n한 번에 듬뿍!', price:'₩4,400',
+      grant:{ candy:5, bomb:3, shuffle:3, rainbow:2 } },
+    { key:'coin_s',    cls:'coin',      icon:'💰', name:'코인 소',
+      desc:'코인 1,200개', price:'₩1,200', grant:{ coin:1200 } },
+    { key:'coin_m',    cls:'coin',      icon:'💰', name:'코인 중',
+      desc:'코인 2,750개 (+10% 보너스)', price:'₩2,500', grant:{ coin:2750 } },
+    { key:'coin_l',    cls:'coin',      icon:'💰', name:'코인 대',
+      desc:'코인 6,600개 (+20% 보너스)', price:'₩5,500', grant:{ coin:6600 } },
+    { key:'coin_xl',   cls:'coin',      icon:'💰', name:'코인 메가',
+      desc:'코인 15,400개 (+40% 보너스)', price:'₩11,000', grant:{ coin:15400 } }
   ];
 
   const STAR_SHOP_ITEMS = [
@@ -963,17 +989,55 @@
     });
 
     const list = document.getElementById('shopList');
-    list.innerHTML = SHOP_ITEMS.map(function(it){
+    const starterBought = localStorage.getItem('sp_starter_bought') === '1';
+    const visibleItems = SHOP_ITEMS.filter(function(it){
+      if(it.key==='starter' && starterBought) return false;
+      if(it.key==='noads' && noAdsOwned) return false;
+      return true;
+    });
+    list.innerHTML = visibleItems.map(function(it){
       const tagHtml = it.tag ? '<span class="shopTag">'+it.tag+'</span>' : '';
       return '<div class="shopRow'+(it.cls?' '+it.cls:'')+'">'
         + '<div class="shopIcon">'+it.icon+'</div>'
-        + '<div class="shopBody"><div class="sTitle">'+it.name+tagHtml+'</div><div class="sDesc">'+it.desc.replace('\n','<br>')+'</div></div>'
+        + '<div class="shopBody"><div class="sTitle">'+it.name+tagHtml+'</div><div class="sDesc">'+it.desc.replace(/\n/g,'<br>')+'</div></div>'
         + '<button class="shopBuyBtn" data-key="'+it.key+'">'+it.price+'</button>'
         + '</div>';
     }).join('');
     list.querySelectorAll('.shopBuyBtn:not(.star)').forEach(function(btn){
-      btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+      btn.addEventListener('click', function(){ purchaseItem(btn.dataset.key); });
     });
+  }
+
+  // 실제 Google Play 결제(Digital Goods API) 연동 전까지의 임시 처리.
+  // Play Console에 상품을 등록한 뒤, 이 함수 내부를 실제 결제 요청으로 교체하면 됨.
+  function purchaseItem(key){
+    const it = SHOP_ITEMS.find(function(i){ return i.key===key; });
+    if(!it) return;
+    if(!confirm(it.name+' ('+it.price+')을(를) 구매하시겠어요?\n[테스트 모드: 실제 결제는 아직 연동되지 않았어요]')) return;
+    if(it.key === 'starter') localStorage.setItem('sp_starter_bought', '1');
+    grantShopItem(it.grant);
+    updateHud();
+    showToast(it.name+' 구매 완료! (테스트)');
+    renderShop();
+  }
+
+  function grantShopItem(grant){
+    if(!grant) return;
+    if(grant.coin) awardCoins(grant.coin);
+    ['candy','bomb','shuffle','rainbow'].forEach(function(k){
+      if(grant[k]){ powerCounts[k] = (powerCounts[k]||0) + grant[k]; }
+    });
+    if(grant.candy||grant.bomb||grant.shuffle||grant.rainbow) savePowerCounts();
+    if(grant.fillHearts){ hearts = HEART_MAX; heartRegenAt = 0; saveHearts(); }
+    if(grant.heartPassDays){
+      const base = Math.max(Date.now(), heartPassUntil);
+      heartPassUntil = base + grant.heartPassDays*24*60*60*1000;
+      localStorage.setItem('sp_heart_pass_until', heartPassUntil);
+    }
+    if(grant.noAds){
+      noAdsOwned = true;
+      localStorage.setItem('sp_no_ads', '1');
+    }
   }
 
   function hideAllPages(){
@@ -1244,7 +1308,7 @@
   tickHeartRegen();
   newStageBoard();
   window.addEventListener('resize', drawChainLine);
-  setInterval(()=>{ tickHeartRegen(); heartsValEl.textContent = hearts; }, 1000);
+  setInterval(()=>{ tickHeartRegen(); renderHeartsVal(); }, 1000);
 
   const splashEl = document.getElementById('splashScreen');
   if(splashEl){
