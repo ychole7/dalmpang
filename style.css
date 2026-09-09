@@ -341,10 +341,8 @@
     background:linear-gradient(180deg,var(--ach-blue),var(--ach-blue-dark)); color:#fff;
     box-shadow:0 2px 0 var(--ach-blue-dark);
   }
-  .shopSectionLabel{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    font-size:13px; font-weight:bold; color:#8a7350; margin:2px 0 8px;
-  }
+  .shopSection{ display:none; }
+  .shopSection.show{ display:block; }
   .shopList{ display:flex; flex-direction:column; gap:12px; flex:0 0 auto; margin-bottom:16px; }
   .shopList:last-of-type{ margin-bottom:0; }
   .shopRow.star{ background:#fff8e6; border-color:#f0dfa0; }

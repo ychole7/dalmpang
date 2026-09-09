@@ -846,7 +846,7 @@
     newStageBoard();
   });
   document.getElementById('continueBtn').addEventListener('click', ()=>{
-    if(coins < CONTINUE_COST){ showToast('코인이 부족해요'); return; }
+    if(coins < CONTINUE_COST){ showToast('모이가 부족해요'); return; }
     coins -= CONTINUE_COST;
     localStorage.setItem('sp_coins', coins);
     coinsValEl.textContent = fmt(coins);
@@ -934,7 +934,7 @@
 
   const SHOP_ITEMS = [
     { key:'starter',   cls:'starter',   icon:'🌟', tag:'첫 구매 한정', name:'스타터팩',
-      desc:'코인 1,000 + 사탕2·폭탄2·셔플2·무지개2\n+ 하트 즉시 충전', price:'₩1,200',
+      desc:'모이 1,000 + 사탕2·폭탄2·셔플2·무지개2\n+ 하트 즉시 충전', price:'₩1,200',
       grant:{ coin:1000, candy:2, bomb:2, shuffle:2, rainbow:2, fillHearts:true } },
     { key:'heartpass', cls:'heartpass', icon:'❤️', name:'하트 무제한 패스',
       desc:'7일 동안 하트가 무제한이에요!\n(구매 즉시 적용, 남은 기간 연장)', price:'₩5,500',
@@ -945,14 +945,14 @@
     { key:'power',     cls:'power',     icon:'🎁', name:'파워팩',
       desc:'사탕5 · 폭탄3 · 셔플3 · 무지개2\n한 번에 듬뿍!', price:'₩4,400',
       grant:{ candy:5, bomb:3, shuffle:3, rainbow:2 } },
-    { key:'coin_s',    cls:'coin',      icon:'💰', name:'코인 소',
-      desc:'코인 1,200개', price:'₩1,200', grant:{ coin:1200 } },
-    { key:'coin_m',    cls:'coin',      icon:'💰', name:'코인 중',
-      desc:'코인 2,750개 (+10% 보너스)', price:'₩2,500', grant:{ coin:2750 } },
-    { key:'coin_l',    cls:'coin',      icon:'💰', name:'코인 대',
-      desc:'코인 6,600개 (+20% 보너스)', price:'₩5,500', grant:{ coin:6600 } },
-    { key:'coin_xl',   cls:'coin',      icon:'💰', name:'코인 메가',
-      desc:'코인 15,400개 (+40% 보너스)', price:'₩11,000', grant:{ coin:15400 } }
+    { key:'coin_s',    cls:'coin',      icon:'💰', name:'모이 소',
+      desc:'모이 1,200개', price:'₩1,200', grant:{ coin:1200 } },
+    { key:'coin_m',    cls:'coin',      icon:'💰', name:'모이 중',
+      desc:'모이 2,750개 (+10% 보너스)', price:'₩2,500', grant:{ coin:2750 } },
+    { key:'coin_l',    cls:'coin',      icon:'💰', name:'모이 대',
+      desc:'모이 6,600개 (+20% 보너스)', price:'₩5,500', grant:{ coin:6600 } },
+    { key:'coin_xl',   cls:'coin',      icon:'💰', name:'모이 메가',
+      desc:'모이 15,400개 (+40% 보너스)', price:'₩11,000', grant:{ coin:15400 } }
   ];
 
   const STAR_SHOP_ITEMS = [
@@ -962,7 +962,29 @@
     { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
   ];
 
+  const SHOP_TABS = [
+    { id:'star',    label:'⭐ 별' },
+    { id:'general', label:'🛍️ 모이 상점' }
+  ];
+  let currentShopTab = 'star';
+
+  function renderShopTabs(){
+    const tabsEl = document.getElementById('shopTabs');
+    tabsEl.innerHTML = SHOP_TABS.map(function(t){
+      return '<button class="achieveTabBtn'+(t.id===currentShopTab?' active':'')+'" data-tab="'+t.id+'">'+t.label+'</button>';
+    }).join('');
+    tabsEl.querySelectorAll('.achieveTabBtn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentShopTab = btn.dataset.tab;
+        renderShop();
+      });
+    });
+    document.getElementById('starShopSection').classList.toggle('show', currentShopTab==='star');
+    document.getElementById('generalShopSection').classList.toggle('show', currentShopTab==='general');
+  }
+
   function renderShop(){
+    renderShopTabs();
     const starList = document.getElementById('starShopList');
     starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
       const affordable = totalStars >= it.star;
@@ -1087,7 +1109,7 @@
   const HEART_REFILL_COST = 30;
   document.getElementById('heartPlus').addEventListener('click', ()=>{
     if(hearts >= HEART_MAX){ showToast('하트가 이미 가득 찼어요'); return; }
-    if(coins < HEART_REFILL_COST){ showToast('코인이 부족해요'); return; }
+    if(coins < HEART_REFILL_COST){ showToast('모이가 부족해요'); return; }
     coins -= HEART_REFILL_COST;
     localStorage.setItem('sp_coins', coins);
     coinsValEl.textContent = fmt(coins);
@@ -1169,7 +1191,7 @@
     { id:'stage', label:'스테이지' },
     { id:'tile',  label:'타일' },
     { id:'clear', label:'클리어' },
-    { id:'coin',  label:'재화' },
+    { id:'coin',  label:'모이' },
     { id:'login', label:'출석' }
   ];
   let currentAchieveTab = 'stage';
@@ -1197,9 +1219,9 @@
     { id:'star3_10',    tab:'clear', icon:'⭐⭐⭐', img:'assets/images/ach_star3_10.png', name:'별 세 개!',   desc:'⭐⭐⭐ 10회 달성',                          target:10,     get:()=>perfectClears, reward:{coin:100} },
     { id:'star3_50',    tab:'clear', icon:'🌟',  img:'assets/images/ach_star3_50.png', name:'별빛 수집가',   desc:'⭐⭐⭐ 50회 달성',                          target:50,     get:()=>perfectClears, reward:{coin:300} },
 
-    { id:'coin1000',    tab:'coin', icon:'🪙',  img:'assets/images/ach_coin1000.png',    name:'동전 한 닢',    desc:'누적 코인 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
-    { id:'coin10000',   tab:'coin', icon:'💰',  img:'assets/images/ach_coin10000.png',  name:'알뜰 닮팡',     desc:'누적 코인 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
-    { id:'coin100000',  tab:'coin', icon:'💎',  img:'assets/images/ach_coin100000.png',  name:'부자 닮팡',     desc:'누적 코인 100,000개 획득',                 target:100000, get:()=>totalCoinsEarned, reward:{star:40} },
+    { id:'coin1000',    tab:'coin', icon:'🪙',  img:'assets/images/ach_coin1000.png',    name:'동전 한 닢',    desc:'누적 모이 1,000개 획득',                   target:1000,   get:()=>totalCoinsEarned, reward:{star:5} },
+    { id:'coin10000',   tab:'coin', icon:'💰',  img:'assets/images/ach_coin10000.png',  name:'알뜰 닮팡',     desc:'누적 모이 10,000개 획득',                  target:10000,  get:()=>totalCoinsEarned, reward:{star:15} },
+    { id:'coin100000',  tab:'coin', icon:'💎',  img:'assets/images/ach_coin100000.png',  name:'부자 닮팡',     desc:'누적 모이 100,000개 획득',                 target:100000, get:()=>totalCoinsEarned, reward:{star:40} },
 
     { id:'login3',      tab:'login', icon:'🌱',  img:'assets/images/ach_login3.png',  name:'다시 만나요',   desc:'3일 연속 접속',                            target:3,      get:()=>loginStreak, reward:{coin:30,heart:1} },
     { id:'login7',      tab:'login', icon:'🔥',  img:'assets/images/ach_login7.png',  name:'매일 만나요',   desc:'7일 연속 접속',                            target:7,      get:()=>loginStreak, reward:{coin:100,heart:2} },
