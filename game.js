@@ -224,7 +224,7 @@
   }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
-      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '')+(v+1)+(stage.setId && stage.setId !== 'easy' ? '.webp' : '.png')+'" alt="병아리">';
+      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '')+(v+1)+'.png" alt="병아리">';
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
