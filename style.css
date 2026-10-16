@@ -151,7 +151,7 @@
   }
   #grid{
     position:relative; width:100%; height:100%;
-    display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); grid-template-rows:repeat(8,minmax(0,1fr)); gap:0.5%;
+    display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); grid-template-rows:repeat(8,minmax(0,1fr)); gap:0.5%;
   }
   svg#lineLayer{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5;}
   .die{
@@ -562,7 +562,7 @@
   padding:2.8%;
   box-shadow: inset 0 3px 9px rgba(46,25,24,.55), 0 7px 14px rgba(65,33,24,.2);
 }
-#boardWrap.chickBoard #grid{gap:0.65%;}
+#boardWrap.chickBoard #grid{gap:0.48%;}
 #boardWrap.chickBoard .die{
  background:none; border-radius:13px; overflow:hidden; min-width:0; min-height:0;
  box-shadow:0 3px 0 rgba(37,19,24,.32), 0 4px 7px rgba(26,18,24,.14);
@@ -576,4 +576,4 @@
  outline:3px solid #fff2bc;outline-offset:-2px;
 }
 #boardWrap.chickBoard .die.popping{animation:tilePunchPop 260ms ease forwards;}
-@media(max-width:390px){#boardWrap.chickBoard{padding:2.6%;}#boardWrap.chickBoard #grid{gap:.55%;}}
+@media(max-width:390px){#boardWrap.chickBoard{padding:2.4%;}#boardWrap.chickBoard #grid{gap:.45%;}}
