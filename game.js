@@ -51,7 +51,17 @@
   ];
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
-  const CHICK_STAGE = { name:'닮은 병아리', type:'chick', difficulty:1 };
+  const CHICK_STAGE = { name:'병아리 마을 · Easy', type:'chick', setId:'easy', difficulty:1 };
+  const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
+  const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
+  const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
+  const CHICK_CHALLENGES = [
+    { name:'두뇌 도전 · 건곤감리', type:'trigram', set:TRIGRAM4, difficulty:5 },
+    { name:'두뇌 도전 · 점 배열', type:'pips', combos:PIP4_A, difficulty:5 },
+    { name:'두뇌 도전 · 방향', type:'arrow', dirs:DIR6, difficulty:5 },
+    { name:'두뇌 도전 · 점 위치', type:'dot', positions:DOT_WIDE, difficulty:5 },
+    { name:'두뇌 도전 · 팔괘', type:'trigram', set:TRIGRAM8, difficulty:6 }
+  ];
 
   const STAGE_POOL = [
     // difficulty: 1(가장 쉬움, 색깔/한눈에 구분) ~ 6(가장 어려움, 개수를 세거나 자세히 봐야 함)
@@ -214,7 +224,7 @@
   }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
-      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(v+1)+'.png" alt="병아리">';
+      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '')+(v+1)+(stage.setId && stage.setId !== 'easy' ? '.webp' : '.png')+'" alt="병아리">';
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
@@ -288,9 +298,15 @@
     for(let i=0;i<total;i++){
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
-      const base = i < 10 ? CHICK_STAGE : pool[i % pool.length];
+      let base;
+      if(i < 15) base=CHICK_STAGE;
+      else if(i < 30) base=CHICK_NORMAL;
+      else if(i < 40) base=CHICK_HARD;
+      else if(i < 45) base=CHICK_OBSERVE;
+      else if(i < 50) base=CHICK_CHALLENGES[i-45];
+      else base=pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<50 ? null : band.timeLimit }));
     }
     return arr;
   }
