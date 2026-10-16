@@ -32,7 +32,7 @@
       if(solid) return '<rect x="18" y="'+(y-5)+'" width="64" height="10" rx="3" fill="#547dba"/>';
       return '<rect x="18" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#547dba"/><rect x="56" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#547dba"/>';
     }).join('');
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'+bars+'</svg>';
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'+bars+'</svg>';
   }
 
   const FACE_EASY = [
@@ -86,7 +86,7 @@
   const TOTAL_STAGES = 1000;
 
   function svgFaceCfg(cfg){
-    return '<svg viewBox="0 0 100 100" width="96%" height="96%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<circle cx="50" cy="50" r="42" fill="#f4c98a" stroke="#ab825e" stroke-width="3"/>'
       + '<circle cx="35" cy="46" r="4" fill="#625a70"/>'
       + '<circle cx="65" cy="46" r="4" fill="#625a70"/>'
@@ -97,17 +97,17 @@
   }
   function svgDotAt(posNum){
     const p = POS[posNum];
-    return '<svg viewBox="0 0 100 100" width="96%" height="96%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="10" fill="#547dba"/>'
       + '</svg>';
   }
   function svgPipsCombo(combo){
     let dots = combo.map(function(p){ const c=POS[p]; return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="9" fill="#547dba"/>'; }).join('');
-    return '<svg viewBox="0 0 100 100" width="96%" height="96%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + dots + '</svg>';
   }
   function svgArrow(deg){
-    return '<svg viewBox="0 0 100 100" width="92%" height="92%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<g transform="rotate('+deg+' 50 50)">'
       + '<polygon points="50,15 76,68 50,54 24,68" fill="#547dba"/>'
       + '</g></svg>';
@@ -115,7 +115,7 @@
   const SEED_SPOTS = { 1:[50,38],2:[36,50],3:[64,50],4:[50,58],5:[30,68],6:[70,68],7:[42,78],8:[58,78] };
   function svgSeedAt(spotNum){
     const p = SEED_SPOTS[spotNum];
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<path d="M50,18 C32,18 18,36 18,56 C18,78 34,92 50,92 C66,92 82,78 82,56 C82,36 68,18 50,18 Z" fill="#e5484d" stroke="#ae515c" stroke-width="4"/>'
       + '<path d="M38,20 L46,10 L50,20 L54,10 L62,20 Z" fill="#4caf50" stroke="#549377" stroke-width="2"/>'
       + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="5" ry="7" fill="#f7d84a" stroke="#b59a48" stroke-width="1.5"/>'
@@ -127,7 +127,7 @@
     const leaves = [[50,30],[70,50],[50,70],[30,50]].map(function(c){
       return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="19" fill="#5fbf5f" stroke="#549377" stroke-width="3"/>';
     }).join('');
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<line x1="50" y1="58" x2="50" y2="88" stroke="#549377" stroke-width="5" stroke-linecap="round"/>'
       + leaves
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#549377"/>'
@@ -136,7 +136,7 @@
   const DROP_SPOTS = { 1:[40,35],2:[58,32],3:[35,55],4:[62,55],5:[45,70],6:[58,68] };
   function svgDropAt(spotNum){
     const p = DROP_SPOTS[spotNum];
-    return '<svg viewBox="0 0 100 100" width="91%" height="96%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<path d="M50,12 C62,32 78,52 78,68 C78,85 65,94 50,94 C35,94 22,85 22,68 C22,52 38,32 50,12 Z" fill="#4aa8e8" stroke="#598eb8" stroke-width="4"/>'
       + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="6" ry="8" fill="#ffffff" opacity="0.85"/>'
       + '</svg>';
@@ -144,7 +144,7 @@
   const BELL_SPOTS = { 1:[50,32],2:[30,52],3:[70,52],4:[50,66] };
   function svgBellAt(spotNum){
     const p = BELL_SPOTS[spotNum];
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<path d="M50,15 C56,15 60,19 60,24 C72,28 78,40 78,55 L82,72 L18,72 L22,55 C22,40 28,28 40,24 C40,19 44,15 50,15 Z" fill="#f2b73b" stroke="#ae8541" stroke-width="4"/>'
       + '<circle cx="50" cy="82" r="7" fill="#f2b73b" stroke="#ae8541" stroke-width="3"/>'
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#a16b67"/>'
@@ -153,7 +153,7 @@
   const PUZZLE_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
   function svgPuzzleAt(spotNum){
     const p = PUZZLE_SPOTS[spotNum];
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<path d="M25,25 H45 C45,18 55,18 55,25 H75 V45 C82,45 82,55 75,55 V75 H55 C55,82 45,82 45,75 H25 V55 C18,55 18,45 25,45 Z" fill="#6ec06e" stroke="#549377" stroke-width="4"/>'
       + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#549377"/>'
       + '</svg>';
@@ -166,7 +166,7 @@
       const x2=50+Math.sin(a)*30, y2=50-Math.cos(a)*30;
       ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#ab825e" stroke-width="2.5"/>';
     }
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<circle cx="50" cy="50" r="40" fill="#fffdf7" stroke="#ab825e" stroke-width="4"/>'
       + ticks
       + '<g transform="rotate('+deg+' 50 50)"><line x1="50" y1="50" x2="50" y2="20" stroke="#547dba" stroke-width="5" stroke-linecap="round"/></g>'
@@ -175,17 +175,20 @@
       + '</svg>';
   }
   function svgTrafficAt(lit){
-    const colors = ['#e5484d','#f2c14e','#4caf50'];
-    const dim    = ['#a66c72','#7a6a3a','#3a5a3c'];
-    const circles = [1,2,3].map(function(n){
-      const on = n===lit;
-      const c = on ? colors[n-1] : dim[n-1];
-      const glow = on ? ' filter="drop-shadow(0 0 4px '+colors[n-1]+')"' : '';
-      return '<circle cx="50" cy="'+(28+n*22)+'" r="12" fill="'+c+'"'+glow+'/>';
+    // 타일을 꽉 채우는 밝은 신호등: 색상 차이와 형태를 동시에 강조
+    const colors = ['#f35f6a','#ffc343','#50ca89'];
+    const dim = ['#edbac0','#e7d3a8','#b3dfc4'];
+    const ys = [24,50,76];
+    const lights = ys.map(function(y,i){
+      const on = lit === i+1;
+      const color = on ? colors[i] : dim[i];
+      return '<circle cx="50" cy="'+y+'" r="11.5" fill="'+color+'" stroke="'+(on?'#fff2d4':'#ebe8df')+'" stroke-width="1.6"/>'
+        + (on ? '<circle cx="46" cy="'+(y-4)+'" r="3.3" fill="#fff" opacity=".65"/>' : '');
     }).join('');
-    return '<svg viewBox="0 0 100 100" width="82%" height="96%">'
-      + '<rect x="28" y="10" width="44" height="82" rx="14" fill="#625a70" stroke="#504f66" stroke-width="2"/>'
-      + circles
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">'
+      + '<rect x="17" y="3" width="66" height="94" rx="19" fill="#95b6d2" stroke="#6f97b9" stroke-width="2.5"/>'
+      + '<rect x="23" y="8" width="54" height="84" rx="15" fill="#dceaf6" opacity=".7"/>'
+      + lights
       + '</svg>';
   }
   const BUTTON_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
@@ -195,7 +198,7 @@
       const active = n===holeNum;
       return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+(active?'#c94f6b':'#9f927c')+'"/>';
     }).join('');
-    return '<svg viewBox="0 0 100 100" width="94%" height="94%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<circle cx="50" cy="50" r="42" fill="#f2e6c9" stroke="#9f927c" stroke-width="4"/>'
       + holes
       + '</svg>';
@@ -203,7 +206,7 @@
   const BALLOON_COLORS = ['#e5484d','#4a90d9','#f2c14e','#4caf50','#9b59b6','#f2914e'];
   function svgBalloonAt(idx){
     const c = BALLOON_COLORS[idx];
-    return '<svg viewBox="0 0 100 100" width="91%" height="96%">'
+    return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
       + '<ellipse cx="50" cy="42" rx="27" ry="33" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="2.5"/>'
       + '<ellipse cx="39" cy="27" rx="8" ry="13" fill="#ffffff" opacity="0.4"/>'
       + '<polygon points="46,73 54,73 50,81" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="1.5"/>'
