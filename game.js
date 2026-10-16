@@ -647,7 +647,7 @@
     if(chain.length>=2){
       const prev = chain[chain.length-2];
       if(prev.r===r && prev.c===c){
-        cellEls[last.r][last.c].classList.remove('selected');
+        cellEls[last.r][last.c].classList.remove('selected','chainBump');
         chain.pop();
         drawChainLine();
         return;
@@ -706,43 +706,84 @@
     el.classList.add('shaking');
   }
 
+  // 기존 DOM 셀을 유지하되, 떨어질 원래 행을 기억해 자연스럽게 낙하시킨다.
+  function gravityAndAnimateChicks(){
+    const stage=currentStage();
+    if(stage.type!=='chick'){
+      applyGravity(); render(); return Promise.resolve();
+    }
+    const sourceRows=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
+    for(let c=0;c<COLS;c++){
+      const kept=[];
+      for(let r=0;r<ROWS;r++) if(board[r][c]!==null) kept.push({r,v:board[r][c]});
+      const missing=ROWS-kept.length;
+      for(let r=0;r<missing;r++) board[r][c]=randSymbolIdx();
+      kept.forEach((entry,i)=>{const dest=missing+i;board[dest][c]=entry.v;sourceRows[dest][c]=entry.r;});
+    }
+    render();
+    const motions=[];
+    for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
+      const el=cellEls[r][c], src=sourceRows[r][c];
+      const height=el.getBoundingClientRect().height;
+      const gap=parseFloat(getComputedStyle(gridEl).rowGap)||0;
+      const offset=(src<0 ? -(r+1) : src-r)*(height+gap);
+      if(Math.abs(offset)<1) continue;
+      if(typeof el.animate==='function'){
+        const motion=el.animate([
+          {transform:'translateY('+offset+'px)',opacity:src<0?0.5:1},
+          {transform:'translateY(0)',opacity:1}
+        ],{duration:src<0?440:330,delay:src<0?80:0,easing:'cubic-bezier(.18,.72,.27,1)',fill:'both'});
+        motions.push(motion.finished.catch(()=>{}));
+      }
+    }
+    return Promise.all(motions).then(()=>{});
+  }
+
   function popCells(cells, isBonus){
     if(poppingInProgress) return;
-    poppingInProgress = true;
-    const chickPop = currentStage().type === 'chick';
-    const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
-    stageScore += gained;
-    let coinGain = Math.max(1, Math.floor(gained/20));
-    if(cells.length>=9) coinGain += 15;
-    else if(cells.length>=5) coinGain += 5;
+    poppingInProgress=true;
+    const chickPop=currentStage().type==='chick';
+    const gained=isBonus ? cells.length*15 : cells.length*cells.length*10;
+    stageScore+=gained;
+    let coinGain=Math.max(1,Math.floor(gained/20));
+    if(cells.length>=9) coinGain+=15;
+    else if(cells.length>=5) coinGain+=5;
     awardCoins(coinGain);
-    if(cells.length > maxCombo){
-      maxCombo = cells.length;
-      localStorage.setItem('sp_max_combo', maxCombo);
-    }
-    totalTilesRemoved += cells.length;
-    totalPops += 1;
-    localStorage.setItem('sp_total_tiles', totalTilesRemoved);
-    localStorage.setItem('sp_total_pops', totalPops);
-    triggerPopEffect(cells.length, gained);
+    if(cells.length>maxCombo){maxCombo=cells.length;localStorage.setItem('sp_max_combo',maxCombo);}
+    totalTilesRemoved+=cells.length;
+    totalPops++;
+    localStorage.setItem('sp_total_tiles',totalTilesRemoved);
+    localStorage.setItem('sp_total_pops',totalPops);
+    triggerPopEffect(cells.length,gained);
     shakeBoard(cells.length);
     vibrateForCombo(cells.length);
+    const wrap=document.getElementById('boardWrap');
+    const mid=cells[Math.floor(cells.length/2)];
+    if(chickPop && mid){
+      const center=cellCenter(mid.r,mid.c);
+      const burst=document.createElement('div');
+      burst.className='chickBurst';
+      burst.style.left=center.x+'px';burst.style.top=center.y+'px';
+      burst.textContent=cells.length>=5?'✦ +'+gained:'+'+gained;
+      wrap.appendChild(burst);
+      setTimeout(()=>burst.remove(),800);
+    }
     cells.forEach(({r,c},i)=>{
       const el=cellEls[r][c];
       el.classList.remove('selected','chainBump');
-      el.style.setProperty('--pop-delay',chickPop ? Math.min(i*28,196)+'ms' : '0ms');
-      el.classList.add(chickPop ? 'chickPopping' : 'popping');
-      board[r][c] = null;
+      el.style.setProperty('--pop-delay',chickPop?Math.min(i*34,240)+'ms':'0ms');
+      el.classList.add(chickPop?'chickPopping':'popping');
+      board[r][c]=null;
     });
     setTimeout(()=>{
-      applyGravity();
-      render();
-      poppingInProgress = false;
-      updateHud();
-      if(stageScore >= currentStage().target){ showStageClear(); }
-      else if(movesLeft<=0){ showStageFail(); }
-      else { checkNoMoves(); }
-    }, chickPop ? 490 : 260);
+      gravityAndAnimateChicks().then(()=>{
+        poppingInProgress=false;
+        updateHud();
+        if(stageScore>=currentStage().target) showStageClear();
+        else if(movesLeft<=0) showStageFail();
+        else checkNoMoves();
+      }).catch(()=>{poppingInProgress=false;render();updateHud();});
+    },chickPop?530:260);
   }
 
   function popChain(cells){
