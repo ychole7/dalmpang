@@ -151,7 +151,7 @@
   }
   #grid{
     position:relative; width:100%; height:100%;
-    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(8,1fr); gap:0.45%;
+    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(8,1fr); gap:0.5%;
   }
   svg#lineLayer{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5;}
   .die{
@@ -159,10 +159,9 @@
     background:url('assets/images/tile_base.png') center/100% 100% no-repeat;
     display:flex; align-items:center; justify-content:center;
     color:var(--navy); font-size:min(9vw, 34px); font-weight:bold; line-height:1;
-    filter:drop-shadow(0 2px 4px rgba(10,33,80,0.14));
-    transition:transform 0.14s ease, filter 0.14s ease, opacity 0.18s ease;
+    transition:transform 0.12s ease, filter 0.12s ease, opacity 0.18s ease;
   }
-  .die.selected{ transform:translateY(-2px) scale(1.1); filter:drop-shadow(0 5px 10px rgba(18,52,112,0.22)) drop-shadow(0 0 8px var(--gold)) brightness(1.03); }
+  .die.selected{ transform:scale(1.12); filter:drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 10px rgba(242,169,59,0.6)); }
   .die.imgTile{ background:none; }
   .die.popping{ animation: tilePunchPop 260ms ease forwards; }
   @keyframes tilePunchPop{
@@ -552,3 +551,27 @@
   .sFooterBtn .sIcon{ font-size:18px; width:auto; }
   .sVersion{ text-align:center; font-size:11px; color:#b0a58c; }
 
+
+/* 닮팡 2.0 병아리 테마 - 원본 스테이지 스타일은 유지 */
+#boardWrap.chickBoard{
+  background:linear-gradient(145deg,#b17646 0%,#f4cf8d 2%,#b87946 4%,#68422d 5%,#51382c 95%,#d49e5d 98%,#ffe0a1 100%);
+  border:5px solid #b77e4a;
+  border-radius:25px;
+  padding:3.4%;
+  box-shadow: inset 0 3px 9px rgba(46,25,24,.55), 0 7px 14px rgba(65,33,24,.2);
+}
+#boardWrap.chickBoard #grid{gap:1%;}
+#boardWrap.chickBoard .die{
+ background:none; border-radius:15px; overflow:hidden;
+ box-shadow:0 3px 0 rgba(37,19,24,.32), 0 4px 7px rgba(26,18,24,.14);
+}
+#boardWrap.chickBoard .die img.chickSymbol{
+ display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;
+}
+#boardWrap.chickBoard .die.selected{
+ transform:translateY(-2px) scale(1.075);z-index:4;
+ filter:drop-shadow(0 0 7px #fff4a6) drop-shadow(0 0 5px #ff79bb);
+ outline:3px solid #fff2bc;outline-offset:-2px;
+}
+#boardWrap.chickBoard .die.popping{animation:tilePunchPop 260ms ease forwards;}
+@media(max-width:390px){#boardWrap.chickBoard{padding:3%;}#boardWrap.chickBoard #grid{gap:.7%;}}

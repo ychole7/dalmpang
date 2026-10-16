@@ -24,58 +24,20 @@
     '☰':[1,1,1], '☱':[1,1,0], '☲':[1,0,1], '☳':[1,0,0],
     '☴':[0,1,1], '☵':[0,1,0], '☶':[0,0,1], '☷':[0,0,0]
   };
-  const UI_COLORS = {
-    ink:'#5b6d86',
-    inkDark:'#42556f',
-    cream:'#fff6e8',
-    creamDark:'#ead9bc',
-    white:'#ffffff',
-    red:'#f46f78',
-    redDark:'#cd5860',
-    yellow:'#f5c758',
-    yellowDark:'#d8a63c',
-    green:'#58c978',
-    greenDark:'#3ea864',
-    blue:'#5f9df4',
-    blueDark:'#467fcf',
-    purple:'#a978e6',
-    purpleDark:'#8a61c4',
-    orange:'#f39b59',
-    orangeDark:'#cf7e43',
-    mint:'#79d4c4',
-    mintDark:'#56b6a3',
-    pink:'#efb0c3',
-    grayLight:'#dbe7f0',
-    gray:'#adc0d2'
-  };
-  function svgTag(inner, w, h){
-    return '<svg viewBox="0 0 100 100" width="'+(w||'92%')+'" height="'+(h||'92%')+'">'+inner+'</svg>';
-  }
-  function svgGloss(cx, cy, rx, ry, opacity){
-    return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="#ffffff" opacity="'+(opacity||0.35)+'"/>';
-  }
-  function svgSuitAt(ch){
-    const suitColors = { '♠':UI_COLORS.inkDark, '♣':UI_COLORS.greenDark, '♥':UI_COLORS.red, '♦':UI_COLORS.orange };
-    return svgTag(
-      '<text x="50" y="67" text-anchor="middle" font-size="68" font-weight="900" fill="'+(suitColors[ch]||UI_COLORS.inkDark)+'"'
-      + ' style="font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;">'+ch+'</text>',
-      '92%','92%'
-    );
-  }
   function svgTrigramAt(ch){
     const lines = TRIGRAM_LINES[ch];
-    const ys = [26,50,74];
+    const ys = [28,50,72];
     const bars = lines.map(function(solid,i){
       const y = ys[i];
-      if(solid) return '<rect x="16" y="'+(y-6)+'" width="68" height="12" rx="5" fill="'+UI_COLORS.inkDark+'"/>';
-      return '<rect x="16" y="'+(y-6)+'" width="28" height="12" rx="5" fill="'+UI_COLORS.inkDark+'"/><rect x="56" y="'+(y-6)+'" width="28" height="12" rx="5" fill="'+UI_COLORS.inkDark+'"/>';
+      if(solid) return '<rect x="18" y="'+(y-5)+'" width="64" height="10" rx="3" fill="#1f2a44"/>';
+      return '<rect x="18" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#1f2a44"/><rect x="56" y="'+(y-5)+'" width="26" height="10" rx="3" fill="#1f2a44"/>';
     }).join('');
-    return svgTag(bars, '92%','92%');
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'+bars+'</svg>';
   }
 
   const FACE_EASY = [
-    { brow:0,   mouth:'M28,61 Q50,82 72,61' },
-    { brow:0,   mouth:'M28,72 Q50,50 72,72' },
+    { brow:0,   mouth:'M28,60 Q50,82 72,60' },
+    { brow:0,   mouth:'M28,72 Q50,48 72,72' },
     { brow:14,  mouth:'M28,66 Q50,66 72,66' },
     { brow:-14, mouth:'M28,66 Q50,66 72,66' }
   ];
@@ -88,6 +50,8 @@
     { brow:-6, mouth:'M30,68 Q50,58 70,68' }
   ];
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
+
+  const CHICK_STAGE = { name:'닮은 병아리', type:'chick', difficulty:1 };
 
   const STAGE_POOL = [
     // difficulty: 1(가장 쉬움, 색깔/한눈에 구분) ~ 6(가장 어려움, 개수를 세거나 자세히 봐야 함)
@@ -124,171 +88,135 @@
   const TOTAL_STAGES = 1000;
 
   function svgFaceCfg(cfg){
-    return svgTag(
-      '<circle cx="50" cy="52" r="39" fill="#ffd79c" stroke="#d79a54" stroke-width="4"/>'
-      + '<circle cx="34" cy="46" r="5.5" fill="'+UI_COLORS.inkDark+'"/>'
-      + '<circle cx="66" cy="46" r="5.5" fill="'+UI_COLORS.inkDark+'"/>'
-      + '<line x1="25" y1="'+(34-cfg.brow)+'" x2="41" y2="'+(34+cfg.brow)+'" stroke="'+UI_COLORS.inkDark+'" stroke-width="4" stroke-linecap="round"/>'
-      + '<line x1="59" y1="'+(34+cfg.brow)+'" x2="75" y2="'+(34-cfg.brow)+'" stroke="'+UI_COLORS.inkDark+'" stroke-width="4" stroke-linecap="round"/>'
-      + '<path d="'+cfg.mouth+'" stroke="#c56f54" stroke-width="4.2" fill="none" stroke-linecap="round"/>'
-      + '<circle cx="23" cy="61" r="5" fill="#f5a9ad" opacity="0.55"/>'
-      + '<circle cx="77" cy="61" r="5" fill="#f5a9ad" opacity="0.55"/>',
-      '94%','94%'
-    );
+    return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
+      + '<circle cx="50" cy="50" r="42" fill="#f4c98a" stroke="#8a5a2b" stroke-width="3"/>'
+      + '<circle cx="35" cy="46" r="4" fill="#2b2118"/>'
+      + '<circle cx="65" cy="46" r="4" fill="#2b2118"/>'
+      + '<line x1="27" y1="'+(33-cfg.brow)+'" x2="42" y2="'+(33+cfg.brow)+'" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/>'
+      + '<line x1="58" y1="'+(33+cfg.brow)+'" x2="73" y2="'+(33-cfg.brow)+'" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/>'
+      + '<path d="'+cfg.mouth+'" stroke="#8a3b2b" stroke-width="3" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
   }
   function svgDotAt(posNum){
     const p = POS[posNum];
-    return svgTag(
-      '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="13" fill="'+UI_COLORS.orange+'" stroke="#ffffff" stroke-width="4"/>'
-      + '<circle cx="'+(p[0]-4)+'" cy="'+(p[1]-5)+'" r="3.2" fill="#ffffff" opacity="0.75"/>',
-      '96%','96%'
-    );
+    return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="10" fill="#1f2a44"/>'
+      + '</svg>';
   }
   function svgPipsCombo(combo){
-    const colors = [UI_COLORS.red, UI_COLORS.blue, UI_COLORS.green, UI_COLORS.yellow, UI_COLORS.purple, UI_COLORS.orange, UI_COLORS.mint, UI_COLORS.pink, UI_COLORS.ink];
-    let dots = combo.map(function(p, idx){
-      const c = POS[p];
-      const fill = colors[idx % colors.length];
-      return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="10.5" fill="'+fill+'" stroke="#ffffff" stroke-width="3.6"/>'
-        + '<circle cx="'+(c[0]-3)+'" cy="'+(c[1]-4)+'" r="2.6" fill="#ffffff" opacity="0.68"/>';
-    }).join('');
-    return svgTag(dots, '94%','94%');
+    let dots = combo.map(function(p){ const c=POS[p]; return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="9" fill="#1f2a44"/>'; }).join('');
+    return '<svg viewBox="0 0 100 100" width="86%" height="86%">'
+      + dots + '</svg>';
   }
   function svgArrow(deg){
-    return svgTag(
-      '<g transform="rotate('+deg+' 50 50)">'
-      + '<path d="M50 14 L80 48 H63 V80 H37 V48 H20 Z" fill="'+UI_COLORS.red+'" stroke="'+UI_COLORS.redDark+'" stroke-width="3.5" stroke-linejoin="round"/>'
-      + svgGloss(43, 28, 8, 5, 0.45)
-      + '</g>',
-      '90%','90%'
-    );
+    return '<svg viewBox="0 0 100 100" width="74%" height="74%">'
+      + '<g transform="rotate('+deg+' 50 50)">'
+      + '<polygon points="50,15 76,68 50,54 24,68" fill="#1f2a44"/>'
+      + '</g></svg>';
   }
   const SEED_SPOTS = { 1:[50,38],2:[36,50],3:[64,50],4:[50,58],5:[30,68],6:[70,68],7:[42,78],8:[58,78] };
   function svgSeedAt(spotNum){
     const p = SEED_SPOTS[spotNum];
-    return svgTag(
-      '<path d="M50,16 C31,16 18,35 18,56 C18,79 34,92 50,92 C66,92 82,79 82,56 C82,35 69,16 50,16 Z" fill="#ff6f79" stroke="#d6545e" stroke-width="4"/>'
-      + '<path d="M38,19 C42,14 45,10 50,8 C55,10 58,14 62,19" fill="none" stroke="#59bc6d" stroke-width="4" stroke-linecap="round"/>'
-      + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="6.5" ry="8.5" fill="'+UI_COLORS.yellow+'" stroke="#fff9dd" stroke-width="2"/>'
-      + '<circle cx="38" cy="34" r="5.5" fill="#ffffff" opacity="0.22"/>',
-      '92%','92%'
-    );
+    return '<svg viewBox="0 0 100 100" width="82%" height="82%">'
+      + '<path d="M50,18 C32,18 18,36 18,56 C18,78 34,92 50,92 C66,92 82,78 82,56 C82,36 68,18 50,18 Z" fill="#e5484d" stroke="#8a1f24" stroke-width="4"/>'
+      + '<path d="M38,20 L46,10 L50,20 L54,10 L62,20 Z" fill="#4caf50" stroke="#2e6b31" stroke-width="2"/>'
+      + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="5" ry="7" fill="#f7d84a" stroke="#8a6a12" stroke-width="1.5"/>'
+      + '</svg>';
   }
   const CLOVER_POS = { 1:[50,30],2:[70,50],3:[50,70],4:[30,50] };
   function svgCloverAt(leafNum){
     const p = CLOVER_POS[leafNum];
     const leaves = [[50,30],[70,50],[50,70],[30,50]].map(function(c){
-      return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="18" fill="'+UI_COLORS.green+'" stroke="'+UI_COLORS.greenDark+'" stroke-width="3.2"/>';
+      return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="19" fill="#5fbf5f" stroke="#2e6b31" stroke-width="3"/>';
     }).join('');
-    return svgTag(
-      '<line x1="50" y1="58" x2="44" y2="88" stroke="'+UI_COLORS.greenDark+'" stroke-width="6" stroke-linecap="round"/>'
+    return '<svg viewBox="0 0 100 100" width="82%" height="82%">'
+      + '<line x1="50" y1="58" x2="50" y2="88" stroke="#2e6b31" stroke-width="5" stroke-linecap="round"/>'
       + leaves
-      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="'+UI_COLORS.yellow+'" stroke="#ffffff" stroke-width="2.5"/>',
-      '92%','92%'
-    );
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#2e6b31"/>'
+      + '</svg>';
   }
   const DROP_SPOTS = { 1:[40,35],2:[58,32],3:[35,55],4:[62,55],5:[45,70],6:[58,68] };
   function svgDropAt(spotNum){
     const p = DROP_SPOTS[spotNum];
-    return svgTag(
-      '<path d="M50,10 C66,31 80,49 80,67 C80,84 66,94 50,94 C34,94 20,84 20,67 C20,49 34,31 50,10 Z" fill="'+UI_COLORS.blue+'" stroke="'+UI_COLORS.blueDark+'" stroke-width="4"/>'
-      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="#ffffff" opacity="0.92"/>'
-      + svgGloss(38, 28, 8, 12, 0.38),
-      '88%','94%'
-    );
+    return '<svg viewBox="0 0 100 100" width="76%" height="82%">'
+      + '<path d="M50,12 C62,32 78,52 78,68 C78,85 65,94 50,94 C35,94 22,85 22,68 C22,52 38,32 50,12 Z" fill="#4aa8e8" stroke="#1f5f8f" stroke-width="4"/>'
+      + '<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="6" ry="8" fill="#ffffff" opacity="0.85"/>'
+      + '</svg>';
   }
   const BELL_SPOTS = { 1:[50,32],2:[30,52],3:[70,52],4:[50,66] };
   function svgBellAt(spotNum){
     const p = BELL_SPOTS[spotNum];
-    return svgTag(
-      '<path d="M50,14 C57,14 62,18 63,24 C75,28 82,40 82,56 L86,72 L14,72 L18,56 C18,40 25,28 37,24 C38,18 43,14 50,14 Z" fill="'+UI_COLORS.yellow+'" stroke="'+UI_COLORS.yellowDark+'" stroke-width="4"/>'
-      + '<circle cx="50" cy="81" r="7.5" fill="'+UI_COLORS.orange+'" stroke="'+UI_COLORS.orangeDark+'" stroke-width="3"/>'
-      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6.5" fill="'+UI_COLORS.red+'" stroke="#ffffff" stroke-width="2.5"/>'
-      + svgGloss(39, 28, 7, 5, 0.28),
-      '90%','90%'
-    );
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<path d="M50,15 C56,15 60,19 60,24 C72,28 78,40 78,55 L82,72 L18,72 L22,55 C22,40 28,28 40,24 C40,19 44,15 50,15 Z" fill="#f2b73b" stroke="#8a611a" stroke-width="4"/>'
+      + '<circle cx="50" cy="82" r="7" fill="#f2b73b" stroke="#8a611a" stroke-width="3"/>'
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#8a3b2b"/>'
+      + '</svg>';
   }
   const PUZZLE_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
   function svgPuzzleAt(spotNum){
     const p = PUZZLE_SPOTS[spotNum];
-    return svgTag(
-      '<path d="M24,25 H44 C44,17 56,17 56,25 H76 V43 C84,43 84,57 76,57 V75 H56 C56,83 44,83 44,75 H24 V57 C16,57 16,43 24,43 Z" fill="'+UI_COLORS.mint+'" stroke="'+UI_COLORS.mintDark+'" stroke-width="4"/>'
-      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="'+UI_COLORS.purple+'" stroke="#ffffff" stroke-width="2.5"/>'
-      + svgGloss(38, 35, 10, 7, 0.25),
-      '92%','92%'
-    );
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<path d="M25,25 H45 C45,18 55,18 55,25 H75 V45 C82,45 82,55 75,55 V75 H55 C55,82 45,82 45,75 H25 V55 C18,55 18,45 25,45 Z" fill="#6ec06e" stroke="#2e6b31" stroke-width="4"/>'
+      + '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#2e6b31"/>'
+      + '</svg>';
   }
   function svgClockAt(deg){
     let ticks = '';
     for(let i=0;i<12;i++){
       const a = i*30*Math.PI/180;
-      const x1=50+Math.sin(a)*33, y1=50-Math.cos(a)*33;
-      const x2=50+Math.sin(a)*27, y2=50-Math.cos(a)*27;
-      ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#cdbb9d" stroke-width="2.4" stroke-linecap="round"/>';
+      const x1=50+Math.sin(a)*36, y1=50-Math.cos(a)*36;
+      const x2=50+Math.sin(a)*30, y2=50-Math.cos(a)*30;
+      ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#8a5a2b" stroke-width="2.5"/>';
     }
-    return svgTag(
-      '<circle cx="50" cy="50" r="38" fill="#fffdf7" stroke="#d9c29c" stroke-width="4"/>'
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<circle cx="50" cy="50" r="40" fill="#fffdf7" stroke="#8a5a2b" stroke-width="4"/>'
       + ticks
-      + '<g transform="rotate('+deg+' 50 50)"><line x1="50" y1="50" x2="50" y2="22" stroke="'+UI_COLORS.blueDark+'" stroke-width="6" stroke-linecap="round"/></g>'
-      + '<line x1="50" y1="50" x2="67" y2="50" stroke="'+UI_COLORS.redDark+'" stroke-width="4.6" stroke-linecap="round"/>'
-      + '<circle cx="50" cy="50" r="5" fill="'+UI_COLORS.yellow+'" stroke="#ffffff" stroke-width="2"/>',
-      '92%','92%'
-    );
+      + '<g transform="rotate('+deg+' 50 50)"><line x1="50" y1="50" x2="50" y2="20" stroke="#1f2a44" stroke-width="5" stroke-linecap="round"/></g>'
+      + '<line x1="50" y1="50" x2="68" y2="50" stroke="#1f2a44" stroke-width="4" stroke-linecap="round"/>'
+      + '<circle cx="50" cy="50" r="4" fill="#1f2a44"/>'
+      + '</svg>';
   }
   function svgTrafficAt(lit){
-    const colors = [UI_COLORS.red, UI_COLORS.yellow, UI_COLORS.green];
-    const off    = ['#f3c7ca','#f5eac1','#cae9d2'];
+    const colors = ['#e5484d','#f2c14e','#4caf50'];
+    const dim    = ['#7a3a3c','#7a6a3a','#3a5a3c'];
     const circles = [1,2,3].map(function(n){
       const on = n===lit;
-      const fill = on ? colors[n-1] : off[n-1];
-      const stroke = on ? '#ffffff' : '#dde7ef';
-      return '<circle cx="50" cy="'+(22+n*20)+'" r="13" fill="'+fill+'" stroke="'+stroke+'" stroke-width="3"/>'
-        + (on ? '<circle cx="46" cy="'+(18+n*20)+'" r="4" fill="#ffffff" opacity="0.45"/>' : '');
+      const c = on ? colors[n-1] : dim[n-1];
+      const glow = on ? ' filter="drop-shadow(0 0 4px '+colors[n-1]+')"' : '';
+      return '<circle cx="50" cy="'+(28+n*22)+'" r="12" fill="'+c+'"'+glow+'/>';
     }).join('');
-    return svgTag(
-      '<rect x="25" y="8" width="50" height="84" rx="17" fill="#b6c8d8" stroke="#7f98ac" stroke-width="4"/>'
-      + '<rect x="33" y="15" width="34" height="70" rx="14" fill="#d6e2ec" opacity="0.65"/>'
-      + circles,
-      '84%','96%'
-    );
+    return '<svg viewBox="0 0 100 100" width="62%" height="90%">'
+      + '<rect x="28" y="10" width="44" height="82" rx="14" fill="#2b2118" stroke="#000" stroke-width="2"/>'
+      + circles
+      + '</svg>';
   }
   const BUTTON_SPOTS = { 1:[38,38],2:[62,38],3:[38,62],4:[62,62] };
   function svgButtonAt(holeNum){
     const holes = [1,2,3,4].map(function(n){
       const p = BUTTON_SPOTS[n];
       const active = n===holeNum;
-      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6.6" fill="'+(active?UI_COLORS.redDark:'#8a9fb4')+'"/>';
+      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+(active?'#c94f6b':'#8a7a5a')+'"/>';
     }).join('');
-    return svgTag(
-      '<circle cx="50" cy="50" r="36" fill="#ffe78f" stroke="#e6ba52" stroke-width="4"/>'
-      + '<circle cx="50" cy="50" r="28" fill="#ffd75a" opacity="0.55"/>'
+    return '<svg viewBox="0 0 100 100" width="80%" height="80%">'
+      + '<circle cx="50" cy="50" r="42" fill="#f2e6c9" stroke="#8a7a5a" stroke-width="4"/>'
       + holes
-      + svgGloss(39, 30, 10, 7, 0.28),
-      '92%','92%'
-    );
+      + '</svg>';
   }
-  const BALLOON_COLORS = [UI_COLORS.red, UI_COLORS.blue, UI_COLORS.yellow, UI_COLORS.green, UI_COLORS.purple, UI_COLORS.orange];
+  const BALLOON_COLORS = ['#e5484d','#4a90d9','#f2c14e','#4caf50','#9b59b6','#f2914e'];
   function svgBalloonAt(idx){
     const c = BALLOON_COLORS[idx];
-    const strokeMap = {};
-    strokeMap[UI_COLORS.red] = UI_COLORS.redDark;
-    strokeMap[UI_COLORS.blue] = UI_COLORS.blueDark;
-    strokeMap[UI_COLORS.yellow] = UI_COLORS.yellowDark;
-    strokeMap[UI_COLORS.green] = UI_COLORS.greenDark;
-    strokeMap[UI_COLORS.purple] = UI_COLORS.purpleDark;
-    strokeMap[UI_COLORS.orange] = UI_COLORS.orangeDark;
-    return svgTag(
-      '<ellipse cx="50" cy="40" rx="29" ry="32" fill="'+c+'" stroke="'+strokeMap[c]+'" stroke-width="3"/>'
-      + svgGloss(39, 23, 8, 12, 0.42)
-      + '<polygon points="46,72 54,72 50,80" fill="'+c+'" stroke="'+strokeMap[c]+'" stroke-width="1.8"/>'
-      + '<path d="M50,80 C47,86 54,90 50,97" stroke="#8b7b67" stroke-width="2.8" fill="none" stroke-linecap="round"/>',
-      '86%','96%'
-    );
+    return '<svg viewBox="0 0 100 100" width="76%" height="90%">'
+      + '<ellipse cx="50" cy="42" rx="27" ry="33" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="2.5"/>'
+      + '<ellipse cx="39" cy="27" rx="8" ry="13" fill="#ffffff" opacity="0.4"/>'
+      + '<polygon points="46,73 54,73 50,81" fill="'+c+'" stroke="rgba(0,0,0,0.28)" stroke-width="1.5"/>'
+      + '<path d="M50,81 C47,87 53,91 50,98" stroke="#6b5842" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
   }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
+      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(v+1)+'.png" alt="병아리">';
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
-      case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:116%;height:116%;object-fit:contain;">';
+      case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
       case 'seed':     return svgSeedAt(stage.positions[v]);
       case 'clover':   return svgCloverAt(v+1);
@@ -300,7 +228,7 @@
       case 'button':   return svgButtonAt(stage.positions[v]);
       case 'balloon':  return svgBalloonAt(v);
       case 'arrow':    return svgArrow(stage.dirs[v]);
-      case 'trigram':  return TRIGRAM_LINES[stage.set[v]] ? svgTrigramAt(stage.set[v]) : svgSuitAt(stage.set[v]);
+      case 'trigram':  return TRIGRAM_LINES[stage.set[v]] ? svgTrigramAt(stage.set[v]) : stage.set[v];
       case 'face':     return svgFaceCfg(stage.set[v]);
       case 'pips':     return svgPipsCombo(stage.combos[v]);
       default: return '?';
@@ -308,6 +236,7 @@
   }
   function stageSize(stage){
     switch(stage.type){
+      case 'chick': return 6;
       case 'dice-std': return STD_DICE.length;
       case 'img6':     return 6;
       case 'dot':      return stage.positions.length;
@@ -359,7 +288,7 @@
     for(let i=0;i<total;i++){
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
-      const base = pool[i % pool.length];
+      const base = i < 10 ? CHICK_STAGE : pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
       arr.push(Object.assign({}, base, { target: target, timeLimit: band.timeLimit }));
     }
@@ -640,6 +569,7 @@
 
   function render(){
     const stage = currentStage();
+    document.getElementById('boardWrap').classList.toggle('chickBoard', stage.type==='chick');
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const v = board[r][c];
