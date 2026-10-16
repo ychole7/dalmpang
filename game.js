@@ -590,11 +590,38 @@
     return { x: rect.left+rect.width/2-wrapRect.left, y: rect.top+rect.height/2-wrapRect.top };
   }
 
+  // Longer chains are rewarded above the existing square-of-length scoring.
+  function chainReward(count){
+    const base=count*count*10;
+    const multiplier=count>=8 ? 1.6 : count>=5 ? 1.25 : 1;
+    return { score:Math.round(base*multiplier), multiplier };
+  }
+  let chainTip=null;
+  function updateChainTip(){
+    if(currentStage().type!=='chick' || chain.length<2){
+      if(chainTip) chainTip.hidden=true;
+      return;
+    }
+    if(!chainTip){
+      chainTip=document.createElement('div');
+      chainTip.className='chickChainTip';
+      document.getElementById('boardWrap').appendChild(chainTip);
+    }
+    const count=chain.length;
+    const reward=chainReward(count);
+    const tier=count>=8?'legend':count>=5?'bonus':'basic';
+    chainTip.dataset.tier=tier;
+    const next=count<5 ? ` · ${5-count}개 더 연결하면 ×1.25` : count<8 ? ` · ${8-count}개 더 연결하면 ×1.6` : ' · 대박 연결!';
+    chainTip.textContent=`${count}개 연결  +${reward.score}${reward.multiplier>1?'  ×'+reward.multiplier:''}${next}`;
+    chainTip.hidden=false;
+  }
+
   function drawChainLine(){
     lineLayer.innerHTML='';
     const wrap = document.getElementById('boardWrap');
-    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); return; }
+    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); updateChainTip(); return; }
     wrap.setAttribute('data-chain-count',String(chain.length));
+    updateChainTip();
     const chick = currentStage().type === 'chick';
     const pts = chain.map(p=>cellCenter(p.r,p.c));
     const points=pts.map(p=>p.x+','+p.y).join(' ');
@@ -664,6 +691,7 @@
   function endChain(){
     lineLayer.innerHTML='';
     document.getElementById('boardWrap').removeAttribute('data-chain-count');
+    if(chainTip) chainTip.hidden=true;
     if(chain.length>=2){ popChain(chain.slice()); }
     else if(chain.length===1){ cellEls[chain[0].r][chain[0].c].classList.remove('selected'); }
     chain=[];
@@ -743,7 +771,8 @@
     if(poppingInProgress) return;
     poppingInProgress=true;
     const chickPop=currentStage().type==='chick';
-    const gained=isBonus ? cells.length*15 : cells.length*cells.length*10;
+    const reward=(!isBonus && chickPop) ? chainReward(cells.length) : null;
+    const gained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
     stageScore+=gained;
     let coinGain=Math.max(1,Math.floor(gained/20));
     if(cells.length>=9) coinGain+=15;
@@ -764,7 +793,7 @@
       const burst=document.createElement('div');
       burst.className='chickBurst';
       burst.style.left=center.x+'px';burst.style.top=center.y+'px';
-      burst.textContent=cells.length>=5?'✦ +'+gained:'+'+gained;
+      burst.textContent=reward && reward.multiplier>1 ? '✨ ×'+reward.multiplier+'  +'+gained : '+'+gained;
       wrap.appendChild(burst);
       setTimeout(()=>burst.remove(),800);
     }
