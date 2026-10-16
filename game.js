@@ -351,6 +351,7 @@
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
   let dragging = false;
+  let poppingInProgress = false;
   let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
   function savePowerCounts(){ localStorage.setItem('sp_power_counts', JSON.stringify(powerCounts)); }
 
@@ -576,7 +577,8 @@
         const el = cellEls[r][c];
         if(v===null){ el.style.visibility='hidden'; }
         else { el.style.visibility='visible'; el.dataset.v=v; el.innerHTML = renderSymbolHTML(stage, v); }
-        el.classList.remove('selected','popping');
+        el.classList.remove('selected','popping','chickPopping','chainBump');
+        el.style.removeProperty('--pop-delay');
         el.classList.toggle('imgTile', stage.type==='img6' && stage.prefix==='face');
       }
     }
@@ -590,17 +592,32 @@
 
   function drawChainLine(){
     lineLayer.innerHTML='';
-    if(chain.length<2) return;
+    const wrap = document.getElementById('boardWrap');
+    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); return; }
+    wrap.setAttribute('data-chain-count',String(chain.length));
+    const chick = currentStage().type === 'chick';
     const pts = chain.map(p=>cellCenter(p.r,p.c));
-    const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    poly.setAttribute('points', pts.map(p=>p.x+','+p.y).join(' '));
-    poly.setAttribute('stroke', '#f2a93b');
-    poly.setAttribute('stroke-width', '6');
-    poly.setAttribute('stroke-linecap','round');
-    poly.setAttribute('stroke-linejoin','round');
-    poly.setAttribute('fill','none');
-    poly.setAttribute('opacity','0.9');
-    lineLayer.appendChild(poly);
+    const points=pts.map(p=>p.x+','+p.y).join(' ');
+    function addLine(cls,color,width,opacity){
+      const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      poly.setAttribute('points',points); poly.setAttribute('class',cls);
+      poly.setAttribute('stroke',color); poly.setAttribute('stroke-width',width);
+      poly.setAttribute('stroke-linecap','round'); poly.setAttribute('stroke-linejoin','round');
+      poly.setAttribute('fill','none'); poly.setAttribute('opacity',opacity);
+      lineLayer.appendChild(poly);
+    }
+    if(chick){
+      addLine('chainHalo','#ff72ba','18','.45');
+      addLine('chainCore','#ff71bc','8','1');
+      addLine('chainHighlight','#fff9ff','3','1');
+      pts.forEach((p,i)=>{
+        const orb=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        orb.setAttribute('cx',p.x);orb.setAttribute('cy',p.y);
+        orb.setAttribute('r',i===pts.length-1?'7':'4');
+        orb.setAttribute('fill','#fff9ff');orb.setAttribute('class','chainOrb');
+        lineLayer.appendChild(orb);
+      });
+    }else addLine('chainClassic','#f2a93b','6','.9');
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
@@ -617,7 +634,7 @@
   }
 
   function startChain(r,c){
-    if(movesLeft<=0) return;
+    if(movesLeft<=0 || poppingInProgress) return;
     chain = [{r,c}];
     cellEls[r][c].classList.add('selected');
     drawChainLine();
@@ -640,11 +657,13 @@
     if(!isAdjacent(last,{r,c})) return;
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
+    if(currentStage().type==='chick') cellEls[r][c].classList.add('chainBump');
     drawChainLine();
   }
 
   function endChain(){
     lineLayer.innerHTML='';
+    document.getElementById('boardWrap').removeAttribute('data-chain-count');
     if(chain.length>=2){ popChain(chain.slice()); }
     else if(chain.length===1){ cellEls[chain[0].r][chain[0].c].classList.remove('selected'); }
     chain=[];
@@ -688,6 +707,9 @@
   }
 
   function popCells(cells, isBonus){
+    if(poppingInProgress) return;
+    poppingInProgress = true;
+    const chickPop = currentStage().type === 'chick';
     const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
     stageScore += gained;
     let coinGain = Math.max(1, Math.floor(gained/20));
@@ -705,21 +727,26 @@
     triggerPopEffect(cells.length, gained);
     shakeBoard(cells.length);
     vibrateForCombo(cells.length);
-    cells.forEach(({r,c})=>{
-      cellEls[r][c].classList.add('popping');
+    cells.forEach(({r,c},i)=>{
+      const el=cellEls[r][c];
+      el.classList.remove('selected','chainBump');
+      el.style.setProperty('--pop-delay',chickPop ? Math.min(i*28,196)+'ms' : '0ms');
+      el.classList.add(chickPop ? 'chickPopping' : 'popping');
       board[r][c] = null;
     });
     setTimeout(()=>{
       applyGravity();
       render();
+      poppingInProgress = false;
       updateHud();
       if(stageScore >= currentStage().target){ showStageClear(); }
       else if(movesLeft<=0){ showStageFail(); }
       else { checkNoMoves(); }
-    }, 260);
+    }, chickPop ? 490 : 260);
   }
 
   function popChain(cells){
+    if(poppingInProgress) return;
     movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
   }
@@ -867,7 +894,7 @@
 
   gridEl.addEventListener('pointerdown', (e)=>{
     const cell = cellFromPoint(e.clientX,e.clientY);
-    if(!cell) return;
+    if(!cell || poppingInProgress || movesLeft<=0) return;
     dragging = true;
     startChain(cell.r,cell.c);
     e.preventDefault();

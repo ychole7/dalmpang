@@ -577,3 +577,35 @@
 }
 #boardWrap.chickBoard .die.popping{animation:tilePunchPop 260ms ease forwards;}
 @media(max-width:390px){#boardWrap.chickBoard{padding:2.4%;}#boardWrap.chickBoard #grid{gap:.45%;}}
+
+/* 닮팡 2.0 병아리 테마: 선택·연결·폭발 개선 */
+#boardWrap.chickBoard .die.selected{
+  transform:translateY(-4px) scale(1.09);
+  z-index:7;outline:3px solid #ffe7f5;outline-offset:-3px;
+  filter:drop-shadow(0 3px 9px rgba(255,93,172,.62)) drop-shadow(0 0 6px rgba(255,255,255,.95));
+  animation:chickSelectBreathe .67s ease-in-out infinite alternate;
+}
+@keyframes chickSelectBreathe{
+  from{filter:drop-shadow(0 2px 5px rgba(255,95,172,.48)) drop-shadow(0 0 3px #fff);}
+  to{filter:drop-shadow(0 4px 12px rgba(255,72,162,.86)) drop-shadow(0 0 9px #fff);}
+}
+#boardWrap.chickBoard .die.chainBump img{animation:chickBump .22s cubic-bezier(.15,1.8,.4,1) both;}
+@keyframes chickBump{0%{transform:scale(.86);}65%{transform:scale(1.09);}100%{transform:scale(1);}}
+#boardWrap.chickBoard #lineLayer .chainHalo{filter:blur(6px);animation:chickLinePulse .62s ease-in-out infinite alternate;}
+@keyframes chickLinePulse{from{opacity:.24;}to{opacity:.65;}}
+#boardWrap.chickBoard #lineLayer .chainCore{filter:drop-shadow(0 0 4px #ff52b5);}
+#boardWrap.chickBoard #lineLayer .chainOrb{filter:drop-shadow(0 0 5px #ff5caa);}
+#boardWrap.chickBoard .die.chickPopping{
+  animation:chickPopBurst 300ms cubic-bezier(.2,.75,.45,1) var(--pop-delay,0ms) both;
+  pointer-events:none;
+}
+@keyframes chickPopBurst{
+  0%{transform:scale(1.07);opacity:1;filter:brightness(1.08);}
+  37%{transform:scale(1.24) rotate(-3deg);opacity:1;filter:brightness(1.35) drop-shadow(0 0 12px #fff8b7);}
+  75%{transform:scale(.73) rotate(8deg);opacity:.7;}
+  100%{transform:scale(.12) rotate(15deg);opacity:0;}
+}
+@media(prefers-reduced-motion:reduce){
+  #boardWrap.chickBoard .die.selected,#boardWrap.chickBoard .die.chainBump img,
+  #boardWrap.chickBoard #lineLayer .chainHalo{animation:none;}
+}
