@@ -84,7 +84,7 @@
   /* ---------- stats row ---------- */
   .statsRow{ display:flex; align-items:stretch; gap:6px; margin-bottom:5px; flex:0 0 auto; }
   .targetCard{
-    position:relative; flex:1 1 auto; background:#fdf7e8; border:1.5px solid #e6cf9f;
+    position:relative; flex:1 1 auto; background:#f4edde; border:1.5px solid #d8c39d;
     border-radius:14px; padding:12px 12px 8px; min-width:0; text-align:center;
     box-shadow:0 2px 3px rgba(0,0,0,0.06);
   }
@@ -95,14 +95,14 @@
     box-shadow:0 2px 0 #234f7d; white-space:nowrap;
   }
   .targetBig{ font-size:21px; font-weight:900; color:var(--ink); margin-bottom:4px; }
-  .barTrack{ position:relative; height:14px; border-radius:8px; background:#f0e5cc; overflow:visible; box-shadow:inset 0 1px 2px rgba(0,0,0,0.1); }
+  .barTrack{ position:relative; height:14px; border-radius:8px; background:#e7dbc1; overflow:visible; box-shadow:inset 0 1px 2px rgba(0,0,0,0.08); }
   .barFill{ height:100%; border-radius:8px; background:linear-gradient(90deg,var(--gold),#ffd98a); width:0%; transition:width .3s; }
   .barStar{
     position:absolute; top:50%; left:0%; transform:translate(-50%,-50%);
     font-size:18px; transition:left .3s;
   }
   .movesBadge{
-    background:#fdf7e8; border:1.5px solid #e6cf9f; border-radius:14px;
+    background:#f4edde; border:1.5px solid #d8c39d; border-radius:14px;
     min-width:58px; display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:4px 6px; box-shadow:0 2px 3px rgba(0,0,0,0.06);
   }
@@ -556,42 +556,43 @@
 
 /* 닮팡 2.0 병아리 테마 - 원본 스테이지 스타일은 유지 */
 #boardWrap.chickBoard{
-  background:linear-gradient(145deg,#b17646 0%,#f4cf8d 2%,#b87946 4%,#68422d 5%,#51382c 95%,#d49e5d 98%,#ffe0a1 100%);
-  border:5px solid #b77e4a;
+  background:linear-gradient(145deg,#8f633f 0%,#c79a69 2%,#8e6442 4%,#5b4031 5%,#4d372d 95%,#b98958 98%,#d9b07a 100%);
+  border:4px solid #a67549;
   border-radius:25px;
   padding:2.8%;
-  box-shadow: inset 0 3px 9px rgba(46,25,24,.55), 0 7px 14px rgba(65,33,24,.2);
+  box-shadow: inset 0 3px 8px rgba(43,27,21,.42), 0 6px 12px rgba(49,31,24,.16);
 }
 #boardWrap.chickBoard #grid{gap:0.48%;}
 #boardWrap.chickBoard .die{
- background:linear-gradient(168deg,#fffdf5 0%,#fff1d7 72%,#f5d6a5 100%);
- border:2px solid #f1d8ad; border-radius:14px; overflow:hidden; min-width:0; min-height:0;
- box-shadow:0 3px 0 rgba(37,19,24,.32), 0 4px 7px rgba(26,18,24,.14);
+ background:linear-gradient(168deg,#f0eadf 0%,#e8ddcc 72%,#d8c2a1 100%);
+ border:2px solid #d9c3a1; border-radius:14px; overflow:hidden; min-width:0; min-height:0;
+ box-shadow:0 2px 0 rgba(44,28,22,.26), 0 3px 6px rgba(26,18,24,.10);
 }
 #boardWrap.chickBoard .die img.chickSymbol{
- display:block; width:96%; height:96%; max-width:100%; max-height:100%; min-width:0; min-height:0; object-fit:contain; pointer-events:none;
+ display:block; width:94%; height:94%; max-width:100%; max-height:100%; min-width:0; min-height:0; object-fit:contain; pointer-events:none;
+ filter:brightness(.95) saturate(.90) contrast(.98);
 }
 #boardWrap.chickBoard .die.selected{
- transform:translateY(-2px) scale(1.075);z-index:4;
- filter:drop-shadow(0 0 7px #fff4a6) drop-shadow(0 0 5px #ff79bb);
- outline:3px solid #fff2bc;outline-offset:-2px;
+ transform:translateY(-2px) scale(1.06);z-index:4;
+ filter:drop-shadow(0 0 5px rgba(255,214,122,.75)) drop-shadow(0 0 3px rgba(255,127,181,.55));
+ outline:2px solid #f8e8be;outline-offset:-2px;
 }
 #boardWrap.chickBoard .die.popping{animation:tilePunchPop 260ms ease forwards;}
 @media(max-width:390px){#boardWrap.chickBoard{padding:2.4%;}#boardWrap.chickBoard #grid{gap:.45%;}}
 
 /* 닮팡 2.0 병아리 연결/폭발/낙하 연출 */
 #boardWrap.chickBoard .die.selected{
- transform:translateY(-2px) scale(1.06);z-index:7;
- outline:2px solid #fff1fb;outline-offset:-3px;
- filter:drop-shadow(0 0 9px #ff77bd) drop-shadow(0 0 4px white);
+ transform:translateY(-2px) scale(1.05);z-index:7;
+ outline:2px solid #f7e3ef;outline-offset:-3px;
+ filter:drop-shadow(0 0 6px rgba(255,124,185,.65)) drop-shadow(0 0 3px rgba(255,250,244,.85));
  transition:transform 120ms ease-out,filter 120ms ease-out;
 }
 #boardWrap.chickBoard .die.chainBump img{animation:chickBump .22s cubic-bezier(.15,1.8,.4,1) both;}
 @keyframes chickBump{0%{transform:scale(.88)}65%{transform:scale(1.08)}100%{transform:scale(1)}}
-#boardWrap.chickBoard #lineLayer .chainHalo{filter:blur(6px);animation:chickLinePulse .6s ease-in-out infinite alternate;}
+#boardWrap.chickBoard #lineLayer .chainHalo{filter:blur(5px);opacity:.48;animation:chickLinePulse .6s ease-in-out infinite alternate;}
 @keyframes chickLinePulse{from{opacity:.3}to{opacity:.75}}
-#boardWrap.chickBoard #lineLayer .chainCore{filter:drop-shadow(0 0 4px #ff52b5)}
-#boardWrap.chickBoard #lineLayer .chainOrb{filter:drop-shadow(0 0 5px #ff5caa)}
+#boardWrap.chickBoard #lineLayer .chainCore{filter:drop-shadow(0 0 3px rgba(255,108,178,.75))}
+#boardWrap.chickBoard #lineLayer .chainOrb{filter:drop-shadow(0 0 4px rgba(255,108,178,.72))}
 #boardWrap.chickBoard .die.chickPopping{
  animation:chickPopBurst 300ms cubic-bezier(.2,.75,.45,1) var(--pop-delay,0ms) both;
  pointer-events:none;
@@ -603,8 +604,8 @@
 }
 #boardWrap .chickBurst{
  position:absolute;z-index:14;pointer-events:none;transform:translate(-50%,-50%);
- color:#fff7c8;font-weight:1000;font-size:clamp(22px,7vw,36px);
- white-space:nowrap;text-shadow:0 2px 0 #c95f76,0 0 12px #ff56aa,0 0 7px white;
+ color:#fff1c8;font-weight:1000;font-size:clamp(22px,7vw,36px);
+ white-space:nowrap;text-shadow:0 2px 0 rgba(180,102,110,.85),0 0 8px rgba(255,113,178,.45),0 0 5px rgba(255,250,244,.85);
  animation:chickBurstFloat .75s ease-out forwards;
 }
 @keyframes chickBurstFloat{
@@ -630,3 +631,11 @@
 .chickChainTip[hidden]{display:none!important;}
 .chickChainTip[data-tier="bonus"]{background:rgba(216,72,127,.94);border-color:#ffe1ee;}
 .chickChainTip[data-tier="legend"]{background:rgba(181,94,23,.96);border-color:#fff3b3;box-shadow:0 0 18px #ffd55c90;}
+
+
+/* soft premium tone tuning */
+#boardWrap.chickBoard .die::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 32%, rgba(116,88,52,.05) 100%);
+}
+#boardWrap.chickBoard .die:not(.selected){ filter:contrast(.98); }
