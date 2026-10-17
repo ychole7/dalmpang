@@ -52,6 +52,7 @@
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
   const CHICK_STAGE = { name:'병아리 마을 · Easy', type:'chick', setId:'easy', difficulty:1 };
+  const STRAWBERRY_EASY = { name:'딸기 정원 · Easy', type:'chick', setId:'strawberry', difficulty:1 };
   const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
   const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
   const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
@@ -224,7 +225,11 @@
   }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
-      case 'chick': return '<img class="chickSymbol" draggable="false" src="assets/images/chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '')+(v+1)+'.png" alt="병아리">';
+      case 'chick': {
+        const isStrawberry = stage.setId === 'strawberry';
+        const filename = isStrawberry ? 'strawberry_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '');
+        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+(v+1)+'.png" alt="'+(isStrawberry ? '딸기' : '병아리')+'">';
+      }
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
@@ -299,7 +304,8 @@
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
       let base;
-      if(i < 15) base=CHICK_STAGE;
+      if(i >= 5 && i < 10) base=STRAWBERRY_EASY;
+      else if(i < 15) base=CHICK_STAGE;
       else if(i < 30) base=CHICK_NORMAL;
       else if(i < 40) base=CHICK_HARD;
       else if(i < 45) base=CHICK_OBSERVE;
@@ -457,7 +463,12 @@
     }
   }
 
-  function currentStage(){ return STAGES[stageIndex % STAGES.length]; }
+  // Temporary theme preview via ?preview=strawberry; stage progress is unchanged.
+  const strawberryPreview = new URLSearchParams(window.location.search).get('preview') === 'strawberry';
+  function currentStage(){
+    const stage = STAGES[stageIndex % STAGES.length];
+    return strawberryPreview ? Object.assign({}, stage, STRAWBERRY_EASY, { target:stage.target, timeLimit:stage.timeLimit }) : stage;
+  }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
   function movesBudget(){ return 16 + Math.min(16, Math.floor(stageIndex/25)); }
