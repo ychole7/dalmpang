@@ -666,78 +666,64 @@
     setChainPreviewBonus(reward.score);
   }
 
-  // Single canvas overlay, using device-pixel-aware coordinates. Unlike the
-  // earlier SVG + CSS bridge layers, this paints the entire route in one pass.
-  let chainCanvas = null;
+  // Direct DOM segments: avoid SVG/canvas render inconsistencies on iOS.
+  let chainPathEl = null;
   let chainFinishTimer = null;
-  function chainCanvasForBoard(){
-    const wrap = document.getElementById('boardWrap');
-    if(!chainCanvas){
-      chainCanvas = document.createElement('canvas');
-      chainCanvas.className = 'chainCanvas';
-      chainCanvas.setAttribute('aria-hidden','true');
-      wrap.appendChild(chainCanvas);
+  function pathOverlay(){
+    if(!chainPathEl){
+      chainPathEl = document.createElement('div');
+      chainPathEl.className='chainPathOverlay';
+      document.getElementById('boardWrap').appendChild(chainPathEl);
     }
-    const width = wrap.clientWidth, height = wrap.clientHeight;
-    const ratio = Math.min(window.devicePixelRatio || 1, 3);
-    const pw = Math.round(width*ratio), ph = Math.round(height*ratio);
-    if(chainCanvas.width!==pw || chainCanvas.height!==ph){
-      chainCanvas.width=pw;
-      chainCanvas.height=ph;
-    }
-    chainCanvas.style.width=width+'px';
-    chainCanvas.style.height=height+'px';
-    const ctx=chainCanvas.getContext('2d');
-    ctx.setTransform(ratio,0,0,ratio,0,0);
-    ctx.clearRect(0,0,width,height);
-    return ctx;
+    return chainPathEl;
+  }
+  function clearChainPath(){
+    if(chainPathEl) chainPathEl.replaceChildren();
   }
   function drawChainLine(){
-    const wrap = document.getElementById('boardWrap');
     lineLayer.innerHTML='';
+    const wrap = document.getElementById('boardWrap');
     clearTimeout(chainFinishTimer);
-    if(chainCanvas) chainCanvas.style.opacity='1';
+    const overlay=pathOverlay();
+    overlay.replaceChildren();
     if(chain.length<2){
       wrap.removeAttribute('data-chain-count');
-      if(chainCanvas) chainCanvasForBoard();
       updateChainTip();
       return;
     }
     wrap.setAttribute('data-chain-count', String(chain.length));
     updateChainTip();
-    const pts = chain.map(p=>cellCenter(p.r,p.c));
-    const ctx = chainCanvasForBoard();
-    function stroke(color,width,blur,shadow){
-      ctx.save();
-      ctx.lineCap='round'; ctx.lineJoin='round';
-      ctx.lineWidth=width;
-      ctx.strokeStyle=color;
-      ctx.shadowBlur=blur;ctx.shadowColor=shadow;
-      ctx.beginPath();
-      pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-      ctx.stroke(); ctx.restore();
+    const pts=chain.map(p=>cellCenter(p.r,p.c));
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1], b=pts[i];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.hypot(dx,dy);
+      const angle=Math.atan2(dy,dx)*180/Math.PI;
+      // All route pieces use a visible positioned DIV; no SVG viewBox or canvas DPR.
+      const segment=document.createElement('div');
+      segment.className='chainBridge';
+      segment.style.width=dist+'px';
+      segment.style.left=a.x+'px';
+      segment.style.top=a.y+'px';
+      segment.style.transform='translateY(-50%) rotate('+angle+'deg)';
+      overlay.appendChild(segment);
     }
-    // Bold path is deliberately drawn OVER the sprites, not under the tiles.
-    stroke('rgba(255,183,38,.35)',29,18,'rgba(255,184,40,.95)');
-    stroke('#ee9a18',17,9,'#ffc956');
-    stroke('#ffc33e',12,0,'transparent');
-    stroke('#fff5cc',5,4,'#fffaf0');
-    pts.forEach((point,i)=>{
-      ctx.save();
-      ctx.beginPath(); ctx.arc(point.x,point.y,i===pts.length-1?11:7,0,Math.PI*2);
-      ctx.fillStyle=i===pts.length-1?'#fff4a4':'#ffcd4d';
-      ctx.shadowBlur=12;ctx.shadowColor='#ffbc45';ctx.fill();
-      ctx.beginPath();ctx.arc(point.x,point.y,i===pts.length-1?5:3.5,0,Math.PI*2);
-      ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
+    pts.forEach((p,i)=>{
+      const node=document.createElement('div');
+      node.className='chainBridgeNode'+(i===pts.length-1?' active':'');
+      node.style.left=p.x+'px';
+      node.style.top=p.y+'px';
+      overlay.appendChild(node);
     });
   }
   function holdFinishedChain(){
-    if(!chainCanvas) return;
     clearTimeout(chainFinishTimer);
-    // Keep the successfully drawn route on screen while popping starts.
-    chainFinishTimer = setTimeout(()=>{
-      if(chainCanvas) chainCanvasForBoard();
-    },430);
+    if(!chainPathEl) return;
+    chainPathEl.classList.add('finishing');
+    chainFinishTimer=setTimeout(()=>{
+      clearChainPath();
+      if(chainPathEl) chainPathEl.classList.remove('finishing');
+    }, 530);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
@@ -802,7 +788,7 @@
       holdFinishedChain();
       popChain(chain.slice());
     } else {
-      if(chainCanvas) chainCanvasForBoard();
+      clearChainPath();
       if(chain.length===1) cellEls[chain[0].r][chain[0].c].classList.remove('selected');
       setChainPreviewBonus(0);
     }

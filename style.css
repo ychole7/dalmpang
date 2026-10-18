@@ -655,3 +655,40 @@
 #boardWrap.chickBoard .chainScoreFloat{z-index:49;}
 #boardWrap.chickBoard.is-chaining .die:not(.selected){filter:brightness(.94) saturate(.94);}
 @media(prefers-reduced-motion:reduce){#boardWrap.chickBoard .die.selected{transition:none;}}
+
+
+/* V8: real DOM connection segments on top of the 6x8 tiles */
+#boardWrap .chainCanvas{display:none!important;}
+#boardWrap .chainPathOverlay{
+  position:absolute;inset:0;z-index:60;pointer-events:none;
+  overflow:visible;isolation:isolate;
+}
+#boardWrap .chainBridge{
+  position:absolute;height:14px;transform-origin:0 50%;
+  border-radius:12px;
+  background:linear-gradient(180deg,#fffad1 0%,#ffd750 25%,#ffad17 65%,#fff8bb 100%);
+  border-top:2px solid #fff5a9;
+  border-bottom:2px solid #f19007;
+  box-shadow:0 0 0 3px rgba(255,169,22,.26),0 0 11px 5px rgba(255,185,35,.65),0 2px 7px rgba(81,44,10,.48);
+  opacity:1;
+}
+#boardWrap .chainBridge::after{
+  content:'';position:absolute;top:3px;left:1px;right:1px;height:3px;
+  border-radius:6px;background:rgba(255,255,255,.88);
+}
+#boardWrap .chainBridgeNode{
+  position:absolute;width:18px;height:18px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 35% 30%,#fff 0 22%,#fff3a8 35%,#ffb924 75%);
+  border:2px solid #fffbd5;
+  box-shadow:0 0 10px 4px rgba(255,188,42,.73),0 1px 4px #965612;
+}
+#boardWrap .chainBridgeNode.active{
+  width:24px;height:24px;
+  box-shadow:0 0 13px 6px rgba(255,188,42,.85),0 1px 4px #965612;
+  animation:chainBridgePulse .5s ease-in-out infinite alternate;
+}
+@keyframes chainBridgePulse{to{transform:translate(-50%,-50%) scale(1.18)}}
+#boardWrap .chainPathOverlay.finishing .chainBridge,
+#boardWrap .chainPathOverlay.finishing .chainBridgeNode{animation:chainBridgeFinish .53s ease-out forwards;}
+@keyframes chainBridgeFinish{0%{opacity:1}75%{opacity:1;filter:brightness(1.35)}100%{opacity:0;filter:brightness(1.7)}}
