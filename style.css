@@ -693,3 +693,41 @@
   box-shadow:0 8px 18px rgba(113,36,68,.2), 0 0 14px rgba(255,122,178,.42);
 }
 @keyframes chainScoreRise{0%{opacity:0;transform:translate(-50%,-35%) scale(.72)}18%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-130%) scale(1)}}
+
+
+/* Visibility and touch reliability fix: keep the line above tiles and overlay
+   unmistakable numbered markers on every selected tile. */
+#boardWrap.chickBoard #grid{isolation:isolate;}
+#boardWrap.chickBoard svg#lineLayer{z-index:15;pointer-events:none;overflow:visible;}
+#boardWrap.chickBoard .die.selected{
+  z-index:8;
+  transform:scale(1.025);
+  outline:4px solid #ffd447;
+  outline-offset:-4px;
+  border-color:#ff8a2b;
+  box-shadow:inset 0 0 0 3px #fff3bb,0 0 0 2px #ffb221,0 0 18px 3px rgba(255,202,34,.9);
+  filter:brightness(1.06);
+}
+#boardWrap.chickBoard .die.selected::before{
+  inset:2px;
+  border:3px solid #fff9cf;
+  border-radius:10px;
+  box-shadow:0 0 12px rgba(255,199,22,.8);
+  animation:none;
+}
+#boardWrap.chickBoard .die.selected::after{
+  content:var(--chain-order, '✓');
+  position:absolute; inset:auto 2px 2px auto;
+  width:23px;height:23px; border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#ffb51d;color:#613400;
+  border:2px solid white;font-size:13px;font-weight:1000;
+  box-shadow:0 2px 7px rgba(0,0,0,.25);
+  z-index:11;pointer-events:none;
+}
+#boardWrap.chickBoard #lineLayer .chainCore{filter:drop-shadow(0 0 4px #ffe65e);}
+#boardWrap.chickBoard #lineLayer .chainDash{stroke-dasharray:none;animation:none;}
+#boardWrap.chickBoard #lineLayer .chainHalo{filter:blur(5px);opacity:.68;}
+#boardWrap.chickBoard #lineLayer .chainHead{fill:#fff;}
+#boardWrap.chickBoard .chickChainTip{z-index:30;}
+#boardWrap.chickBoard .chainScoreFloat{z-index:29;}

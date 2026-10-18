@@ -673,6 +673,7 @@
     wrap.setAttribute('data-chain-count',String(chain.length));
     updateChainTip();
     const chick = currentStage().type === 'chick';
+    chain.forEach(function(p,i){ cellEls[p.r][p.c].style.setProperty('--chain-order', '\''+(i+1)+'\''); });
     const pts = chain.map(p=>cellCenter(p.r,p.c));
     const points=pts.map(p=>p.x+','+p.y).join(' ');
     function addLine(cls,color,width,opacity){
@@ -723,13 +724,16 @@
   function isAdjacent(a,b){ return Math.abs(a.r-b.r)<=1 && Math.abs(a.c-b.c)<=1 && !(a.r===b.r && a.c===b.c); }
 
   function cellFromPoint(x,y){
-    const el = document.elementFromPoint(x,y);
-    if(!el) return null;
-    const die = el.closest('.die');
-    if(!die) return null;
-    const r = parseInt(die.dataset.r,10), c = parseInt(die.dataset.c,10);
-    if(board[r][c]===null) return null;
-    return {r,c};
+    // Hit test by actual tile rectangles instead of elementFromPoint: selected
+    // tiles and floating FX can cover adjacent elements on mobile Safari.
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        if(board[r][c]===null) continue;
+        const bounds=cellEls[r][c].getBoundingClientRect();
+        if(x>=bounds.left && x<=bounds.right && y>=bounds.top && y<=bounds.bottom) return {r,c};
+      }
+    }
+    return null;
   }
 
   function startChain(r,c){
@@ -748,6 +752,7 @@
       const prev = chain[chain.length-2];
       if(prev.r===r && prev.c===c){
         cellEls[last.r][last.c].classList.remove('selected','chainBump');
+        cellEls[last.r][last.c].style.removeProperty('--chain-order');
         chain.pop();
         drawChainLine();
         return;
@@ -770,6 +775,7 @@
     lineLayer.innerHTML='';
     document.getElementById('boardWrap').removeAttribute('data-chain-count');
     if(chainTip) chainTip.hidden=true;
+    chain.forEach(function(p){ cellEls[p.r][p.c].style.removeProperty('--chain-order'); });
     if(chain.length>=2){ popChain(chain.slice()); }
     else if(chain.length===1){
       cellEls[chain[0].r][chain[0].c].classList.remove('selected');
@@ -1060,11 +1066,13 @@
     const cell = cellFromPoint(e.clientX,e.clientY);
     if(cell) extendChain(cell.r,cell.c);
   });
-  window.addEventListener('pointerup',()=>{
+  function finishPointerChain(){
     if(!dragging) return;
     dragging=false;
     endChain();
-  });
+  }
+  window.addEventListener('pointerup',finishPointerChain);
+  window.addEventListener('pointercancel',finishPointerChain);
 
   // ---- power-ups ----
   document.getElementById('btnCandy').addEventListener('click', ()=>{
