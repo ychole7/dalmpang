@@ -712,27 +712,27 @@
       line.className='candyChainSegment';
       // The visible V12 DOM layer remains; only its appearance changes.
       line.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;box-sizing:border-box!important;';
-      line.style.left=a.x+'px'; line.style.top=(a.y-4)+'px';
-      line.style.width=length+'px'; line.style.height='8px';
+      line.style.left=a.x+'px'; line.style.top=(a.y-3)+'px';
+      line.style.width=length+'px'; line.style.height='6px';
       line.style.transformOrigin='0 50%';
       line.style.transform='rotate('+angle+'deg)';
-      line.style.background='linear-gradient(180deg,#fff3ad 0%,#f9bf42 35%,#e99a23 100%)';
+      line.style.background='linear-gradient(180deg,#fff8d8 0%,#ffd56f 46%,#ecaa37 100%)';
       line.style.borderRadius='999px';
-      line.style.boxShadow='0 0 8px 3px rgba(255,190,73,.35),0 1px 3px rgba(107,56,15,.22)';
+      line.style.boxShadow='0 0 9px 2px rgba(255,196,73,.34),0 1px 2px rgba(107,56,15,.12)';
       chainPathEl.appendChild(line);
     }
     // Small join beads soften the corners without covering the art.
     pts.forEach(function(p,i){
       const dot=document.createElement('div');
       const last=i===pts.length-1;
-      const size=last?13:9;
+      const size=last?11:8;
       dot.className='candyChainNode'+(last?' active':'');
       dot.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;pointer-events:none!important;box-sizing:border-box!important;';
       dot.style.left=(p.x-size/2)+'px';dot.style.top=(p.y-size/2)+'px';
       dot.style.width=size+'px';dot.style.height=size+'px';
       dot.style.background='radial-gradient(circle at 35% 30%,#fffdf3,#ffd276 55%,#ed9c23 100%)';
       dot.style.borderRadius='50%';
-      dot.style.boxShadow=last?'0 0 10px 4px rgba(255,194,69,.55)':'0 0 6px 2px rgba(255,192,61,.32)';
+      dot.style.boxShadow=last?'0 0 10px 3px rgba(255,194,69,.44)':'0 0 6px 2px rgba(255,192,61,.26)';
       chainPathEl.appendChild(dot);
     });
   }
@@ -746,6 +746,8 @@
   function holdFinishedChain(){
     ensureChainPath();
     clearTimeout(chainFinishTimer);
+    chainPathEl.classList.remove('finishing');
+    void chainPathEl.offsetWidth;
     chainPathEl.classList.add('finishing');
     chainFinishTimer=setTimeout(function(){
       clearChainPath();
@@ -796,7 +798,12 @@
     if(!isAdjacent(last,{r,c})) return;
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
-    if(currentStage().type==='chick') cellEls[r][c].classList.add('chainBump');
+    if(currentStage().type==='chick'){
+      const tile=cellEls[r][c];
+      tile.classList.remove('chainBump');
+      void tile.offsetWidth;
+      tile.classList.add('chainBump');
+    }
     if(chain.length>=2){
       const reward = chainReward(chain.length);
       spawnChainScore('+'+reward.score, r, c, reward.multiplier>1 || chain.length>=5);

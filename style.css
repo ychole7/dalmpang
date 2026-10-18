@@ -647,3 +647,33 @@
   content:'';position:absolute;inset:3px;border:1px solid rgba(255,253,224,.83);
   border-radius:9px;pointer-events:none;
 }
+
+/* V14 tactile tuning: retain the proven DOM renderer and selection logic */
+#boardWrap.chickBoard .die.chainBump img.chickSymbol{
+  animation:chickBumpV14 270ms cubic-bezier(.18,1.42,.34,1) both;
+}
+@keyframes chickBumpV14{
+  0%{transform:scale(.94)}
+  48%{transform:scale(1.095)}
+  78%{transform:scale(.985)}
+  100%{transform:scale(1)}
+}
+#dalmpangCandyPath .candyChainSegment{animation:candySegmentIn 150ms ease-out both;}
+#dalmpangCandyPath .candyChainNode.active{animation:candyNodeBeat 430ms ease-in-out infinite alternate;}
+@keyframes candySegmentIn{from{opacity:.45;filter:brightness(1.5)}to{opacity:1;filter:brightness(1)}}
+@keyframes candyNodeBeat{from{filter:brightness(1)}to{filter:brightness(1.25)}}
+#dalmpangCandyPath.finishing .candyChainSegment,
+#dalmpangCandyPath.finishing .candyChainNode{animation:candyPathFinishV14 .4s ease-out forwards;}
+@keyframes candyPathFinishV14{0%{opacity:1;filter:brightness(1)}35%{opacity:1;filter:brightness(1.3)}100%{opacity:0;filter:brightness(1.5)}}
+#boardWrap.chickBoard .die.chickPopping{animation:chickPopV14 320ms cubic-bezier(.22,.7,.33,1) var(--pop-delay,0ms) both;}
+@keyframes chickPopV14{
+  0%{transform:scale(1);opacity:1;filter:brightness(1)}
+  34%{transform:scale(1.17);opacity:1;filter:brightness(1.26) drop-shadow(0 0 7px rgba(255,224,142,.8))}
+  67%{transform:scale(.75);opacity:.85}
+  100%{transform:scale(.14);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+ #boardWrap.chickBoard .die.chainBump img.chickSymbol,
+ #dalmpangCandyPath .candyChainSegment,
+ #dalmpangCandyPath .candyChainNode.active{animation:none}
+}
