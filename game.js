@@ -669,10 +669,12 @@
   function drawChainLine(){
     lineLayer.innerHTML='';
     const wrap = document.getElementById('boardWrap');
+    // SVG user coordinates must match CSS pixel coordinates on mobile Safari.
+    lineLayer.setAttribute('viewBox', '0 0 '+wrap.clientWidth+' '+wrap.clientHeight);
+    lineLayer.setAttribute('preserveAspectRatio', 'none');
     if(chain.length<2){ wrap.removeAttribute('data-chain-count'); updateChainTip(); return; }
     wrap.setAttribute('data-chain-count',String(chain.length));
     updateChainTip();
-    chain.forEach(function(p,i){ cellEls[p.r][p.c].style.setProperty('--chain-order', '"'+(i+1)+'"'); });
     const pts = chain.map(p=>cellCenter(p.r,p.c));
     const points=pts.map(p=>p.x+','+p.y).join(' ');
     function addLine(cls,color,width,opacity){
