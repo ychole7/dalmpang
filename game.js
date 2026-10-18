@@ -666,93 +666,78 @@
     setChainPreviewBonus(reward.score);
   }
 
-  // Draw short bridges in the spaces between neighboring tiles. These DOM
-  // elements do not rely on SVG viewBox scaling or SVG stacking on iOS Safari.
-  function drawChainBridges(){
+  // Single canvas overlay, using device-pixel-aware coordinates. Unlike the
+  // earlier SVG + CSS bridge layers, this paints the entire route in one pass.
+  let chainCanvas = null;
+  let chainFinishTimer = null;
+  function chainCanvasForBoard(){
     const wrap = document.getElementById('boardWrap');
-    let layer = wrap.querySelector('.chainBridgeLayer');
-    if(!layer){
-      layer = document.createElement('div');
-      layer.className = 'chainBridgeLayer';
-      wrap.appendChild(layer);
+    if(!chainCanvas){
+      chainCanvas = document.createElement('canvas');
+      chainCanvas.className = 'chainCanvas';
+      chainCanvas.setAttribute('aria-hidden','true');
+      wrap.appendChild(chainCanvas);
     }
-    layer.replaceChildren();
-    if(chain.length<2) return;
-    for(let i=1;i<chain.length;i++){
-      const a = cellCenter(chain[i-1].r,chain[i-1].c);
-      const b = cellCenter(chain[i].r,chain[i].c);
-      const dx = b.x-a.x, dy = b.y-a.y;
-      const dist = Math.hypot(dx,dy);
-      if(!dist) continue;
-      const segment = document.createElement('div');
-      segment.className = 'chainBridge';
-      segment.style.left = ((a.x+b.x)/2)+'px';
-      segment.style.top = ((a.y+b.y)/2)+'px';
-      segment.style.width = Math.max(26,dist*.95)+'px';
-      segment.style.transform = 'translate(-50%,-50%) rotate('+Math.atan2(dy,dx)+'rad)';
-      layer.appendChild(segment);
+    const width = wrap.clientWidth, height = wrap.clientHeight;
+    const ratio = Math.min(window.devicePixelRatio || 1, 3);
+    const pw = Math.round(width*ratio), ph = Math.round(height*ratio);
+    if(chainCanvas.width!==pw || chainCanvas.height!==ph){
+      chainCanvas.width=pw;
+      chainCanvas.height=ph;
     }
+    chainCanvas.style.width=width+'px';
+    chainCanvas.style.height=height+'px';
+    const ctx=chainCanvas.getContext('2d');
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.clearRect(0,0,width,height);
+    return ctx;
   }
-  function clearChainBridges(){
-    const layer = document.querySelector('#boardWrap .chainBridgeLayer');
-    if(layer) layer.replaceChildren();
-  }
-
   function drawChainLine(){
-    lineLayer.innerHTML='';
     const wrap = document.getElementById('boardWrap');
-    // SVG user coordinates must match CSS pixel coordinates on mobile Safari.
-    lineLayer.setAttribute('viewBox', '0 0 '+wrap.clientWidth+' '+wrap.clientHeight);
-    lineLayer.setAttribute('preserveAspectRatio', 'none');
-    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); clearChainBridges(); updateChainTip(); return; }
-    wrap.setAttribute('data-chain-count',String(chain.length));
-    updateChainTip();
-    drawChainBridges();
-    const pts = chain.map(p=>cellCenter(p.r,p.c));
-    const points=pts.map(p=>p.x+','+p.y).join(' ');
-    function addLine(cls,color,width,opacity){
-      const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      poly.setAttribute('points',points);
-      poly.setAttribute('class',cls);
-      poly.setAttribute('stroke',color);
-      poly.setAttribute('stroke-width',width);
-      poly.setAttribute('stroke-linecap','round');
-      poly.setAttribute('stroke-linejoin','round');
-      poly.setAttribute('fill','none');
-      poly.setAttribute('opacity',opacity);
-      lineLayer.appendChild(poly);
+    lineLayer.innerHTML='';
+    clearTimeout(chainFinishTimer);
+    if(chainCanvas) chainCanvas.style.opacity='1';
+    if(chain.length<2){
+      wrap.removeAttribute('data-chain-count');
+      if(chainCanvas) chainCanvasForBoard();
+      updateChainTip();
+      return;
     }
-    addLine('chainHalo','#ffd34f','28','.34');
-    addLine('chainGlow','#ff9833','20','.42');
-    addLine('chainCore','#ffb51f','12','1');
-    addLine('chainHighlight','#fff9d7','4.5','1');
-    addLine('chainDash','#ffffff','2.4','.95');
-    pts.forEach((p,i)=>{
-      if(i < pts.length-1){
-        const np = pts[i+1];
-        const sx = (p.x + np.x) / 2;
-        const sy = (p.y + np.y) / 2;
-        const spark=document.createElementNS('http://www.w3.org/2000/svg','circle');
-        spark.setAttribute('cx',sx); spark.setAttribute('cy',sy);
-        spark.setAttribute('r',(i%2===0)?4.5:3.5);
-        spark.setAttribute('fill','#fff2a3');
-        spark.setAttribute('class','chainSpark');
-        spark.style.animationDelay=(i*65)+'ms';
-        lineLayer.appendChild(spark);
-      }
-      const nodeOuter=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      nodeOuter.setAttribute('cx',p.x); nodeOuter.setAttribute('cy',p.y);
-      nodeOuter.setAttribute('r',i===pts.length-1?'14':'10');
-      nodeOuter.setAttribute('fill',i===pts.length-1?'#ffb31d':'#ffc53f');
-      nodeOuter.setAttribute('class',i===pts.length-1?'chainHeadGlow':'chainNode');
-      lineLayer.appendChild(nodeOuter);
-      const nodeInner=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      nodeInner.setAttribute('cx',p.x); nodeInner.setAttribute('cy',p.y);
-      nodeInner.setAttribute('r',i===pts.length-1?'7.2':'5.4');
-      nodeInner.setAttribute('fill','#fffdf3');
-      nodeInner.setAttribute('class',i===pts.length-1?'chainHead':'chainOrb');
-      lineLayer.appendChild(nodeInner);
+    wrap.setAttribute('data-chain-count', String(chain.length));
+    updateChainTip();
+    const pts = chain.map(p=>cellCenter(p.r,p.c));
+    const ctx = chainCanvasForBoard();
+    function stroke(color,width,blur,shadow){
+      ctx.save();
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      ctx.lineWidth=width;
+      ctx.strokeStyle=color;
+      ctx.shadowBlur=blur;ctx.shadowColor=shadow;
+      ctx.beginPath();
+      pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+      ctx.stroke(); ctx.restore();
+    }
+    // Bold path is deliberately drawn OVER the sprites, not under the tiles.
+    stroke('rgba(255,183,38,.35)',29,18,'rgba(255,184,40,.95)');
+    stroke('#ee9a18',17,9,'#ffc956');
+    stroke('#ffc33e',12,0,'transparent');
+    stroke('#fff5cc',5,4,'#fffaf0');
+    pts.forEach((point,i)=>{
+      ctx.save();
+      ctx.beginPath(); ctx.arc(point.x,point.y,i===pts.length-1?11:7,0,Math.PI*2);
+      ctx.fillStyle=i===pts.length-1?'#fff4a4':'#ffcd4d';
+      ctx.shadowBlur=12;ctx.shadowColor='#ffbc45';ctx.fill();
+      ctx.beginPath();ctx.arc(point.x,point.y,i===pts.length-1?5:3.5,0,Math.PI*2);
+      ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
     });
+  }
+  function holdFinishedChain(){
+    if(!chainCanvas) return;
+    clearTimeout(chainFinishTimer);
+    // Keep the successfully drawn route on screen while popping starts.
+    chainFinishTimer = setTimeout(()=>{
+      if(chainCanvas) chainCanvasForBoard();
+    },430);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
@@ -810,28 +795,15 @@
   function endChain(){
     const wrap = document.getElementById('boardWrap');
     const completed = chain.length>=2;
-    if(completed){
-      // Briefly hold the entire visible route after release. In prior versions
-      // it vanished on pointerup before the successful match animation.
-      const overlay = wrap.querySelector('.chainBridgeLayer');
-      if(overlay){
-        const frozen = overlay.cloneNode(true);
-        frozen.className = 'chainBridgeLayer chainBridgeFinish';
-        wrap.appendChild(frozen);
-        setTimeout(()=>frozen.remove(),520);
-      }
-    }
-    lineLayer.innerHTML='';
-    clearChainBridges();
     wrap.removeAttribute('data-chain-count');
     wrap.classList.remove('is-chaining');
     if(chainTip) chainTip.hidden=true;
-    chain.forEach(function(p){ cellEls[p.r][p.c].style.removeProperty('--chain-order'); });
-    if(completed){ popChain(chain.slice()); }
-    else if(chain.length===1){
-      cellEls[chain[0].r][chain[0].c].classList.remove('selected');
-      setChainPreviewBonus(0);
+    if(completed){
+      holdFinishedChain();
+      popChain(chain.slice());
     } else {
+      if(chainCanvas) chainCanvasForBoard();
+      if(chain.length===1) cellEls[chain[0].r][chain[0].c].classList.remove('selected');
       setChainPreviewBonus(0);
     }
     chain=[];

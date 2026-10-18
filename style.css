@@ -631,68 +631,27 @@
 
 
 
-/* Gold chain: visually selected tiles + continuous line, no number/check badges */
-#boardWrap.chickBoard #grid {isolation:isolate;}
-#boardWrap.chickBoard svg#lineLayer {z-index:20; pointer-events:none; overflow:visible;}
-#boardWrap.chickBoard.is-chaining .die:not(.selected) {filter:brightness(.94) saturate(.93);}
-#boardWrap.chickBoard .die.selected {
-  z-index:9; transform:scale(1.035); border-color:#f4bc42;
-  outline:3px solid #ffc23c; outline-offset:-3px;
-  box-shadow:inset 0 0 0 2px #fff2bd,0 0 12px 3px rgba(255,191,52,.65);
-  filter:brightness(1.06);
+/* V7: approved 6-step connection interaction. One canvas above sprites. */
+#boardWrap.chickBoard .die.selected{
+  z-index:7;
+  transform:scale(1.045);
+  border:2px solid #ffcd56;
+  outline:3px solid #ffe190;
+  outline-offset:-3px;
+  background:linear-gradient(168deg,#fff3d5,#f3e2bb);
+  box-shadow:0 0 0 3px rgba(255,205,68,.45),0 0 14px 4px rgba(255,184,34,.67);
+  filter:brightness(1.07);
 }
-#boardWrap.chickBoard .die.selected::before {
-  content:''; position:absolute; inset:3px; border:2px solid #fff8db;
-  border-radius:9px; pointer-events:none; animation:none;
+#boardWrap.chickBoard .die.selected::before{
+  content:'';position:absolute;inset:4px;border:2px solid rgba(255,250,212,.96);
+  border-radius:10px;pointer-events:none;
 }
-#boardWrap.chickBoard .die.selected::after {content:none;}
-#boardWrap.chickBoard .die.chainBump img {animation:chickBump .2s cubic-bezier(.15,1.8,.4,1) both;}
-#boardWrap.chickBoard #lineLayer .chainHalo {filter:blur(6px);opacity:.6;animation:chickLinePulse .55s ease-in-out infinite alternate;}
-#boardWrap.chickBoard #lineLayer .chainGlow {opacity:.46;}
-#boardWrap.chickBoard #lineLayer .chainCore {filter:drop-shadow(0 0 3px rgba(255,164,28,.75));}
-#boardWrap.chickBoard #lineLayer .chainDash {stroke-dasharray:9 12;animation:goldChainFlow .5s linear infinite;}
-#boardWrap.chickBoard #lineLayer .chainSpark {filter:drop-shadow(0 0 5px #ffd677);}
-#boardWrap.chickBoard #lineLayer .chainNode,#boardWrap.chickBoard #lineLayer .chainHeadGlow {filter:drop-shadow(0 0 5px #fdbb35);}
-@keyframes goldChainFlow {from{stroke-dashoffset:0}to{stroke-dashoffset:-21}}
-#boardWrap.chickBoard .chainScoreFloat{z-index:23;}
-#boardWrap.chickBoard .chickChainTip{z-index:24;}
-/* live projected score while dragging; finalized only on release */
-.movesScore.previewing,#movesScoreEcho.previewing{color:#b27217;}
-.chainScoreFloat{
- position:absolute;z-index:23;pointer-events:none;transform:translate(-50%,-50%);
- padding:4px 9px;border-radius:999px;background:#fff7d7;
- border:2px solid #ffc951;color:#95511d;font-weight:900;
- font-size:clamp(12px,3vw,16px);white-space:nowrap;
- box-shadow:0 3px 9px rgba(68,32,0,.18);
- animation:chainScoreRise .52s ease-out forwards;
+#boardWrap.chickBoard .die.selected::after{content:none;}
+#boardWrap .chainCanvas{
+  display:block;position:absolute;top:0;left:0;z-index:45;
+  pointer-events:none;touch-action:none;opacity:1;
 }
-.chainScoreFloat.strong{background:#fff0bd;border-color:#ffae33;}
-@keyframes chainScoreRise{
- 0%{opacity:0;transform:translate(-50%,-30%) scale(.78)}
- 25%{opacity:1;transform:translate(-50%,-65%) scale(1.08)}
- 100%{opacity:0;transform:translate(-50%,-135%) scale(1)}
-}
-
-
-/* V5: explicit gold connectors across tile gaps (independent of SVG). */
-#boardWrap .chainBridgeLayer{
-  position:absolute;inset:0;z-index:26;pointer-events:none;overflow:visible;
-}
-#boardWrap .chainBridge{
-  position:absolute;height:14px;border-radius:999px;
-  background:linear-gradient(180deg,#fff6a8 0%,#ffd143 24%,#ffae22 58%,#e8890f 100%);
-  border:2px solid #fff8c5;
-  box-shadow:0 0 0 3px rgba(255,172,28,.6),0 0 12px 6px rgba(255,188,45,.75),inset 0 2px 2px #fff;
-  animation:chainBridgeGlow .38s ease-in-out infinite alternate;
-}
-@keyframes chainBridgeGlow{
-  from{filter:brightness(.97);opacity:.9}
-  to{filter:brightness(1.22);opacity:1}
-}
-
-/* Hold a successful connection visible briefly after finger release. */
-#boardWrap .chainBridgeLayer{z-index:60 !important; overflow:visible; pointer-events:none;}
-#boardWrap .chainBridge{height:12px; background:#ffca32; border:3px solid #fff7cd; box-shadow:0 0 0 3px rgba(255,152,18,.8),0 0 13px 5px rgba(255,200,66,.78);}
-#boardWrap .chainBridgeFinish{animation:bridgeFinishFade .5s ease-out forwards;}
-#boardWrap .chainBridgeFinish .chainBridge{animation:none;background:#fff2a6;border-color:white;}
-@keyframes bridgeFinishFade{0%{opacity:1;filter:brightness(1.35)}60%{opacity:1}100%{opacity:0}}
+#boardWrap.chickBoard .chickChainTip{z-index:50;}
+#boardWrap.chickBoard .chainScoreFloat{z-index:49;}
+#boardWrap.chickBoard.is-chaining .die:not(.selected){filter:brightness(.94) saturate(.94);}
+@media(prefers-reduced-motion:reduce){#boardWrap.chickBoard .die.selected{transition:none;}}
