@@ -666,74 +666,89 @@
     setChainPreviewBonus(reward.score);
   }
 
-  // V9 diagnostics: draw in viewport coordinates at document.body level.
-  // This bypasses all board stacking contexts, SVG sizing and canvas transforms.
+  // V10: self-contained overlay. No dependency on stylesheets or SVG/canvas.
   let chainPathEl = null;
   let chainDebugEl = null;
   let chainFinishTimer = null;
   function chainDiagnosticInit(){
     if(!chainPathEl){
       chainPathEl=document.createElement('div');
-      chainPathEl.className='chainViewportDiagnostic';
+      chainPathEl.id='chainLineV10';
+      Object.assign(chainPathEl.style, {
+        position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100vh',
+        zIndex:'2147483000',pointerEvents:'none',overflow:'visible',
+        opacity:'1',display:'block',visibility:'visible'
+      });
       document.body.appendChild(chainPathEl);
     }
     if(!chainDebugEl){
       chainDebugEl=document.createElement('div');
-      chainDebugEl.className='chainDiagnosticReadout';
-      chainDebugEl.textContent='V9 진단 준비 · 타일을 드래그하세요';
+      chainDebugEl.id='chainStatusV10';
+      Object.assign(chainDebugEl.style,{
+        position:'fixed',top:'78px',left:'8px',right:'8px',zIndex:'2147483001',
+        pointerEvents:'none',background:'#240e10',color:'#fff',padding:'5px 8px',
+        border:'2px solid #f34',borderRadius:'8px',textAlign:'center',
+        font:'bold 12px sans-serif',display:'block',visibility:'visible'
+      });
+      chainDebugEl.textContent='V10 준비';
       document.body.appendChild(chainDebugEl);
     }
   }
-  function clearChainPath(){
-    if(chainPathEl) chainPathEl.replaceChildren();
-  }
+  function clearChainPath(){ if(chainPathEl) chainPathEl.innerHTML=''; }
   function drawChainLine(){
-    lineLayer.innerHTML='';
-    chainDiagnosticInit();
-    clearTimeout(chainFinishTimer);
-    chainPathEl.replaceChildren();
-    const boardEl=document.getElementById('boardWrap');
-    const boardRect=boardEl.getBoundingClientRect();
-    const pts=chain.map(p=>{
-      const rect=cellEls[p.r][p.c].getBoundingClientRect();
-      return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
-    });
-    const valid=pts.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
-    const viewport=getComputedStyle(chainPathEl);
-    chainDebugEl.textContent='V9 | 선택 '+chain.length+'개 | 선 '+Math.max(0,chain.length-1)+'개 | 좌표 '+(valid?'정상':'오류')+' | 레이어 '+viewport.zIndex+' | 보드 '+Math.round(boardRect.width)+'×'+Math.round(boardRect.height);
-    if(chain.length<2 || !valid){
-      boardEl.removeAttribute('data-chain-count');
+    try{
+      chainDiagnosticInit();
+      clearTimeout(chainFinishTimer);
+      clearChainPath();
+      const pts=chain.map(function(p){
+        const b=cellEls[p.r][p.c].getBoundingClientRect();
+        return { x:b.left+b.width/2, y:b.top+b.height/2 };
+      });
+      const valid=pts.every(function(p){return isFinite(p.x)&&isFinite(p.y);});
+      chainDebugEl.textContent='V10 연결 '+chain.length+'개 | 선 '+Math.max(0,chain.length-1)+'개 | '+(valid?'좌표 정상':'좌표 오류');
+      const wrap=document.getElementById('boardWrap');
+      if(pts.length<2 || !valid){
+        wrap.removeAttribute('data-chain-count');
+        updateChainTip();
+        return;
+      }
+      wrap.setAttribute('data-chain-count',String(chain.length));
       updateChainTip();
-      return;
-    }
-    boardEl.setAttribute('data-chain-count',String(chain.length));
-    updateChainTip();
-    for(let i=1;i<pts.length;i++){
-      const a=pts[i-1],b=pts[i];
-      const dx=b.x-a.x,dy=b.y-a.y;
-      const dist=Math.hypot(dx,dy);
-      const angle=Math.atan2(dy,dx)*180/Math.PI;
-      const seg=document.createElement('div');
-      seg.className='chainDiagnosticSegment';
-      seg.style.left=a.x+'px';seg.style.top=a.y+'px';
-      seg.style.width=dist+'px';
-      seg.style.transform='translateY(-50%) rotate('+angle+'deg)';
-      chainPathEl.appendChild(seg);
-    }
-    for(let i=0;i<pts.length;i++){
-      const pt=pts[i];
-      const dot=document.createElement('div');
-      dot.className='chainDiagnosticPoint';
-      dot.style.left=pt.x+'px';dot.style.top=pt.y+'px';
-      dot.textContent=String(i+1);
-      chainPathEl.appendChild(dot);
+      for(let i=1;i<pts.length;i++){
+        const a=pts[i-1],b=pts[i];
+        const length=Math.hypot(b.x-a.x,b.y-a.y);
+        const degrees=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+        const line=document.createElement('div');
+        Object.assign(line.style,{
+          position:'absolute',left:a.x+'px',top:a.y+'px',width:length+'px',height:'13px',
+          transform:'translateY(-50%) rotate('+degrees+'deg)',transformOrigin:'0 50%',
+          background:'#ffca31',border:'3px solid #fffdf3',borderRadius:'15px',
+          boxShadow:'0 0 0 3px #ad5700,0 0 12px 6px rgba(255,172,37,.8)',
+          opacity:'1',display:'block',visibility:'visible',pointerEvents:'none'
+        });
+        chainPathEl.appendChild(line);
+      }
+      for(let i=0;i<pts.length;i++){
+        const point=document.createElement('div');
+        Object.assign(point.style,{
+          position:'absolute',left:(pts[i].x-10)+'px',top:(pts[i].y-10)+'px',
+          width:'20px',height:'20px',borderRadius:'50%',background:'#fff',
+          border:'4px solid #ffb600',boxShadow:'0 0 10px 4px #ffbf4b',
+          pointerEvents:'none'
+        });
+        chainPathEl.appendChild(point);
+      }
+      chainDebugEl.textContent+=' | 생성 '+chainPathEl.children.length+'개';
+    }catch(err){
+      chainDiagnosticInit();
+      chainDebugEl.textContent='V10 오류: '+String(err && err.message || err).slice(0,110);
     }
   }
   function holdFinishedChain(){
     chainDiagnosticInit();
     clearTimeout(chainFinishTimer);
-    chainDebugEl.textContent+=' | 연결 성공';
-    chainFinishTimer=setTimeout(clearChainPath,1100);
+    chainDebugEl.textContent+=' | 완료';
+    chainFinishTimer=setTimeout(clearChainPath,450);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
