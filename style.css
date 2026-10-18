@@ -639,3 +639,57 @@
   background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 32%, rgba(116,88,52,.05) 100%);
 }
 #boardWrap.chickBoard .die:not(.selected){ filter:contrast(.98); }
+
+
+/* --- connection fx upgrade --- */
+#movesScoreEcho.previewing{
+  color:#a45f12;
+  text-shadow:0 0 10px rgba(255,214,92,.45);
+}
+#progressFill.previewing{ filter:saturate(1.08) brightness(1.04); }
+#barStar.previewing{ filter:drop-shadow(0 0 8px rgba(255,210,90,.55)); }
+#movesScoreEcho.scorePop{ animation:hudScorePop .32s ease; }
+#progressFill.scorePop{ animation:hudBarPop .34s ease; transform-origin:left center; }
+#barStar.scorePop{ animation:hudStarPop .36s ease; }
+@keyframes hudScorePop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes hudBarPop{0%{transform:scaleX(1)}45%{transform:scaleX(1.03)}100%{transform:scaleX(1)}}
+@keyframes hudStarPop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.16)}100%{transform:translateY(0) scale(1)}}
+
+#boardWrap.chickBoard .die.selected::before{
+  content:''; position:absolute; inset:4px; border-radius:12px; pointer-events:none;
+  box-shadow:inset 0 0 0 2px rgba(255,244,207,.9), 0 0 16px rgba(255,124,185,.22);
+  animation:selectedHaloPulse .55s ease-in-out infinite alternate;
+}
+@keyframes selectedHaloPulse{from{opacity:.68; transform:scale(.98)}to{opacity:1; transform:scale(1)}}
+#boardWrap.chickBoard .die.selected img.chickSymbol{ animation:selectedSymbolPulse .26s ease-out; }
+@keyframes selectedSymbolPulse{0%{transform:scale(.9)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+#boardWrap.chickBoard #lineLayer .chainHalo{filter:blur(8px);opacity:.56;animation:chickLinePulse .45s ease-in-out infinite alternate;}
+#boardWrap.chickBoard #lineLayer .chainHalo2{filter:blur(2px);opacity:.3;animation:chickLinePulse2 .55s ease-in-out infinite alternate;}
+@keyframes chickLinePulse2{from{opacity:.16}to{opacity:.42}}
+#boardWrap.chickBoard #lineLayer .chainCore{filter:drop-shadow(0 0 5px rgba(255,108,178,.8)) drop-shadow(0 0 12px rgba(255,211,93,.25));}
+#boardWrap.chickBoard #lineLayer .chainDash{stroke-dasharray:12 10;animation:chainDashFlow .55s linear infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.65));}
+#boardWrap.chickBoard #lineLayer .chainHighlight{opacity:.92;}
+#boardWrap.chickBoard #lineLayer .chainOrb{filter:drop-shadow(0 0 7px rgba(255,219,110,.72));animation:orbPulse .45s ease-in-out infinite alternate;}
+#boardWrap.chickBoard #lineLayer .chainHeadGlow{filter:blur(4px);opacity:.72;animation:headGlowPulse .35s ease-in-out infinite alternate;}
+#boardWrap.chickBoard #lineLayer .chainHead{filter:drop-shadow(0 0 7px rgba(255,255,255,.95));animation:headCorePulse .35s ease-in-out infinite alternate;}
+#boardWrap.chickBoard #lineLayer .chainSpark{filter:drop-shadow(0 0 6px rgba(255,244,173,.9));animation:sparkTwinkle .5s ease-in-out infinite alternate;}
+@keyframes chainDashFlow{from{stroke-dashoffset:0}to{stroke-dashoffset:-22}}
+@keyframes orbPulse{from{transform:scale(.92)}to{transform:scale(1.16)}}
+@keyframes headGlowPulse{from{opacity:.48; transform:scale(.9)}to{opacity:.9; transform:scale(1.2)}}
+@keyframes headCorePulse{from{transform:scale(.92)}to{transform:scale(1.12)}}
+@keyframes sparkTwinkle{from{opacity:.35; transform:scale(.8)}to{opacity:1; transform:scale(1.28)}}
+.chainScoreFloat{
+  position:absolute; z-index:18; pointer-events:none; transform:translate(-50%,-50%);
+  padding:4px 10px; border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,245,211,.96));
+  border:2px solid rgba(255,201,93,.95);
+  color:#8d4d13; font-weight:1000; font-size:clamp(12px,3vw,16px);
+  box-shadow:0 6px 16px rgba(106,60,11,.18), 0 0 12px rgba(255,193,74,.38);
+  white-space:nowrap; animation:chainScoreRise .52s ease-out forwards;
+}
+.chainScoreFloat.strong{
+  background:linear-gradient(180deg, rgba(255,244,251,.98), rgba(255,228,243,.96));
+  border-color:#ff86bb; color:#9d2e62;
+  box-shadow:0 8px 18px rgba(113,36,68,.2), 0 0 14px rgba(255,122,178,.42);
+}
+@keyframes chainScoreRise{0%{opacity:0;transform:translate(-50%,-35%) scale(.72)}18%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-130%) scale(1)}}

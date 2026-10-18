@@ -375,6 +375,7 @@
   let heartPassUntil = parseInt(localStorage.getItem('sp_heart_pass_until')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
+  let chainPreviewBonus = 0;
   let dragging = false;
   let poppingInProgress = false;
   let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
@@ -485,6 +486,16 @@
     showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 1000);
   }
 
+  function pulseHudScore(previewing){
+    [movesScoreEchoEl, progressFillEl, barStarEl].forEach(function(el){
+      if(!el) return;
+      el.classList.remove('scorePop');
+      void el.offsetWidth;
+      el.classList.add('scorePop');
+      el.classList.toggle('previewing', !!previewing);
+    });
+  }
+
   function triggerPopEffect(count, gained){
     const t = comboTierFor(count);
     let popHTML = '';
@@ -571,19 +582,24 @@
     return m+':'+String(s).padStart(2,'0');
   }
 
-  function updateHud(){
+  function updateHud(previewBonus){
     const st = currentStage();
+    const bonus = previewBonus || 0;
+    const shownScore = stageScore + bonus;
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
     targetValEl.textContent = fmt(st.target);
-    const pct = Math.min(100, (stageScore/st.target)*100);
+    const pct = Math.min(100, (shownScore/st.target)*100);
     progressFillEl.style.width = pct+'%';
     barStarEl.style.left = pct+'%';
     movesValEl.textContent = movesLeft;
-    const ratio = stageScore / st.target;
+    const ratio = shownScore / st.target;
     const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
     movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
-    movesScoreEchoEl.textContent = fmt(stageScore);
+    movesScoreEchoEl.textContent = fmt(shownScore);
+    movesScoreEchoEl.classList.toggle('previewing', bonus>0);
+    progressFillEl.classList.toggle('previewing', bonus>0);
+    barStarEl.classList.toggle('previewing', bonus>0);
     renderHeartsVal();
     updateHeartTimerDisplay();
     document.getElementById('cntCandy').textContent = powerCounts.candy;
@@ -632,6 +648,7 @@
   function updateChainTip(){
     if(currentStage().type!=='chick' || chain.length<2){
       if(chainTip) chainTip.hidden=true;
+      setChainPreviewBonus(0);
       return;
     }
     if(!chainTip){
@@ -646,6 +663,7 @@
     const next=count<5 ? ` · ${5-count}개 더 연결하면 ×1.25` : count<8 ? ` · ${8-count}개 더 연결하면 ×1.6` : ' · 대박 연결!';
     chainTip.textContent=`${count}개 연결  +${reward.score}${reward.multiplier>1?'  ×'+reward.multiplier:''}${next}`;
     chainTip.hidden=false;
+    setChainPreviewBonus(reward.score);
   }
 
   function drawChainLine(){
@@ -666,16 +684,38 @@
       lineLayer.appendChild(poly);
     }
     if(chick){
-      addLine('chainHalo','#ff72ba','18','.45');
-      addLine('chainCore','#ff71bc','8','1');
-      addLine('chainHighlight','#fff9ff','3','1');
+      addLine('chainHalo','#ff72ba','22','.42');
+      addLine('chainHalo2','#ffd45e','14','.26');
+      addLine('chainCore','#ff71bc','10','1');
+      addLine('chainDash','#fff9ff','5','.98');
+      addLine('chainHighlight','#fffdfd','2.4','1');
       pts.forEach((p,i)=>{
+        if(i < pts.length-1){
+          const np = pts[i+1];
+          const sx = (p.x + np.x) / 2;
+          const sy = (p.y + np.y) / 2;
+          const spark=document.createElementNS('http://www.w3.org/2000/svg','circle');
+          spark.setAttribute('cx',sx); spark.setAttribute('cy',sy);
+          spark.setAttribute('r',(i%2===0)?3.8:2.8);
+          spark.setAttribute('fill','#fff4ae'); spark.setAttribute('class','chainSpark');
+          spark.style.animationDelay = (i*70)+'ms';
+          lineLayer.appendChild(spark);
+        }
         const orb=document.createElementNS('http://www.w3.org/2000/svg','circle');
         orb.setAttribute('cx',p.x);orb.setAttribute('cy',p.y);
-        orb.setAttribute('r',i===pts.length-1?'7':'4');
-        orb.setAttribute('fill','#fff9ff');orb.setAttribute('class','chainOrb');
+        orb.setAttribute('r',i===pts.length-1?'7.8':'4.8');
+        orb.setAttribute('fill',i===pts.length-1?'#fff2a2':'#fff9ff');orb.setAttribute('class','chainOrb');
         lineLayer.appendChild(orb);
       });
+      const head = pts[pts.length-1];
+      const headGlow=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      headGlow.setAttribute('cx',head.x); headGlow.setAttribute('cy',head.y);
+      headGlow.setAttribute('r','13'); headGlow.setAttribute('fill','#ffd45e'); headGlow.setAttribute('class','chainHeadGlow');
+      lineLayer.appendChild(headGlow);
+      const headCore=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      headCore.setAttribute('cx',head.x); headCore.setAttribute('cy',head.y);
+      headCore.setAttribute('r','6.2'); headCore.setAttribute('fill','#ffffff'); headCore.setAttribute('class','chainHead');
+      lineLayer.appendChild(headCore);
     }else addLine('chainClassic','#f2a93b','6','.9');
   }
 
@@ -695,6 +735,7 @@
   function startChain(r,c){
     if(movesLeft<=0 || poppingInProgress) return;
     chain = [{r,c}];
+    setChainPreviewBonus(0);
     cellEls[r][c].classList.add('selected');
     drawChainLine();
   }
@@ -717,6 +758,11 @@
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
     if(currentStage().type==='chick') cellEls[r][c].classList.add('chainBump');
+    if(chain.length>=2 && currentStage().type==='chick'){
+      const reward = chainReward(chain.length);
+      spawnChainScore('+'+reward.score, r, c, reward.multiplier>1 || chain.length>=5);
+      pulseHudScore(true);
+    }
     drawChainLine();
   }
 
@@ -725,7 +771,12 @@
     document.getElementById('boardWrap').removeAttribute('data-chain-count');
     if(chainTip) chainTip.hidden=true;
     if(chain.length>=2){ popChain(chain.slice()); }
-    else if(chain.length===1){ cellEls[chain[0].r][chain[0].c].classList.remove('selected'); }
+    else if(chain.length===1){
+      cellEls[chain[0].r][chain[0].c].classList.remove('selected');
+      setChainPreviewBonus(0);
+    } else {
+      setChainPreviewBonus(0);
+    }
     chain=[];
   }
 
@@ -806,6 +857,8 @@
     const reward=(!isBonus && chickPop) ? chainReward(cells.length) : null;
     const gained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
     stageScore+=gained;
+    updateHud();
+    pulseHudScore(false);
     let coinGain=Math.max(1,Math.floor(gained/20));
     if(cells.length>=9) coinGain+=15;
     else if(cells.length>=5) coinGain+=5;
@@ -849,6 +902,7 @@
 
   function popChain(cells){
     if(poppingInProgress) return;
+    chainPreviewBonus = 0;
     movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
   }
