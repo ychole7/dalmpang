@@ -672,3 +672,20 @@
  25%{opacity:1;transform:translate(-50%,-65%) scale(1.08)}
  100%{opacity:0;transform:translate(-50%,-135%) scale(1)}
 }
+
+
+/* V5: explicit gold connectors across tile gaps (independent of SVG). */
+#boardWrap .chainBridgeLayer{
+  position:absolute;inset:0;z-index:26;pointer-events:none;overflow:visible;
+}
+#boardWrap .chainBridge{
+  position:absolute;height:14px;border-radius:999px;
+  background:linear-gradient(180deg,#fff6a8 0%,#ffd143 24%,#ffae22 58%,#e8890f 100%);
+  border:2px solid #fff8c5;
+  box-shadow:0 0 0 3px rgba(255,172,28,.6),0 0 12px 6px rgba(255,188,45,.75),inset 0 2px 2px #fff;
+  animation:chainBridgeGlow .38s ease-in-out infinite alternate;
+}
+@keyframes chainBridgeGlow{
+  from{filter:brightness(.97);opacity:.9}
+  to{filter:brightness(1.22);opacity:1}
+}

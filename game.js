@@ -666,15 +666,48 @@
     setChainPreviewBonus(reward.score);
   }
 
+  // Draw short bridges in the spaces between neighboring tiles. These DOM
+  // elements do not rely on SVG viewBox scaling or SVG stacking on iOS Safari.
+  function drawChainBridges(){
+    const wrap = document.getElementById('boardWrap');
+    let layer = wrap.querySelector('.chainBridgeLayer');
+    if(!layer){
+      layer = document.createElement('div');
+      layer.className = 'chainBridgeLayer';
+      wrap.appendChild(layer);
+    }
+    layer.replaceChildren();
+    if(chain.length<2) return;
+    for(let i=1;i<chain.length;i++){
+      const a = cellCenter(chain[i-1].r,chain[i-1].c);
+      const b = cellCenter(chain[i].r,chain[i].c);
+      const dx = b.x-a.x, dy = b.y-a.y;
+      const dist = Math.hypot(dx,dy);
+      if(!dist) continue;
+      const segment = document.createElement('div');
+      segment.className = 'chainBridge';
+      segment.style.left = ((a.x+b.x)/2)+'px';
+      segment.style.top = ((a.y+b.y)/2)+'px';
+      segment.style.width = Math.min(44,dist*.55)+'px';
+      segment.style.transform = 'translate(-50%,-50%) rotate('+Math.atan2(dy,dx)+'rad)';
+      layer.appendChild(segment);
+    }
+  }
+  function clearChainBridges(){
+    const layer = document.querySelector('#boardWrap .chainBridgeLayer');
+    if(layer) layer.replaceChildren();
+  }
+
   function drawChainLine(){
     lineLayer.innerHTML='';
     const wrap = document.getElementById('boardWrap');
     // SVG user coordinates must match CSS pixel coordinates on mobile Safari.
     lineLayer.setAttribute('viewBox', '0 0 '+wrap.clientWidth+' '+wrap.clientHeight);
     lineLayer.setAttribute('preserveAspectRatio', 'none');
-    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); updateChainTip(); return; }
+    if(chain.length<2){ wrap.removeAttribute('data-chain-count'); clearChainBridges(); updateChainTip(); return; }
     wrap.setAttribute('data-chain-count',String(chain.length));
     updateChainTip();
+    drawChainBridges();
     const pts = chain.map(p=>cellCenter(p.r,p.c));
     const points=pts.map(p=>p.x+','+p.y).join(' ');
     function addLine(cls,color,width,opacity){
@@ -776,6 +809,7 @@
 
   function endChain(){
     lineLayer.innerHTML='';
+    clearChainBridges();
     const wrap = document.getElementById('boardWrap');
     wrap.removeAttribute('data-chain-count');
     wrap.classList.remove('is-chaining');
