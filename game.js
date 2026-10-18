@@ -688,7 +688,7 @@
       segment.className = 'chainBridge';
       segment.style.left = ((a.x+b.x)/2)+'px';
       segment.style.top = ((a.y+b.y)/2)+'px';
-      segment.style.width = Math.min(44,dist*.55)+'px';
+      segment.style.width = Math.max(26,dist*.95)+'px';
       segment.style.transform = 'translate(-50%,-50%) rotate('+Math.atan2(dy,dx)+'rad)';
       layer.appendChild(segment);
     }
@@ -808,14 +808,26 @@
   }
 
   function endChain(){
+    const wrap = document.getElementById('boardWrap');
+    const completed = chain.length>=2;
+    if(completed){
+      // Briefly hold the entire visible route after release. In prior versions
+      // it vanished on pointerup before the successful match animation.
+      const overlay = wrap.querySelector('.chainBridgeLayer');
+      if(overlay){
+        const frozen = overlay.cloneNode(true);
+        frozen.className = 'chainBridgeLayer chainBridgeFinish';
+        wrap.appendChild(frozen);
+        setTimeout(()=>frozen.remove(),520);
+      }
+    }
     lineLayer.innerHTML='';
     clearChainBridges();
-    const wrap = document.getElementById('boardWrap');
     wrap.removeAttribute('data-chain-count');
     wrap.classList.remove('is-chaining');
     if(chainTip) chainTip.hidden=true;
     chain.forEach(function(p){ cellEls[p.r][p.c].style.removeProperty('--chain-order'); });
-    if(chain.length>=2){ popChain(chain.slice()); }
+    if(completed){ popChain(chain.slice()); }
     else if(chain.length===1){
       cellEls[chain[0].r][chain[0].c].classList.remove('selected');
       setChainPreviewBonus(0);

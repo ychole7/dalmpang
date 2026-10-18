@@ -689,3 +689,10 @@
   from{filter:brightness(.97);opacity:.9}
   to{filter:brightness(1.22);opacity:1}
 }
+
+/* Hold a successful connection visible briefly after finger release. */
+#boardWrap .chainBridgeLayer{z-index:60 !important; overflow:visible; pointer-events:none;}
+#boardWrap .chainBridge{height:12px; background:#ffca32; border:3px solid #fff7cd; box-shadow:0 0 0 3px rgba(255,152,18,.8),0 0 13px 5px rgba(255,200,66,.78);}
+#boardWrap .chainBridgeFinish{animation:bridgeFinishFade .5s ease-out forwards;}
+#boardWrap .chainBridgeFinish .chainBridge{animation:none;background:#fff2a6;border-color:white;}
+@keyframes bridgeFinishFade{0%{opacity:1;filter:brightness(1.35)}60%{opacity:1}100%{opacity:0}}
