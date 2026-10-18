@@ -666,64 +666,74 @@
     setChainPreviewBonus(reward.score);
   }
 
-  // Direct DOM segments: avoid SVG/canvas render inconsistencies on iOS.
+  // V9 diagnostics: draw in viewport coordinates at document.body level.
+  // This bypasses all board stacking contexts, SVG sizing and canvas transforms.
   let chainPathEl = null;
+  let chainDebugEl = null;
   let chainFinishTimer = null;
-  function pathOverlay(){
+  function chainDiagnosticInit(){
     if(!chainPathEl){
-      chainPathEl = document.createElement('div');
-      chainPathEl.className='chainPathOverlay';
-      document.getElementById('boardWrap').appendChild(chainPathEl);
+      chainPathEl=document.createElement('div');
+      chainPathEl.className='chainViewportDiagnostic';
+      document.body.appendChild(chainPathEl);
     }
-    return chainPathEl;
+    if(!chainDebugEl){
+      chainDebugEl=document.createElement('div');
+      chainDebugEl.className='chainDiagnosticReadout';
+      chainDebugEl.textContent='V9 진단 준비 · 타일을 드래그하세요';
+      document.body.appendChild(chainDebugEl);
+    }
   }
   function clearChainPath(){
     if(chainPathEl) chainPathEl.replaceChildren();
   }
   function drawChainLine(){
     lineLayer.innerHTML='';
-    const wrap = document.getElementById('boardWrap');
+    chainDiagnosticInit();
     clearTimeout(chainFinishTimer);
-    const overlay=pathOverlay();
-    overlay.replaceChildren();
-    if(chain.length<2){
-      wrap.removeAttribute('data-chain-count');
+    chainPathEl.replaceChildren();
+    const boardEl=document.getElementById('boardWrap');
+    const boardRect=boardEl.getBoundingClientRect();
+    const pts=chain.map(p=>{
+      const rect=cellEls[p.r][p.c].getBoundingClientRect();
+      return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+    });
+    const valid=pts.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+    const viewport=getComputedStyle(chainPathEl);
+    chainDebugEl.textContent='V9 | 선택 '+chain.length+'개 | 선 '+Math.max(0,chain.length-1)+'개 | 좌표 '+(valid?'정상':'오류')+' | 레이어 '+viewport.zIndex+' | 보드 '+Math.round(boardRect.width)+'×'+Math.round(boardRect.height);
+    if(chain.length<2 || !valid){
+      boardEl.removeAttribute('data-chain-count');
       updateChainTip();
       return;
     }
-    wrap.setAttribute('data-chain-count', String(chain.length));
+    boardEl.setAttribute('data-chain-count',String(chain.length));
     updateChainTip();
-    const pts=chain.map(p=>cellCenter(p.r,p.c));
     for(let i=1;i<pts.length;i++){
-      const a=pts[i-1], b=pts[i];
-      const dx=b.x-a.x, dy=b.y-a.y;
+      const a=pts[i-1],b=pts[i];
+      const dx=b.x-a.x,dy=b.y-a.y;
       const dist=Math.hypot(dx,dy);
       const angle=Math.atan2(dy,dx)*180/Math.PI;
-      // All route pieces use a visible positioned DIV; no SVG viewBox or canvas DPR.
-      const segment=document.createElement('div');
-      segment.className='chainBridge';
-      segment.style.width=dist+'px';
-      segment.style.left=a.x+'px';
-      segment.style.top=a.y+'px';
-      segment.style.transform='translateY(-50%) rotate('+angle+'deg)';
-      overlay.appendChild(segment);
+      const seg=document.createElement('div');
+      seg.className='chainDiagnosticSegment';
+      seg.style.left=a.x+'px';seg.style.top=a.y+'px';
+      seg.style.width=dist+'px';
+      seg.style.transform='translateY(-50%) rotate('+angle+'deg)';
+      chainPathEl.appendChild(seg);
     }
-    pts.forEach((p,i)=>{
-      const node=document.createElement('div');
-      node.className='chainBridgeNode'+(i===pts.length-1?' active':'');
-      node.style.left=p.x+'px';
-      node.style.top=p.y+'px';
-      overlay.appendChild(node);
-    });
+    for(let i=0;i<pts.length;i++){
+      const pt=pts[i];
+      const dot=document.createElement('div');
+      dot.className='chainDiagnosticPoint';
+      dot.style.left=pt.x+'px';dot.style.top=pt.y+'px';
+      dot.textContent=String(i+1);
+      chainPathEl.appendChild(dot);
+    }
   }
   function holdFinishedChain(){
+    chainDiagnosticInit();
     clearTimeout(chainFinishTimer);
-    if(!chainPathEl) return;
-    chainPathEl.classList.add('finishing');
-    chainFinishTimer=setTimeout(()=>{
-      clearChainPath();
-      if(chainPathEl) chainPathEl.classList.remove('finishing');
-    }, 530);
+    chainDebugEl.textContent+=' | 연결 성공';
+    chainFinishTimer=setTimeout(clearChainPath,1100);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
