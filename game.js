@@ -644,6 +644,23 @@
     const multiplier=count>=8 ? 1.6 : count>=5 ? 1.25 : 1;
     return { score:Math.round(base*multiplier), multiplier };
   }
+  // Keep the on-drag score as a preview; only commit it when the tiles pop.
+  function setChainPreviewBonus(score){
+    chainPreviewBonus = score || 0;
+    updateHud(chainPreviewBonus);
+  }
+  function spawnChainScore(label, r, c, strong){
+    const wrap = document.getElementById('boardWrap');
+    const center = cellCenter(r,c);
+    const badge = document.createElement('div');
+    badge.className = 'chickBurst';
+    badge.style.left = center.x + 'px';
+    badge.style.top = center.y + 'px';
+    badge.textContent = label;
+    if(strong) badge.style.color = '#ffe19b';
+    wrap.appendChild(badge);
+    setTimeout(function(){ badge.remove(); }, 700);
+  }
   let chainTip=null;
   function updateChainTip(){
     if(currentStage().type!=='chick' || chain.length<2){
