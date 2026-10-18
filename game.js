@@ -672,52 +672,52 @@
     if(chain.length<2){ wrap.removeAttribute('data-chain-count'); updateChainTip(); return; }
     wrap.setAttribute('data-chain-count',String(chain.length));
     updateChainTip();
-    const chick = currentStage().type === 'chick';
-    chain.forEach(function(p,i){ cellEls[p.r][p.c].style.setProperty('--chain-order', '\''+(i+1)+'\''); });
+    chain.forEach(function(p,i){ cellEls[p.r][p.c].style.setProperty('--chain-order', '"'+(i+1)+'"'); });
     const pts = chain.map(p=>cellCenter(p.r,p.c));
     const points=pts.map(p=>p.x+','+p.y).join(' ');
     function addLine(cls,color,width,opacity){
       const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      poly.setAttribute('points',points); poly.setAttribute('class',cls);
-      poly.setAttribute('stroke',color); poly.setAttribute('stroke-width',width);
-      poly.setAttribute('stroke-linecap','round'); poly.setAttribute('stroke-linejoin','round');
-      poly.setAttribute('fill','none'); poly.setAttribute('opacity',opacity);
+      poly.setAttribute('points',points);
+      poly.setAttribute('class',cls);
+      poly.setAttribute('stroke',color);
+      poly.setAttribute('stroke-width',width);
+      poly.setAttribute('stroke-linecap','round');
+      poly.setAttribute('stroke-linejoin','round');
+      poly.setAttribute('fill','none');
+      poly.setAttribute('opacity',opacity);
       lineLayer.appendChild(poly);
     }
-    if(chick){
-      addLine('chainHalo','#ff72ba','22','.42');
-      addLine('chainHalo2','#ffd45e','14','.26');
-      addLine('chainCore','#ff71bc','10','1');
-      addLine('chainDash','#fff9ff','5','.98');
-      addLine('chainHighlight','#fffdfd','2.4','1');
-      pts.forEach((p,i)=>{
-        if(i < pts.length-1){
-          const np = pts[i+1];
-          const sx = (p.x + np.x) / 2;
-          const sy = (p.y + np.y) / 2;
-          const spark=document.createElementNS('http://www.w3.org/2000/svg','circle');
-          spark.setAttribute('cx',sx); spark.setAttribute('cy',sy);
-          spark.setAttribute('r',(i%2===0)?3.8:2.8);
-          spark.setAttribute('fill','#fff4ae'); spark.setAttribute('class','chainSpark');
-          spark.style.animationDelay = (i*70)+'ms';
-          lineLayer.appendChild(spark);
-        }
-        const orb=document.createElementNS('http://www.w3.org/2000/svg','circle');
-        orb.setAttribute('cx',p.x);orb.setAttribute('cy',p.y);
-        orb.setAttribute('r',i===pts.length-1?'7.8':'4.8');
-        orb.setAttribute('fill',i===pts.length-1?'#fff2a2':'#fff9ff');orb.setAttribute('class','chainOrb');
-        lineLayer.appendChild(orb);
-      });
-      const head = pts[pts.length-1];
-      const headGlow=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      headGlow.setAttribute('cx',head.x); headGlow.setAttribute('cy',head.y);
-      headGlow.setAttribute('r','13'); headGlow.setAttribute('fill','#ffd45e'); headGlow.setAttribute('class','chainHeadGlow');
-      lineLayer.appendChild(headGlow);
-      const headCore=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      headCore.setAttribute('cx',head.x); headCore.setAttribute('cy',head.y);
-      headCore.setAttribute('r','6.2'); headCore.setAttribute('fill','#ffffff'); headCore.setAttribute('class','chainHead');
-      lineLayer.appendChild(headCore);
-    }else addLine('chainClassic','#f2a93b','6','.9');
+    addLine('chainHalo','#ffd34f','28','.34');
+    addLine('chainGlow','#ff9833','20','.42');
+    addLine('chainCore','#ffb51f','12','1');
+    addLine('chainHighlight','#fff9d7','4.5','1');
+    addLine('chainDash','#ffffff','2.4','.95');
+    pts.forEach((p,i)=>{
+      if(i < pts.length-1){
+        const np = pts[i+1];
+        const sx = (p.x + np.x) / 2;
+        const sy = (p.y + np.y) / 2;
+        const spark=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        spark.setAttribute('cx',sx); spark.setAttribute('cy',sy);
+        spark.setAttribute('r',(i%2===0)?4.5:3.5);
+        spark.setAttribute('fill','#fff2a3');
+        spark.setAttribute('class','chainSpark');
+        spark.style.animationDelay=(i*65)+'ms';
+        lineLayer.appendChild(spark);
+      }
+      const nodeOuter=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      nodeOuter.setAttribute('cx',p.x); nodeOuter.setAttribute('cy',p.y);
+      nodeOuter.setAttribute('r',i===pts.length-1?'14':'10');
+      nodeOuter.setAttribute('fill',i===pts.length-1?'#ffb31d':'#ffc53f');
+      nodeOuter.setAttribute('class',i===pts.length-1?'chainHeadGlow':'chainNode');
+      lineLayer.appendChild(nodeOuter);
+      const nodeInner=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      nodeInner.setAttribute('cx',p.x); nodeInner.setAttribute('cy',p.y);
+      nodeInner.setAttribute('r',i===pts.length-1?'7.2':'5.4');
+      nodeInner.setAttribute('fill','#fffdf3');
+      nodeInner.setAttribute('class',i===pts.length-1?'chainHead':'chainOrb');
+      lineLayer.appendChild(nodeInner);
+    });
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
@@ -740,6 +740,7 @@
     if(movesLeft<=0 || poppingInProgress) return;
     chain = [{r,c}];
     setChainPreviewBonus(0);
+    document.getElementById('boardWrap').classList.add('is-chaining');
     cellEls[r][c].classList.add('selected');
     drawChainLine();
   }
@@ -763,7 +764,7 @@
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
     if(currentStage().type==='chick') cellEls[r][c].classList.add('chainBump');
-    if(chain.length>=2 && currentStage().type==='chick'){
+    if(chain.length>=2){
       const reward = chainReward(chain.length);
       spawnChainScore('+'+reward.score, r, c, reward.multiplier>1 || chain.length>=5);
       pulseHudScore(true);
@@ -773,7 +774,9 @@
 
   function endChain(){
     lineLayer.innerHTML='';
-    document.getElementById('boardWrap').removeAttribute('data-chain-count');
+    const wrap = document.getElementById('boardWrap');
+    wrap.removeAttribute('data-chain-count');
+    wrap.classList.remove('is-chaining');
     if(chainTip) chainTip.hidden=true;
     chain.forEach(function(p){ cellEls[p.r][p.c].style.removeProperty('--chain-order'); });
     if(chain.length>=2){ popChain(chain.slice()); }

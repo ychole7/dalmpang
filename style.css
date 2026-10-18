@@ -731,3 +731,51 @@
 #boardWrap.chickBoard #lineLayer .chainHead{fill:#fff;}
 #boardWrap.chickBoard .chickChainTip{z-index:30;}
 #boardWrap.chickBoard .chainScoreFloat{z-index:29;}
+
+
+/* v3 clearer chain visibility */
+#boardWrap.is-chaining #grid{isolation:isolate;}
+#boardWrap.is-chaining svg#lineLayer{z-index:22;pointer-events:none;overflow:visible;}
+#boardWrap.is-chaining .die:not(.selected){
+  opacity:.42;
+  filter:saturate(.7) brightness(.98);
+  transform:scale(.96);
+}
+#boardWrap.is-chaining .die.selected{
+  z-index:10;
+  transform:scale(1.06);
+  outline:5px solid #ffbf24;
+  outline-offset:-4px;
+  box-shadow:0 0 0 4px rgba(255,244,190,.95), 0 0 26px rgba(255,191,36,.88), inset 0 0 14px rgba(255,248,218,.75);
+  filter:brightness(1.06) saturate(1.05);
+}
+#boardWrap.is-chaining .die.selected::before{
+  content:'';
+  position:absolute; inset:3px; pointer-events:none; z-index:10;
+  border-radius:10px; border:3px solid rgba(255,252,237,.96);
+  box-shadow:0 0 14px rgba(255,225,110,.75);
+}
+#boardWrap.is-chaining .die.selected::after{
+  content:var(--chain-order, '1');
+  position:absolute; top:4px; left:4px; z-index:12; pointer-events:none;
+  width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#fff8d2,#ffbf24);
+  color:#744200; border:2px solid #fff; font-size:13px; font-weight:1000;
+  box-shadow:0 2px 8px rgba(0,0,0,.28);
+}
+#boardWrap.is-chaining #lineLayer .chainHalo{filter:blur(7px); animation:chainPulseStrong .4s ease-in-out infinite alternate;}
+#boardWrap.is-chaining #lineLayer .chainGlow{filter:blur(1px); opacity:.55;}
+#boardWrap.is-chaining #lineLayer .chainCore{filter:drop-shadow(0 0 8px rgba(255,157,45,.9)) drop-shadow(0 0 14px rgba(255,222,112,.7));}
+#boardWrap.is-chaining #lineLayer .chainHighlight{opacity:.98;}
+#boardWrap.is-chaining #lineLayer .chainDash{stroke-dasharray:10 10; animation:chainDashFlowStrong .35s linear infinite; filter:drop-shadow(0 0 5px rgba(255,255,255,.8));}
+#boardWrap.is-chaining #lineLayer .chainNode{filter:drop-shadow(0 0 8px rgba(255,191,36,.95)); animation:nodePulse .35s ease-in-out infinite alternate;}
+#boardWrap.is-chaining #lineLayer .chainOrb{filter:drop-shadow(0 0 8px rgba(255,255,255,.92));}
+#boardWrap.is-chaining #lineLayer .chainHeadGlow{filter:drop-shadow(0 0 14px rgba(255,191,36,1)); animation:headPulseStrong .28s ease-in-out infinite alternate;}
+#boardWrap.is-chaining #lineLayer .chainHead{filter:drop-shadow(0 0 10px rgba(255,255,255,.98));}
+#boardWrap.is-chaining #lineLayer .chainSpark{filter:drop-shadow(0 0 10px rgba(255,241,157,.95)); animation:sparkTwinkleStrong .45s ease-in-out infinite alternate;}
+@keyframes chainPulseStrong{from{opacity:.3}to{opacity:.52}}
+@keyframes chainDashFlowStrong{from{stroke-dashoffset:0}to{stroke-dashoffset:-20}}
+@keyframes nodePulse{from{transform:scale(.96)}to{transform:scale(1.12)}}
+@keyframes headPulseStrong{from{transform:scale(.96)}to{transform:scale(1.22)}}
+@keyframes sparkTwinkleStrong{from{opacity:.4; transform:scale(.8)}to{opacity:1; transform:scale(1.35)}}
