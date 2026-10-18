@@ -677,3 +677,34 @@
  #dalmpangCandyPath .candyChainSegment,
  #dalmpangCandyPath .candyChainNode.active{animation:none}
 }
+
+
+/* V15: single clear live-score cue during dragging */
+#boardWrap .chainLiveScore{
+  position:absolute;z-index:32;pointer-events:none;
+  transform:translate(-50%,-50%);
+  min-width:64px;text-align:center;white-space:nowrap;
+  background:linear-gradient(180deg,#fff9df,#ffd974);
+  color:#7d4109;border:2px solid #fffdf4;border-radius:18px;
+  padding:5px 11px;font-weight:1000;font-size:clamp(14px,3.7vw,19px);
+  box-shadow:0 3px 0 rgba(137,74,14,.35),0 4px 13px rgba(255,179,48,.55);
+  text-shadow:0 1px 0 rgba(255,255,255,.75);
+}
+#boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,#fff0cb,#ffc365);}
+#boardWrap .chainLiveScore.bump{animation:chainLiveBump .18s ease-out;}
+@keyframes chainLiveBump{
+  0%{transform:translate(-50%,-50%) scale(.85)}
+  65%{transform:translate(-50%,-50%) scale(1.12)}
+  100%{transform:translate(-50%,-50%) scale(1)}
+}
+#boardWrap .chainFinalScore{
+  color:#fff8d8;font-size:clamp(27px,7.2vw,41px);
+  text-shadow:0 3px 0 #a65312,0 0 14px rgba(255,211,72,.85);
+  animation:chainFinalBurst .75s cubic-bezier(.15,.75,.3,1) forwards;
+}
+@keyframes chainFinalBurst{
+  0%{opacity:0;transform:translate(-50%,-10%) scale(.65)}
+  22%{opacity:1;transform:translate(-50%,-72%) scale(1.27)}
+  60%{opacity:1;transform:translate(-50%,-95%) scale(1.08)}
+  100%{opacity:0;transform:translate(-50%,-150%) scale(.98)}
+}

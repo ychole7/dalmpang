@@ -649,38 +649,51 @@
     chainPreviewBonus = score || 0;
     updateHud(chainPreviewBonus);
   }
-  function spawnChainScore(label, r, c, strong){
-    const wrap = document.getElementById('boardWrap');
-    const center = cellCenter(r,c);
-    const badge = document.createElement('div');
-    badge.className = 'chickBurst';
-    badge.style.left = center.x + 'px';
-    badge.style.top = center.y + 'px';
-    badge.textContent = label;
-    if(strong) badge.style.color = '#ffe19b';
-    wrap.appendChild(badge);
-    setTimeout(function(){ badge.remove(); }, 700);
+  // One persistent floating preview follows the newest selected tile.
+  let chainScorePreviewEl=null;
+  function hideChainScorePreview(){
+    if(chainScorePreviewEl){chainScorePreviewEl.remove();chainScorePreviewEl=null;}
+  }
+  function updateChainScorePreview(){
+    if(chain.length<2){hideChainScorePreview();return;}
+    if(!chainScorePreviewEl){
+      chainScorePreviewEl=document.createElement('div');
+      chainScorePreviewEl.className='chainLiveScore';
+      document.getElementById('boardWrap').appendChild(chainScorePreviewEl);
+    }
+    const p=chain[chain.length-1];
+    const center=cellCenter(p.r,p.c);
+    const wrap=document.getElementById('boardWrap');
+    const x=Math.max(45,Math.min(wrap.clientWidth-45,center.x));
+    const y=Math.max(30,center.y-36);
+    const reward=chainReward(chain.length);
+    chainScorePreviewEl.textContent='+'+fmt(reward.score);
+    chainScorePreviewEl.style.left=x+'px';
+    chainScorePreviewEl.style.top=y+'px';
+    chainScorePreviewEl.classList.toggle('bonus',reward.multiplier>1);
+    chainScorePreviewEl.classList.remove('bump');
+    void chainScorePreviewEl.offsetWidth;
+    chainScorePreviewEl.classList.add('bump');
   }
   let chainTip=null;
   function updateChainTip(){
-    if(currentStage().type!=='chick' || chain.length<2){
+    // Guidance appears only on longer chains, leaving regular play uncluttered.
+    if(currentStage().type!=='chick' || chain.length<5){
       if(chainTip) chainTip.hidden=true;
-      setChainPreviewBonus(0);
-      return;
+    }else{
+      if(!chainTip){
+        chainTip=document.createElement('div');
+        chainTip.className='chickChainTip';
+        document.getElementById('boardWrap').appendChild(chainTip);
+      }
+      const count=chain.length;
+      const reward=chainReward(count);
+      chainTip.dataset.tier=count>=8?'legend':'bonus';
+      chainTip.textContent=count>=8 ? '✨ 대박 연결! ×'+reward.multiplier : '✨ 연속 연결 ×'+reward.multiplier;
+      chainTip.hidden=false;
     }
-    if(!chainTip){
-      chainTip=document.createElement('div');
-      chainTip.className='chickChainTip';
-      document.getElementById('boardWrap').appendChild(chainTip);
-    }
-    const count=chain.length;
-    const reward=chainReward(count);
-    const tier=count>=8?'legend':count>=5?'bonus':'basic';
-    chainTip.dataset.tier=tier;
-    const next=count<5 ? ` · ${5-count}개 더 연결하면 ×1.25` : count<8 ? ` · ${8-count}개 더 연결하면 ×1.6` : ' · 대박 연결!';
-    chainTip.textContent=`${count}개 연결  +${reward.score}${reward.multiplier>1?'  ×'+reward.multiplier:''}${next}`;
-    chainTip.hidden=false;
-    setChainPreviewBonus(reward.score);
+    setChainPreviewBonus(chain.length>=2 ? chainReward(chain.length).score : 0);
+    updateChainScorePreview();
   }
 
   // V13: compact candy connection path; keep the working V12 DOM renderer.
@@ -806,7 +819,6 @@
     }
     if(chain.length>=2){
       const reward = chainReward(chain.length);
-      spawnChainScore('+'+reward.score, r, c, reward.multiplier>1 || chain.length>=5);
       pulseHudScore(true);
     }
     drawChainLine();
@@ -818,6 +830,7 @@
     wrap.removeAttribute('data-chain-count');
     wrap.classList.remove('is-chaining');
     if(chainTip) chainTip.hidden=true;
+    hideChainScorePreview();
     if(completed){
       holdFinishedChain();
       popChain(chain.slice());
@@ -925,7 +938,7 @@
     if(chickPop && mid){
       const center=cellCenter(mid.r,mid.c);
       const burst=document.createElement('div');
-      burst.className='chickBurst';
+      burst.className='chickBurst chainFinalScore';
       burst.style.left=center.x+'px';burst.style.top=center.y+'px';
       burst.textContent=reward && reward.multiplier>1 ? '✨ ×'+reward.multiplier+'  +'+gained : '+'+gained;
       wrap.appendChild(burst);
