@@ -666,89 +666,77 @@
     setChainPreviewBonus(reward.score);
   }
 
-  // V10: self-contained overlay. No dependency on stylesheets or SVG/canvas.
+  // V11: direct DOM bridge renderer, called in the pointer path itself.
   let chainPathEl = null;
   let chainDebugEl = null;
   let chainFinishTimer = null;
   function chainDiagnosticInit(){
     if(!chainPathEl){
-      chainPathEl=document.createElement('div');
-      chainPathEl.id='chainLineV10';
-      Object.assign(chainPathEl.style, {
-        position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100vh',
-        zIndex:'2147483000',pointerEvents:'none',overflow:'visible',
-        opacity:'1',display:'block',visibility:'visible'
-      });
+      chainPathEl = document.createElement('div');
+      chainPathEl.id = 'dalmpangV11BridgeLayer';
+      chainPathEl.style.cssText = 'position:fixed!important;inset:0!important;z-index:2147483600!important;pointer-events:none!important;display:block!important;visibility:visible!important;opacity:1!important;overflow:visible!important;';
       document.body.appendChild(chainPathEl);
     }
     if(!chainDebugEl){
-      chainDebugEl=document.createElement('div');
-      chainDebugEl.id='chainStatusV10';
-      Object.assign(chainDebugEl.style,{
-        position:'fixed',top:'78px',left:'8px',right:'8px',zIndex:'2147483001',
-        pointerEvents:'none',background:'#240e10',color:'#fff',padding:'5px 8px',
-        border:'2px solid #f34',borderRadius:'8px',textAlign:'center',
-        font:'bold 12px sans-serif',display:'block',visibility:'visible'
-      });
-      chainDebugEl.textContent='V10 준비';
+      chainDebugEl = document.createElement('div');
+      chainDebugEl.id = 'dalmpangV11Status';
+      chainDebugEl.style.cssText = 'position:fixed!important;top:78px!important;left:7px!important;right:7px!important;z-index:2147483601!important;pointer-events:none!important;background:#391313!important;color:#fff!important;padding:5px 8px!important;border:2px solid #ffd439!important;border-radius:8px!important;font:bold 12px sans-serif!important;text-align:center!important;';
+      chainDebugEl.textContent = 'V11 준비';
       document.body.appendChild(chainDebugEl);
     }
   }
-  function clearChainPath(){ if(chainPathEl) chainPathEl.innerHTML=''; }
-  function drawChainLine(){
+  function clearChainPath(){ if(chainPathEl) chainPathEl.replaceChildren(); }
+  function renderChainBridges(){
+    chainDiagnosticInit();
+    clearTimeout(chainFinishTimer);
+    clearChainPath();
     try{
-      chainDiagnosticInit();
-      clearTimeout(chainFinishTimer);
-      clearChainPath();
-      const pts=chain.map(function(p){
-        const b=cellEls[p.r][p.c].getBoundingClientRect();
-        return { x:b.left+b.width/2, y:b.top+b.height/2 };
+      const pts = chain.map(function(p){
+        const b = cellEls[p.r][p.c].getBoundingClientRect();
+        return {x:b.left+b.width/2,y:b.top+b.height/2};
       });
-      const valid=pts.every(function(p){return isFinite(p.x)&&isFinite(p.y);});
-      chainDebugEl.textContent='V10 연결 '+chain.length+'개 | 선 '+Math.max(0,chain.length-1)+'개 | '+(valid?'좌표 정상':'좌표 오류');
-      const wrap=document.getElementById('boardWrap');
-      if(pts.length<2 || !valid){
-        wrap.removeAttribute('data-chain-count');
-        updateChainTip();
-        return;
-      }
-      wrap.setAttribute('data-chain-count',String(chain.length));
-      updateChainTip();
+      const valid = pts.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+      chainDebugEl.textContent='V11 선택 '+chain.length+'개 | 구간 '+Math.max(0,pts.length-1)+'개 | '+(valid?'좌표 정상':'좌표 오류');
+      if(!valid) return;
       for(let i=1;i<pts.length;i++){
         const a=pts[i-1],b=pts[i];
         const length=Math.hypot(b.x-a.x,b.y-a.y);
-        const degrees=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+        const angle=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
         const line=document.createElement('div');
-        Object.assign(line.style,{
-          position:'absolute',left:a.x+'px',top:a.y+'px',width:length+'px',height:'13px',
-          transform:'translateY(-50%) rotate('+degrees+'deg)',transformOrigin:'0 50%',
-          background:'#ffca31',border:'3px solid #fffdf3',borderRadius:'15px',
-          boxShadow:'0 0 0 3px #ad5700,0 0 12px 6px rgba(255,172,37,.8)',
-          opacity:'1',display:'block',visibility:'visible',pointerEvents:'none'
-        });
+        line.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;box-sizing:border-box!important;';
+        line.style.left=a.x+'px'; line.style.top=(a.y-9)+'px';
+        line.style.width=length+'px'; line.style.height='18px';
+        line.style.transformOrigin='0 50%';
+        line.style.transform='rotate('+angle+'deg)';
+        line.style.background='#ffb700'; line.style.border='4px solid #fff';
+        line.style.borderRadius='12px';
+        line.style.boxShadow='0 0 0 4px #e17b00,0 0 22px 8px rgba(255,183,0,.85)';
         chainPathEl.appendChild(line);
       }
       for(let i=0;i<pts.length;i++){
-        const point=document.createElement('div');
-        Object.assign(point.style,{
-          position:'absolute',left:(pts[i].x-10)+'px',top:(pts[i].y-10)+'px',
-          width:'20px',height:'20px',borderRadius:'50%',background:'#fff',
-          border:'4px solid #ffb600',boxShadow:'0 0 10px 4px #ffbf4b',
-          pointerEvents:'none'
-        });
-        chainPathEl.appendChild(point);
+        const p=pts[i]; const dot=document.createElement('div');
+        dot.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;pointer-events:none!important;background:#fff!important;border:4px solid #f9b400!important;border-radius:50%!important;box-shadow:0 0 14px #ffc12d!important;';
+        dot.style.left=(p.x-12)+'px'; dot.style.top=(p.y-12)+'px';
+        dot.style.width='24px'; dot.style.height='24px';
+        chainPathEl.appendChild(dot);
       }
-      chainDebugEl.textContent+=' | 생성 '+chainPathEl.children.length+'개';
+      chainDebugEl.textContent+=' | 생성 '+chainPathEl.childElementCount+'개';
     }catch(err){
-      chainDiagnosticInit();
-      chainDebugEl.textContent='V10 오류: '+String(err && err.message || err).slice(0,110);
+      chainDebugEl.textContent='V11 오류 '+String(err&&err.message||err).slice(0,120);
     }
+  }
+  function drawChainLine(){
+    const wrap=document.getElementById('boardWrap');
+    if(chain.length>=2) wrap.setAttribute('data-chain-count',String(chain.length));
+    else wrap.removeAttribute('data-chain-count');
+    updateChainTip();
+    renderChainBridges();
   }
   function holdFinishedChain(){
     chainDiagnosticInit();
-    clearTimeout(chainFinishTimer);
     chainDebugEl.textContent+=' | 완료';
-    chainFinishTimer=setTimeout(clearChainPath,450);
+    clearTimeout(chainFinishTimer);
+    chainFinishTimer=setTimeout(clearChainPath,650);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
@@ -774,6 +762,7 @@
     document.getElementById('boardWrap').classList.add('is-chaining');
     cellEls[r][c].classList.add('selected');
     drawChainLine();
+    renderChainBridges();
   }
 
   function extendChain(r,c){
@@ -801,6 +790,7 @@
       pulseHudScore(true);
     }
     drawChainLine();
+    renderChainBridges();
   }
 
   function endChain(){
