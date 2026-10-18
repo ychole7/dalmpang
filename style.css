@@ -30,7 +30,7 @@
     color:var(--ink);
     display:flex; flex-direction:column; align-items:center;
     height:100vh; height:100dvh;
-    padding:16px 7px 7px;
+    padding:11px 5px 5px;
     touch-action:none;
   }
   .app{ width:100%; max-width:420px; flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
@@ -82,10 +82,10 @@
   .gearBtn img{ width:20px; height:20px; object-fit:contain; }
 
   /* ---------- stats row ---------- */
-  .statsRow{ display:flex; align-items:stretch; gap:6px; margin-bottom:5px; flex:0 0 auto; }
+  .statsRow{ display:flex; align-items:stretch; gap:5px; margin-bottom:4px; flex:0 0 auto; }
   .targetCard{
     position:relative; flex:1 1 auto; background:#f4edde; border:1.5px solid #d8c39d;
-    border-radius:14px; padding:12px 12px 8px; min-width:0; text-align:center;
+    border-radius:14px; padding:9px 10px 6px; min-width:0; text-align:center;
     box-shadow:0 2px 3px rgba(0,0,0,0.06);
   }
   .targetBadge{
@@ -258,7 +258,7 @@
     100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(200deg); opacity:0; }
   }
 
-  .powerRow{ display:flex; gap:8px; justify-content:center; margin-top:6px; margin-bottom:6px; flex:0 0 auto; }
+  .powerRow{ display:flex; gap:8px; justify-content:center; margin-top:3px; margin-bottom:3px; flex:0 0 auto; }
   .powerBtn{
     position:relative; background:transparent; border:none; border-radius:16px;
     display:flex; align-items:center; justify-content:center; font-size:22px;
@@ -280,7 +280,7 @@
   .bottomNav{
     display:flex; justify-content:space-between; align-items:center; flex:0 0 auto;
     background:linear-gradient(180deg,#2f5fa8,#1f3f78); border-top:1px solid rgba(255,255,255,0.15);
-    border-radius:16px 16px 0 0; padding:7px 8px 8px; margin-top:5px;
+    border-radius:16px 16px 0 0; padding:5px 8px 6px; margin-top:3px;
     box-shadow:0 -3px 8px rgba(0,0,0,0.2);
   }
   .navBtn{ display:flex; flex-direction:column; align-items:center; font-size:11px; color:#bcd2ea; gap:0; flex:1; transition:color 0.18s ease; height:56px; justify-content:center; }
@@ -557,19 +557,19 @@
 /* 닮팡 2.0 병아리 테마 - 원본 스테이지 스타일은 유지 */
 #boardWrap.chickBoard{
   background:linear-gradient(145deg,#8f633f 0%,#c79a69 2%,#8e6442 4%,#5b4031 5%,#4d372d 95%,#b98958 98%,#d9b07a 100%);
-  border:4px solid #a67549;
+  border:3px solid #a67549;
   border-radius:25px;
-  padding:2.8%;
+  padding:1.8%;
   box-shadow: inset 0 3px 8px rgba(43,27,21,.42), 0 6px 12px rgba(49,31,24,.16);
 }
-#boardWrap.chickBoard #grid{gap:0.48%;}
+#boardWrap.chickBoard #grid{gap:0.25%;}
 #boardWrap.chickBoard .die{
  background:linear-gradient(168deg,#f0eadf 0%,#e8ddcc 72%,#d8c2a1 100%);
- border:2px solid #d9c3a1; border-radius:14px; overflow:hidden; min-width:0; min-height:0;
+ border:1.5px solid #d9c3a1; border-radius:12px; overflow:hidden; min-width:0; min-height:0;
  box-shadow:0 2px 0 rgba(44,28,22,.26), 0 3px 6px rgba(26,18,24,.10);
 }
 #boardWrap.chickBoard .die img.chickSymbol{
- display:block; width:94%; height:94%; max-width:100%; max-height:100%; min-width:0; min-height:0; object-fit:contain; pointer-events:none;
+ display:block; width:108%; height:108%; max-width:none; max-height:none; flex-shrink:0; min-width:0; min-height:0; object-fit:contain; pointer-events:none;
  filter:brightness(.95) saturate(.90) contrast(.98);
 }
 #boardWrap.chickBoard .die.selected{
@@ -578,7 +578,7 @@
  outline:2px solid #f8e8be;outline-offset:-2px;
 }
 #boardWrap.chickBoard .die.popping{animation:tilePunchPop 260ms ease forwards;}
-@media(max-width:390px){#boardWrap.chickBoard{padding:2.4%;}#boardWrap.chickBoard #grid{gap:.45%;}}
+@media(max-width:390px){#boardWrap.chickBoard{padding:1.7%;}#boardWrap.chickBoard #grid{gap:.25%;}}
 
 /* 닮팡 2.0 병아리 연결/폭발/낙하 연출 */
 #boardWrap.chickBoard .die.selected{
