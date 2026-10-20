@@ -585,7 +585,7 @@
   function updateHud(previewBonus){
     const st = currentStage();
     const bonus = previewBonus || 0;
-    const shownScore = stageScore + bonus;
+    const shownScore = stageScore;
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
     targetValEl.textContent = fmt(st.target);
@@ -647,7 +647,7 @@
   // Keep the on-drag score as a preview; only commit it when the tiles pop.
   function setChainPreviewBonus(score){
     chainPreviewBonus = score || 0;
-    updateHud(chainPreviewBonus);
+    // Preview is shown only beside the selected tile; HUD remains committed score.
   }
   // One persistent floating preview follows the newest selected tile.
   let chainScorePreviewEl=null;
@@ -819,7 +819,7 @@
     }
     if(chain.length>=2){
       const reward = chainReward(chain.length);
-      pulseHudScore(true);
+      // Do not animate the HUD for uncommitted drag score.
     }
     drawChainLine();
   }
