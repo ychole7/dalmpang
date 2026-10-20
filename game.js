@@ -1,5 +1,5 @@
 (function(){
-  const COLS = 7, ROWS = 8;
+  const COLS = 6, ROWS = 8;
 
   const POS = {1:[25,25],2:[50,25],3:[75,25],4:[25,50],5:[50,50],6:[75,50],7:[25,75],8:[50,75],9:[75,75]};
 
@@ -51,11 +51,22 @@
   ];
   const FACE_MIXED = FACE_EASY.concat(FACE_HARD);
 
-  const FLOWER_EASY = { name:'꽃 정원 · Easy', type:'img6', prefix:'flower_easy', difficulty:1 };
+  const CHICK_STAGE = { name:'병아리 마을 · Easy', type:'chick', setId:'easy', difficulty:1 };
+  const STRAWBERRY_EASY = { name:'딸기 정원 · Easy', type:'chick', setId:'strawberry', difficulty:1 };
+  const DOG_EASY = { name:'강아지 마을 · Easy', type:'chick', setId:'dog', difficulty:1 };
+  const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
+  const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
+  const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
+  const CHICK_CHALLENGES = [
+    { name:'두뇌 도전 · 건곤감리', type:'trigram', set:TRIGRAM4, difficulty:5 },
+    { name:'두뇌 도전 · 점 배열', type:'pips', combos:PIP4_A, difficulty:5 },
+    { name:'두뇌 도전 · 방향', type:'arrow', dirs:DIR6, difficulty:5 },
+    { name:'두뇌 도전 · 점 위치', type:'dot', positions:DOT_WIDE, difficulty:5 },
+    { name:'두뇌 도전 · 팔괘', type:'trigram', set:TRIGRAM8, difficulty:6 }
+  ];
 
   const STAGE_POOL = [
     // difficulty: 1(가장 쉬움, 색깔/한눈에 구분) ~ 6(가장 어려움, 개수를 세거나 자세히 봐야 함)
-    FLOWER_EASY,
     { name:'신호등',            type:'traffic', difficulty:1 },
     { name:'색깔 풍선',        type:'balloon', difficulty:1 },
     { name:'카드 무늬',         type:'trigram', set:SUIT_SET, difficulty:2 },
@@ -215,6 +226,12 @@
   }
   function renderSymbolHTML(stage, v){
     switch(stage.type){
+      case 'chick': {
+        const isStrawberry = stage.setId === 'strawberry';
+        const isDog = stage.setId === 'dog';
+        const filename = isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '');
+        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+(v+1)+'.png" alt="'+(isStrawberry ? '딸기' : isDog ? '강아지' : '병아리')+'">';
+      }
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
       case 'dot':      return svgDotAt(stage.positions[v]);
@@ -236,6 +253,7 @@
   }
   function stageSize(stage){
     switch(stage.type){
+      case 'chick': return 6;
       case 'dice-std': return STD_DICE.length;
       case 'img6':     return 6;
       case 'dot':      return stage.positions.length;
@@ -287,17 +305,21 @@
     for(let i=0;i<total;i++){
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
-      const base = pool[i % pool.length];
+      let base;
+      if(i >= 5 && i < 10) base=STRAWBERRY_EASY;
+      else if(i >= 10 && i < 15) base=DOG_EASY;
+      else if(i < 15) base=CHICK_STAGE;
+      else if(i < 30) base=CHICK_NORMAL;
+      else if(i < 40) base=CHICK_HARD;
+      else if(i < 45) base=CHICK_OBSERVE;
+      else if(i < 50) base=CHICK_CHALLENGES[i-45];
+      else base=pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<50 ? null : band.timeLimit }));
     }
     return arr;
   }
   const STAGES = buildStages(TOTAL_STAGES);
-
-  // 테마 미리보기: ?preview=flower 로 바로 꽃 스테이지를 확인할 수 있음
-  const previewTheme = new URLSearchParams(window.location.search).get('preview');
-  const previewStage = previewTheme === 'flower' ? FLOWER_EASY : null;
 
   const gridEl = document.getElementById('grid');
   const lineLayer = document.getElementById('lineLayer');
@@ -353,7 +375,9 @@
   let heartPassUntil = parseInt(localStorage.getItem('sp_heart_pass_until')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
   let chain = [];
+  let chainPreviewBonus = 0;
   let dragging = false;
+  let poppingInProgress = false;
   let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
   function savePowerCounts(){ localStorage.setItem('sp_power_counts', JSON.stringify(powerCounts)); }
 
@@ -443,9 +467,13 @@
     }
   }
 
+  // Temporary theme preview using ?preview=dog or ?preview=strawberry.
+  // No changes to saved progress, scores, or stage difficulty.
+  const previewTheme = new URLSearchParams(window.location.search).get('preview');
+  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : null;
   function currentStage(){
     const stage = STAGES[stageIndex % STAGES.length];
-    return previewStage ? Object.assign({}, stage, previewStage, { target: stage.target, timeLimit: stage.timeLimit }) : stage;
+    return previewStage ? Object.assign({}, stage, previewStage, { target:stage.target, timeLimit:stage.timeLimit }) : stage;
   }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
@@ -456,6 +484,16 @@
     toastEl.classList.add('show');
     clearTimeout(showToast._t);
     showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 1000);
+  }
+
+  function pulseHudScore(previewing){
+    [movesScoreEchoEl, progressFillEl, barStarEl].forEach(function(el){
+      if(!el) return;
+      el.classList.remove('scorePop');
+      void el.offsetWidth;
+      el.classList.add('scorePop');
+      el.classList.toggle('previewing', !!previewing);
+    });
   }
 
   function triggerPopEffect(count, gained){
@@ -544,19 +582,24 @@
     return m+':'+String(s).padStart(2,'0');
   }
 
-  function updateHud(){
+  function updateHud(previewBonus){
     const st = currentStage();
+    const bonus = previewBonus || 0;
+    const shownScore = stageScore;
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
     stageNameLblEl.textContent = st.name;
     targetValEl.textContent = fmt(st.target);
-    const pct = Math.min(100, (stageScore/st.target)*100);
+    const pct = Math.min(100, (shownScore/st.target)*100);
     progressFillEl.style.width = pct+'%';
     barStarEl.style.left = pct+'%';
     movesValEl.textContent = movesLeft;
-    const ratio = stageScore / st.target;
+    const ratio = shownScore / st.target;
     const liveStars = ratio>=2 ? 3 : (ratio>=1.4 ? 2 : (ratio>=1 ? 1 : 0));
     movesStarsEl.textContent = '⭐'.repeat(liveStars) + '☆'.repeat(3-liveStars);
-    movesScoreEchoEl.textContent = fmt(stageScore);
+    movesScoreEchoEl.textContent = fmt(shownScore);
+    movesScoreEchoEl.classList.toggle('previewing', bonus>0);
+    progressFillEl.classList.toggle('previewing', bonus>0);
+    barStarEl.classList.toggle('previewing', bonus>0);
     renderHeartsVal();
     updateHeartTimerDisplay();
     document.getElementById('cntCandy').textContent = powerCounts.candy;
@@ -575,13 +618,15 @@
 
   function render(){
     const stage = currentStage();
+    document.getElementById('boardWrap').classList.toggle('chickBoard', stage.type==='chick');
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const v = board[r][c];
         const el = cellEls[r][c];
         if(v===null){ el.style.visibility='hidden'; }
         else { el.style.visibility='visible'; el.dataset.v=v; el.innerHTML = renderSymbolHTML(stage, v); }
-        el.classList.remove('selected','popping');
+        el.classList.remove('selected','popping','chickPopping','chainBump');
+        el.style.removeProperty('--pop-delay');
         el.classList.toggle('imgTile', stage.type==='img6' && stage.prefix==='face');
       }
     }
@@ -593,37 +638,157 @@
     return { x: rect.left+rect.width/2-wrapRect.left, y: rect.top+rect.height/2-wrapRect.top };
   }
 
-  function drawChainLine(){
-    lineLayer.innerHTML='';
+  // Longer chains are rewarded above the existing square-of-length scoring.
+  function chainReward(count){
+    const base=count*count*10;
+    const multiplier=count>=8 ? 1.6 : count>=5 ? 1.25 : 1;
+    return { score:Math.round(base*multiplier), multiplier };
+  }
+  // Keep the on-drag score as a preview; only commit it when the tiles pop.
+  function setChainPreviewBonus(score){
+    chainPreviewBonus = score || 0;
+    // Preview is shown only beside the selected tile; HUD remains committed score.
+  }
+  // One persistent floating preview follows the newest selected tile.
+  let chainScorePreviewEl=null;
+  function hideChainScorePreview(){
+    if(chainScorePreviewEl){chainScorePreviewEl.remove();chainScorePreviewEl=null;}
+  }
+  function updateChainScorePreview(){
+    if(chain.length<2){hideChainScorePreview();return;}
+    if(!chainScorePreviewEl){
+      chainScorePreviewEl=document.createElement('div');
+      chainScorePreviewEl.className='chainLiveScore';
+      document.getElementById('boardWrap').appendChild(chainScorePreviewEl);
+    }
+    const p=chain[chain.length-1];
+    const center=cellCenter(p.r,p.c);
+    const wrap=document.getElementById('boardWrap');
+    const x=Math.max(45,Math.min(wrap.clientWidth-45,center.x));
+    const y=Math.max(30,center.y-36);
+    const reward=chainReward(chain.length);
+    chainScorePreviewEl.textContent='+'+fmt(reward.score);
+    chainScorePreviewEl.style.left=x+'px';
+    chainScorePreviewEl.style.top=y+'px';
+    chainScorePreviewEl.classList.toggle('bonus',reward.multiplier>1);
+    chainScorePreviewEl.classList.remove('bump');
+    void chainScorePreviewEl.offsetWidth;
+    chainScorePreviewEl.classList.add('bump');
+  }
+  let chainTip=null;
+  function updateChainTip(){
+    // Guidance appears only on longer chains, leaving regular play uncluttered.
+    if(currentStage().type!=='chick' || chain.length<5){
+      if(chainTip) chainTip.hidden=true;
+    }else{
+      if(!chainTip){
+        chainTip=document.createElement('div');
+        chainTip.className='chickChainTip';
+        document.getElementById('boardWrap').appendChild(chainTip);
+      }
+      const count=chain.length;
+      const reward=chainReward(count);
+      chainTip.dataset.tier=count>=8?'legend':'bonus';
+      chainTip.textContent=count>=8 ? '✨ 대박 연결! ×'+reward.multiplier : '✨ 연속 연결 ×'+reward.multiplier;
+      chainTip.hidden=false;
+    }
+    setChainPreviewBonus(chain.length>=2 ? chainReward(chain.length).score : 0);
+    updateChainScorePreview();
+  }
+
+  // V13: compact candy connection path; keep the working V12 DOM renderer.
+  let chainPathEl = null;
+  let chainFinishTimer = null;
+  function ensureChainPath(){
+    if(chainPathEl) return;
+    chainPathEl=document.createElement('div');
+    chainPathEl.id='dalmpangCandyPath';
+    chainPathEl.style.cssText='position:fixed!important;inset:0!important;z-index:2147483600!important;pointer-events:none!important;display:block!important;visibility:visible!important;opacity:1!important;overflow:visible!important;';
+    document.body.appendChild(chainPathEl);
+  }
+  function clearChainPath(){ if(chainPathEl) chainPathEl.replaceChildren(); }
+  function renderChainBridges(){
+    ensureChainPath();
+    clearTimeout(chainFinishTimer);
+    clearChainPath();
     if(chain.length<2) return;
-    const pts = chain.map(p=>cellCenter(p.r,p.c));
-    const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    poly.setAttribute('points', pts.map(p=>p.x+','+p.y).join(' '));
-    poly.setAttribute('stroke', '#f2a93b');
-    poly.setAttribute('stroke-width', '6');
-    poly.setAttribute('stroke-linecap','round');
-    poly.setAttribute('stroke-linejoin','round');
-    poly.setAttribute('fill','none');
-    poly.setAttribute('opacity','0.9');
-    lineLayer.appendChild(poly);
+    const pts=chain.map(function(p){
+      const b=cellEls[p.r][p.c].getBoundingClientRect();
+      return {x:b.left+b.width/2,y:b.top+b.height/2};
+    });
+    if(!pts.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))) return;
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1], b=pts[i];
+      const length=Math.hypot(b.x-a.x,b.y-a.y);
+      const angle=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+      const line=document.createElement('div');
+      line.className='candyChainSegment';
+      // The visible V12 DOM layer remains; only its appearance changes.
+      line.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;box-sizing:border-box!important;';
+      line.style.left=a.x+'px'; line.style.top=(a.y-3)+'px';
+      line.style.width=length+'px'; line.style.height='6px';
+      line.style.transformOrigin='0 50%';
+      line.style.transform='rotate('+angle+'deg)';
+      line.style.background='linear-gradient(180deg,#fff8d8 0%,#ffd56f 46%,#ecaa37 100%)';
+      line.style.borderRadius='999px';
+      line.style.boxShadow='0 0 9px 2px rgba(255,196,73,.34),0 1px 2px rgba(107,56,15,.12)';
+      chainPathEl.appendChild(line);
+    }
+    // Small join beads soften the corners without covering the art.
+    pts.forEach(function(p,i){
+      const dot=document.createElement('div');
+      const last=i===pts.length-1;
+      const size=last?11:8;
+      dot.className='candyChainNode'+(last?' active':'');
+      dot.style.cssText='position:absolute!important;display:block!important;visibility:visible!important;pointer-events:none!important;box-sizing:border-box!important;';
+      dot.style.left=(p.x-size/2)+'px';dot.style.top=(p.y-size/2)+'px';
+      dot.style.width=size+'px';dot.style.height=size+'px';
+      dot.style.background='radial-gradient(circle at 35% 30%,#fffdf3,#ffd276 55%,#ed9c23 100%)';
+      dot.style.borderRadius='50%';
+      dot.style.boxShadow=last?'0 0 10px 3px rgba(255,194,69,.44)':'0 0 6px 2px rgba(255,192,61,.26)';
+      chainPathEl.appendChild(dot);
+    });
+  }
+  function drawChainLine(){
+    const wrap=document.getElementById('boardWrap');
+    if(chain.length>=2) wrap.setAttribute('data-chain-count',String(chain.length));
+    else wrap.removeAttribute('data-chain-count');
+    updateChainTip();
+    renderChainBridges();
+  }
+  function holdFinishedChain(){
+    ensureChainPath();
+    clearTimeout(chainFinishTimer);
+    chainPathEl.classList.remove('finishing');
+    void chainPathEl.offsetWidth;
+    chainPathEl.classList.add('finishing');
+    chainFinishTimer=setTimeout(function(){
+      clearChainPath();
+      chainPathEl.classList.remove('finishing');
+    },400);
   }
 
   function inChain(r,c){ return chain.some(p=>p.r===r && p.c===c); }
   function isAdjacent(a,b){ return Math.abs(a.r-b.r)<=1 && Math.abs(a.c-b.c)<=1 && !(a.r===b.r && a.c===b.c); }
 
   function cellFromPoint(x,y){
-    const el = document.elementFromPoint(x,y);
-    if(!el) return null;
-    const die = el.closest('.die');
-    if(!die) return null;
-    const r = parseInt(die.dataset.r,10), c = parseInt(die.dataset.c,10);
-    if(board[r][c]===null) return null;
-    return {r,c};
+    // Hit test by actual tile rectangles instead of elementFromPoint: selected
+    // tiles and floating FX can cover adjacent elements on mobile Safari.
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        if(board[r][c]===null) continue;
+        const bounds=cellEls[r][c].getBoundingClientRect();
+        if(x>=bounds.left && x<=bounds.right && y>=bounds.top && y<=bounds.bottom) return {r,c};
+      }
+    }
+    return null;
   }
 
   function startChain(r,c){
-    if(movesLeft<=0) return;
+    if(movesLeft<=0 || poppingInProgress) return;
     chain = [{r,c}];
+    setChainPreviewBonus(0);
+    document.getElementById('boardWrap').classList.add('is-chaining');
     cellEls[r][c].classList.add('selected');
     drawChainLine();
   }
@@ -635,7 +800,8 @@
     if(chain.length>=2){
       const prev = chain[chain.length-2];
       if(prev.r===r && prev.c===c){
-        cellEls[last.r][last.c].classList.remove('selected');
+        cellEls[last.r][last.c].classList.remove('selected','chainBump');
+        cellEls[last.r][last.c].style.removeProperty('--chain-order');
         chain.pop();
         drawChainLine();
         return;
@@ -645,13 +811,34 @@
     if(!isAdjacent(last,{r,c})) return;
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
+    if(currentStage().type==='chick'){
+      const tile=cellEls[r][c];
+      tile.classList.remove('chainBump');
+      void tile.offsetWidth;
+      tile.classList.add('chainBump');
+    }
+    if(chain.length>=2){
+      const reward = chainReward(chain.length);
+      // Do not animate the HUD for uncommitted drag score.
+    }
     drawChainLine();
   }
 
   function endChain(){
-    lineLayer.innerHTML='';
-    if(chain.length>=2){ popChain(chain.slice()); }
-    else if(chain.length===1){ cellEls[chain[0].r][chain[0].c].classList.remove('selected'); }
+    const wrap = document.getElementById('boardWrap');
+    const completed = chain.length>=2;
+    wrap.removeAttribute('data-chain-count');
+    wrap.classList.remove('is-chaining');
+    if(chainTip) chainTip.hidden=true;
+    hideChainScorePreview();
+    if(completed){
+      holdFinishedChain();
+      popChain(chain.slice());
+    } else {
+      clearChainPath();
+      if(chain.length===1) cellEls[chain[0].r][chain[0].c].classList.remove('selected');
+      setChainPreviewBonus(0);
+    }
     chain=[];
   }
 
@@ -692,39 +879,92 @@
     el.classList.add('shaking');
   }
 
-  function popCells(cells, isBonus){
-    const gained = isBonus ? cells.length*15 : cells.length*cells.length*10;
-    stageScore += gained;
-    let coinGain = Math.max(1, Math.floor(gained/20));
-    if(cells.length>=9) coinGain += 15;
-    else if(cells.length>=5) coinGain += 5;
-    awardCoins(coinGain);
-    if(cells.length > maxCombo){
-      maxCombo = cells.length;
-      localStorage.setItem('sp_max_combo', maxCombo);
+  // 기존 DOM 셀을 유지하되, 떨어질 원래 행을 기억해 자연스럽게 낙하시킨다.
+  function gravityAndAnimateChicks(){
+    const stage=currentStage();
+    if(stage.type!=='chick'){
+      applyGravity(); render(); return Promise.resolve();
     }
-    totalTilesRemoved += cells.length;
-    totalPops += 1;
-    localStorage.setItem('sp_total_tiles', totalTilesRemoved);
-    localStorage.setItem('sp_total_pops', totalPops);
-    triggerPopEffect(cells.length, gained);
+    const sourceRows=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
+    for(let c=0;c<COLS;c++){
+      const kept=[];
+      for(let r=0;r<ROWS;r++) if(board[r][c]!==null) kept.push({r,v:board[r][c]});
+      const missing=ROWS-kept.length;
+      for(let r=0;r<missing;r++) board[r][c]=randSymbolIdx();
+      kept.forEach((entry,i)=>{const dest=missing+i;board[dest][c]=entry.v;sourceRows[dest][c]=entry.r;});
+    }
+    render();
+    const motions=[];
+    for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
+      const el=cellEls[r][c], src=sourceRows[r][c];
+      const height=el.getBoundingClientRect().height;
+      const gap=parseFloat(getComputedStyle(gridEl).rowGap)||0;
+      const offset=(src<0 ? -(r+1) : src-r)*(height+gap);
+      if(Math.abs(offset)<1) continue;
+      if(typeof el.animate==='function'){
+        const motion=el.animate([
+          {transform:'translateY('+offset+'px)',opacity:src<0?0.5:1},
+          {transform:'translateY(0)',opacity:1}
+        ],{duration:src<0?440:330,delay:src<0?80:0,easing:'cubic-bezier(.18,.72,.27,1)',fill:'both'});
+        motions.push(motion.finished.catch(()=>{}));
+      }
+    }
+    return Promise.all(motions).then(()=>{});
+  }
+
+  function popCells(cells, isBonus){
+    if(poppingInProgress) return;
+    poppingInProgress=true;
+    const chickPop=currentStage().type==='chick';
+    const reward=(!isBonus && chickPop) ? chainReward(cells.length) : null;
+    const gained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
+    stageScore+=gained;
+    updateHud();
+    pulseHudScore(false);
+    let coinGain=Math.max(1,Math.floor(gained/20));
+    if(cells.length>=9) coinGain+=15;
+    else if(cells.length>=5) coinGain+=5;
+    awardCoins(coinGain);
+    if(cells.length>maxCombo){maxCombo=cells.length;localStorage.setItem('sp_max_combo',maxCombo);}
+    totalTilesRemoved+=cells.length;
+    totalPops++;
+    localStorage.setItem('sp_total_tiles',totalTilesRemoved);
+    localStorage.setItem('sp_total_pops',totalPops);
+    triggerPopEffect(cells.length,gained);
     shakeBoard(cells.length);
     vibrateForCombo(cells.length);
-    cells.forEach(({r,c})=>{
-      cellEls[r][c].classList.add('popping');
-      board[r][c] = null;
+    const wrap=document.getElementById('boardWrap');
+    const mid=cells[Math.floor(cells.length/2)];
+    if(chickPop && mid){
+      const center=cellCenter(mid.r,mid.c);
+      const burst=document.createElement('div');
+      burst.className='chickBurst chainFinalScore';
+      burst.style.left=center.x+'px';burst.style.top=center.y+'px';
+      burst.textContent=reward && reward.multiplier>1 ? '✨ ×'+reward.multiplier+'  +'+gained : '+'+gained;
+      wrap.appendChild(burst);
+      setTimeout(()=>burst.remove(),800);
+    }
+    cells.forEach(({r,c},i)=>{
+      const el=cellEls[r][c];
+      el.classList.remove('selected','chainBump');
+      el.style.setProperty('--pop-delay',chickPop?Math.min(i*34,240)+'ms':'0ms');
+      el.classList.add(chickPop?'chickPopping':'popping');
+      board[r][c]=null;
     });
     setTimeout(()=>{
-      applyGravity();
-      render();
-      updateHud();
-      if(stageScore >= currentStage().target){ showStageClear(); }
-      else if(movesLeft<=0){ showStageFail(); }
-      else { checkNoMoves(); }
-    }, 260);
+      gravityAndAnimateChicks().then(()=>{
+        poppingInProgress=false;
+        updateHud();
+        if(stageScore>=currentStage().target) showStageClear();
+        else if(movesLeft<=0) showStageFail();
+        else checkNoMoves();
+      }).catch(()=>{poppingInProgress=false;render();updateHud();});
+    },chickPop?530:260);
   }
 
   function popChain(cells){
+    if(poppingInProgress) return;
+    chainPreviewBonus = 0;
     movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
   }
@@ -872,7 +1112,7 @@
 
   gridEl.addEventListener('pointerdown', (e)=>{
     const cell = cellFromPoint(e.clientX,e.clientY);
-    if(!cell) return;
+    if(!cell || poppingInProgress || movesLeft<=0) return;
     dragging = true;
     startChain(cell.r,cell.c);
     e.preventDefault();
@@ -882,11 +1122,13 @@
     const cell = cellFromPoint(e.clientX,e.clientY);
     if(cell) extendChain(cell.r,cell.c);
   });
-  window.addEventListener('pointerup',()=>{
+  function finishPointerChain(){
     if(!dragging) return;
     dragging=false;
     endChain();
-  });
+  }
+  window.addEventListener('pointerup',finishPointerChain);
+  window.addEventListener('pointercancel',finishPointerChain);
 
   // ---- power-ups ----
   document.getElementById('btnCandy').addEventListener('click', ()=>{
