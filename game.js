@@ -54,6 +54,8 @@
   const CHICK_STAGE = { name:'병아리 마을 · Easy', type:'chick', setId:'easy', difficulty:1 };
   const STRAWBERRY_EASY = { name:'딸기 정원 · Easy', type:'chick', setId:'strawberry', difficulty:1 };
   const DOG_EASY = { name:'강아지 마을 · Easy', type:'chick', setId:'dog', difficulty:1 };
+  const FLOWER_EASY = { name:'꽃 정원 · Easy', type:'chick', setId:'flower', difficulty:1 };
+  const TEST_THEME_ROTATION = [CHICK_STAGE, STRAWBERRY_EASY, DOG_EASY, FLOWER_EASY];
   const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
   const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
   const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
@@ -229,8 +231,9 @@
       case 'chick': {
         const isStrawberry = stage.setId === 'strawberry';
         const isDog = stage.setId === 'dog';
-        const filename = isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '');
-        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+(v+1)+'.png" alt="'+(isStrawberry ? '딸기' : isDog ? '강아지' : '병아리')+'">';
+        const isFlower = stage.setId === 'flower';
+        const filename = isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : isFlower ? 'flower_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : '');
+        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+(v+1)+'.png" alt="'+(isStrawberry ? '딸기' : isDog ? '강아지' : isFlower ? '꽃' : '병아리')+'">';
       }
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
@@ -306,13 +309,9 @@
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
       let base;
-      if(i >= 5 && i < 10) base=STRAWBERRY_EASY;
-      else if(i >= 10 && i < 15) base=DOG_EASY;
-      else if(i < 15) base=CHICK_STAGE;
-      else if(i < 30) base=CHICK_NORMAL;
-      else if(i < 40) base=CHICK_HARD;
-      else if(i < 45) base=CHICK_OBSERVE;
-      else if(i < 50) base=CHICK_CHALLENGES[i-45];
+      // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower).
+      // Stage 1–50 cycles all four themes; existing stage progression is unchanged.
+      if(i < 50) base=TEST_THEME_ROTATION[i % TEST_THEME_ROTATION.length];
       else base=pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
       arr.push(Object.assign({}, base, { target: target, timeLimit: i<50 ? null : band.timeLimit }));
@@ -467,10 +466,10 @@
     }
   }
 
-  // Temporary theme preview using ?preview=dog or ?preview=strawberry.
+  // Optional theme preview: ?preview=chick|strawberry|dog|flower.
   // No changes to saved progress, scores, or stage difficulty.
   const previewTheme = new URLSearchParams(window.location.search).get('preview');
-  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : null;
+  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : previewTheme === 'flower' ? FLOWER_EASY : previewTheme === 'chick' ? CHICK_STAGE : null;
   function currentStage(){
     const stage = STAGES[stageIndex % STAGES.length];
     return previewStage ? Object.assign({}, stage, previewStage, { target:stage.target, timeLimit:stage.timeLimit }) : stage;
