@@ -57,7 +57,8 @@
   const FLOWER_EASY = { name:'꽃 정원 · Easy', type:'chick', setId:'flower', difficulty:1 };
   const RABBIT_EASY = { name:'토끼 마을 · Easy', type:'chick', setId:'rabbit', difficulty:1 };
   const CAT_EASY = { name:'고양이 마을 · Easy', type:'chick', setId:'cat', difficulty:1 };
-  const TEST_THEME_ROTATION = [CHICK_STAGE, STRAWBERRY_EASY, DOG_EASY, FLOWER_EASY, RABBIT_EASY, CAT_EASY];
+  const BEAR_EASY = { name:'곰돌이 마을 · Easy', type:'chick', setId:'bear', difficulty:1 };
+  const TEST_THEME_ROTATION = [CHICK_STAGE, STRAWBERRY_EASY, DOG_EASY, FLOWER_EASY, RABBIT_EASY, CAT_EASY, BEAR_EASY];
   const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
   const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
   const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
@@ -236,9 +237,10 @@
         const isFlower = stage.setId === 'flower';
         const isRabbit = stage.setId === 'rabbit';
         const isCat = stage.setId === 'cat';
+        const isBear = stage.setId === 'bear';
         const rabbitNames = ['happy','wink','laugh','surprise','grumpy','sleepy'];
-        const filename = isCat ? 'cat_easy_'+(v+1) : isRabbit ? 'rabbit_'+String(v+1).padStart(2,'0')+'_'+rabbitNames[v] : (isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : isFlower ? 'flower_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : ''))+(v+1);
-        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+'.png" alt="'+(isCat ? '고양이' : isRabbit ? '토끼' : isStrawberry ? '딸기' : isDog ? '강아지' : isFlower ? '꽃' : '병아리')+'">';
+        const filename = isBear ? 'bear_easy_'+(v+1) : isCat ? 'cat_easy_'+(v+1) : isRabbit ? 'rabbit_'+String(v+1).padStart(2,'0')+'_'+rabbitNames[v] : (isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : isFlower ? 'flower_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : ''))+(v+1);
+        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+'.png" alt="'+(isBear ? '곰돌이' : isCat ? '고양이' : isRabbit ? '토끼' : isStrawberry ? '딸기' : isDog ? '강아지' : isFlower ? '꽃' : '병아리')+'">';
       }
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
@@ -314,8 +316,8 @@
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
       let base;
-      // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat).
-      // Stage 1–50 cycles all six themes; existing stage progression is unchanged.
+      // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat, 7 bear).
+      // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       if(i < 50) base=TEST_THEME_ROTATION[i % TEST_THEME_ROTATION.length];
       else base=pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
@@ -471,10 +473,10 @@
     }
   }
 
-  // Optional theme preview: ?preview=chick|strawberry|dog|flower|rabbit|cat.
+  // Optional theme preview: ?preview=chick|strawberry|dog|flower|rabbit|cat|bear.
   // No changes to saved progress, scores, or stage difficulty.
   const previewTheme = new URLSearchParams(window.location.search).get('preview');
-  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : previewTheme === 'flower' ? FLOWER_EASY : previewTheme === 'rabbit' ? RABBIT_EASY : previewTheme === 'cat' ? CAT_EASY : previewTheme === 'chick' ? CHICK_STAGE : null;
+  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : previewTheme === 'flower' ? FLOWER_EASY : previewTheme === 'rabbit' ? RABBIT_EASY : previewTheme === 'cat' ? CAT_EASY : previewTheme === 'bear' ? BEAR_EASY : previewTheme === 'chick' ? CHICK_STAGE : null;
   function currentStage(){
     const stage = STAGES[stageIndex % STAGES.length];
     return previewStage ? Object.assign({}, stage, previewStage, { target:stage.target, timeLimit:stage.timeLimit }) : stage;
