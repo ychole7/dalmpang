@@ -623,6 +623,8 @@
         70%{opacity:1;transform:translateY(0) scale(1)}
         100%{opacity:0;transform:translateY(-30px) scale(1.12)}
       }
+      /* Special tiles are independent full-size PNG sprites, not small icon badges. */
+      #boardWrap .die .specialTileArt{position:relative;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(68,42,31,.16))}
       /* V20: compact effects stay inside each tile, without obscuring the theme art. */
       #boardWrap .die .v20Special{position:absolute;right:1px;top:1px;z-index:6;width:27%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:clamp(10px,3vw,17px);font-weight:1000;color:white;pointer-events:none;border:1.5px solid #fff;box-shadow:0 2px 5px rgba(44,20,65,.35);text-shadow:0 1px 2px rgba(23,18,40,.3)}
       #boardWrap .die .v20-rainbow{background:conic-gradient(#ff79a4,#ffd35d,#8fe790,#66c8ff,#b18bff,#ff79a4);box-shadow:0 0 8px rgba(150,126,250,.5),0 2px 4px rgba(40,20,60,.2)}
@@ -663,31 +665,86 @@
   // V20: stage-local special tiles; no Fever mechanics.
   const specials=new Map();
   const skey=(r,c)=>r+','+c;
+  const SPECIAL_TYPES = ['stone','bomb','star','ice','gift','rainbow'];
+  const SPECIAL_WEIGHTS = [30,22,14,18,10,6];
+  function isBlocked(r,c){return ['stone','ice'].includes(specialAt(r,c));}
+  function chooseSpecialType(stageNo){
+    // Unlock mechanics gradually, rather than overwhelming early stages.
+    const unlocked=stageNo>=25 ? SPECIAL_TYPES : stageNo>=17 ? SPECIAL_TYPES.slice(0,5) : stageNo>=9 ? SPECIAL_TYPES.slice(0,4) : ['stone','bomb'];
+    const weights=unlocked.map(type=>SPECIAL_WEIGHTS[SPECIAL_TYPES.indexOf(type)]);
+    let roll=Math.random()*weights.reduce((a,b)=>a+b,0);
+    for(let i=0;i<unlocked.length;i++){roll-=weights[i];if(roll<0)return unlocked[i];}
+    return unlocked[unlocked.length-1];
+  }
+  function hasOpenPair(){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(isBlocked(r,c))continue;
+      for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+        if(!dr&&!dc)continue;
+        const nr=r+dr,nc=c+dc;
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS||isBlocked(nr,nc))continue;
+        if(board[r][c]===board[nr][nc]||specialAt(r,c)==='rainbow'||specialAt(nr,nc)==='rainbow')return true;
+      }
+    }
+    return false;
+  }
   function createSpecials(){
     specials.clear();
-    if(currentStage().type!=='chick') return;
+    if(currentStage().type!=='chick')return;
+    const stageNo=stageSlot()+1;
+    if(stageNo<=2)return;
+    const roll=Math.random();
+    // 0:45%, 1:35%, 2:17%, 3:3%; early stages get at most one.
+    const count=Math.min(stageNo<9?1:stageNo<17?2:3,roll<.45?0:roll<.80?1:roll<.97?2:3);
+    if(!count)return;
     const cells=[];
-    for(let r=1;r<ROWS-1;r++) for(let c=0;c<COLS;c++) if(board[r][c]!==null)cells.push({r,c});
-    for(let i=cells.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
-    if(cells[0])specials.set(skey(cells[0].r,cells[0].c),'rainbow');
-    if(cells[1])specials.set(skey(cells[1].r,cells[1].c),'bomb');
+    for(let r=1;r<ROWS-1;r++)for(let c=0;c<COLS;c++)if(board[r][c]!==null)cells.push({r,c});
+    for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
+    let placed=0;
+    for(const p of cells){
+      if([...specials.keys()].some(key=>{
+        const [r,c]=key.split(',').map(Number);
+        return Math.abs(r-p.r)<=1&&Math.abs(c-p.c)<=1;
+      }))continue;
+      const type=chooseSpecialType(stageNo);
+      specials.set(skey(p.r,p.c),type);
+      if(!hasOpenPair())specials.delete(skey(p.r,p.c));
+      else placed++;
+      if(placed>=count)break;
+    }
   }
   function specialAt(r,c){return specials.get(skey(r,c));}
   function chainColor(){
     const ordinary=chain.find(p=>specialAt(p.r,p.c)!=='rainbow');
     return ordinary ? board[ordinary.r][ordinary.c] : null;
   }
-  function addBombSplash(cells){
-    const removed=new Map(cells.map(p=>[skey(p.r,p.c),p]));
-    // Bombs explode in a 3×3 area only when deliberately included in the chain.
-    const bombs=cells.filter(p=>specialAt(p.r,p.c)==='bomb');
+  function specialEffects(chainCells){
+    const removed=new Map(chainCells.map(p=>[skey(p.r,p.c),p]));
+    const bombs=chainCells.filter(p=>specialAt(p.r,p.c)==='bomb');
     bombs.forEach(p=>{
       for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
-        let r=p.r+dr,c=p.c+dc;
+        const r=p.r+dr,c=p.c+dc;
         if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null)removed.set(skey(r,c),{r,c});
       }
     });
-    return {cells:Array.from(removed.values()),bonus:removed.size-cells.length,exploded:bombs.length};
+    const giftTriggered=new Set();
+    const thawed=new Set();
+    // Adjacent successful connections break ice; gifts open for coin rewards.
+    for(const p of [...removed.values()]){
+      for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+        const r=p.r+dr,c=p.c+dc;
+        if(r<0||r>=ROWS||c<0||c>=COLS||(!dr&&!dc))continue;
+        const type=specialAt(r,c),key=skey(r,c);
+        if(type==='ice'&&!removed.has(key))thawed.add(key);
+        if(type==='gift'&&!removed.has(key)){giftTriggered.add(key);removed.set(key,{r,c});}
+      }
+    }
+    for(const key of thawed)specials.delete(key); // Ice melts into an ordinary playable tile.
+    return {
+      cells:[...removed.values()],bonus:removed.size-chainCells.length,exploded:bombs.length,
+      star:chainCells.some(p=>specialAt(p.r,p.c)==='star'),giftCount:giftTriggered.size+chainCells.filter(p=>specialAt(p.r,p.c)==='gift').length,
+      thawed:thawed.size
+    };
   }
   function newStageBoard(){
     stageScore = 0;
@@ -750,7 +807,7 @@
         else {
           el.style.visibility='visible'; el.dataset.v=v;
           const special=specialAt(r,c);
-          el.innerHTML=renderSymbolHTML(stage,v)+(special ? '<span class="v20Special v20-'+special+'" aria-hidden="true">'+(special==='bomb'?'✹':'✦')+'</span>' : '');
+          el.innerHTML=special ? '<img class="chickSymbol specialTileArt" draggable="false" src="assets/images/special_'+special+'.png" alt="특수 타일">' : renderSymbolHTML(stage,v);
         }
         el.classList.remove('selected','popping','chickPopping','chainBump');
         el.style.removeProperty('--pop-delay');
@@ -921,6 +978,7 @@
 
   function startChain(r,c){
     if(movesLeft<=0 || poppingInProgress) return;
+    if(isBlocked(r,c))return;
     chain = [{r,c}];
     setChainPreviewBonus(0);
     document.getElementById('boardWrap').classList.add('is-chaining');
@@ -929,6 +987,7 @@
   }
 
   function extendChain(r,c){
+    if(isBlocked(r,c))return;
     const value=chainColor();
     if(specialAt(r,c)!=='rainbow' && value!==null && board[r][c]!==value) return;
     const last = chain[chain.length-1];
@@ -1021,14 +1080,16 @@
       applyGravity(); render(); return Promise.resolve();
     }
     const sourceRows=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
+    const fallingSpecials=new Map();
     for(let c=0;c<COLS;c++){
       const kept=[];
-      for(let r=0;r<ROWS;r++) if(board[r][c]!==null) kept.push({r,v:board[r][c]});
+      for(let r=0;r<ROWS;r++) if(board[r][c]!==null) kept.push({r,v:board[r][c],special:specialAt(r,c)});
       const missing=ROWS-kept.length;
       for(let r=0;r<missing;r++) board[r][c]=randSymbolIdx();
-      kept.forEach((entry,i)=>{const dest=missing+i;board[dest][c]=entry.v;sourceRows[dest][c]=entry.r;});
+      kept.forEach((entry,i)=>{const dest=missing+i;board[dest][c]=entry.v;sourceRows[dest][c]=entry.r;if(entry.special)fallingSpecials.set(skey(dest,c),entry.special);});
     }
-    createSpecials();
+    specials.clear();
+    for(const [key,type] of fallingSpecials)specials.set(key,type);
     render();
     const motions=[];
     for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
@@ -1052,19 +1113,20 @@
     if(poppingInProgress) return;
     poppingInProgress=true;
     const originalCount=cells.length;
-    const splash=(!isBonus && currentStage().type==='chick') ? addBombSplash(cells) : {cells,bonus:0,exploded:0};
+    const splash=(!isBonus && currentStage().type==='chick') ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
     cells=splash.cells;
     const chickPop=currentStage().type==='chick';
     const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
     // Score comes from the original chain; bomb splash awards 35 points per extra tile.
     const baseGained=isBonus ? cells.length*15 : (reward ? reward.score+splash.bonus*35 : cells.length*cells.length*10);
-    const gained=baseGained;
+    const gained=splash.star?Math.round(baseGained*2):baseGained;
     stageScore+=gained;
     updateHud();
     pulseHudScore(false);
     let coinGain=Math.max(1,Math.floor(gained/20));
     if(cells.length>=9) coinGain+=15;
     else if(cells.length>=5) coinGain+=5;
+    if(splash.giftCount)coinGain+=splash.giftCount*40;
     awardCoins(coinGain);
     if(cells.length>maxCombo){maxCombo=cells.length;localStorage.setItem('sp_max_combo',maxCombo);}
     totalTilesRemoved+=cells.length;
@@ -1072,7 +1134,10 @@
     localStorage.setItem('sp_total_tiles',totalTilesRemoved);
     localStorage.setItem('sp_total_pops',totalPops);
     triggerPopEffect(originalCount,gained);
-    if(splash.exploded)showToast('💥 폭탄! 주변 ' + splash.bonus + '개 추가 제거');
+    if(splash.exploded)showToast('💥 폭탄! 주변 '+splash.bonus+'개 추가 제거');
+    else if(splash.giftCount)showToast('🎁 선물 보너스 +'+(splash.giftCount*40)+' 모이');
+    else if(splash.star)showToast('⭐ 황금별 점수 ×2!');
+    else if(splash.thawed)showToast('🧊 얼음 해제!');
     shakeBoard(cells.length);
     vibrateForCombo(cells.length);
     const wrap=document.getElementById('boardWrap');
@@ -1125,6 +1190,7 @@
   }
 
   function hasAnyMove(){
+    if(currentStage().type==='chick')return hasOpenPair();
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const v = board[r][c];
@@ -1256,7 +1322,7 @@
 
   gridEl.addEventListener('pointerdown', (e)=>{
     const cell = cellFromPoint(e.clientX,e.clientY);
-    if(!cell || poppingInProgress || movesLeft<=0) return;
+    if(!cell || poppingInProgress || movesLeft<=0 || isBlocked(cell.r,cell.c)) return;
     dragging = true;
     startChain(cell.r,cell.c);
     e.preventDefault();
