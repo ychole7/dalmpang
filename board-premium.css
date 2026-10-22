@@ -1,4 +1,4 @@
-/* Dalmpang V26: image-backed premium wood board skin.
+/* Dalmpang V24: image-backed premium wood board skin.
    Visual changes only: do not change board grid, lineLayer, touch coordinates, or JS. */
 #boardWrap, #boardWrap.chickBoard {
   background: #b77c48 url('assets/images/board_frame.png') center / 100% 100% no-repeat;
@@ -36,4 +36,52 @@
 @media(max-width:390px){
   #boardWrap,#boardWrap.chickBoard{padding:3.45%;}
   #boardWrap #grid,#boardWrap.chickBoard #grid{gap:.30%;}
+}
+
+/* V27 — release-only soft candy pop. The existing game.js sets chickPopping
+   and --pop-delay; its score, line layers, hit tests, and 530ms gravity stay intact.
+   Pseudo elements are clipped inside each tile and never intercept touch. */
+#boardWrap.chickBoard .die.chickPopping {
+  animation: dalmV27Pop 320ms cubic-bezier(.20,.70,.30,1) var(--pop-delay,0ms) both;
+  transform-origin:center center;
+  pointer-events:none;
+  isolation:isolate;
+}
+@keyframes dalmV27Pop {
+  0%   { transform:scale(1); opacity:1; filter:brightness(1); }
+  27%  { transform:scale(.92,1.08); opacity:1; filter:brightness(1.08); }
+  53%  { transform:scale(1.17,.88); opacity:1; filter:brightness(1.25) drop-shadow(0 0 5px rgba(255,239,180,.8)); }
+  73%  { transform:scale(1.20); opacity:.92; filter:brightness(1.45); }
+  100% { transform:scale(.22) rotate(7deg); opacity:0; filter:brightness(1.5); }
+}
+#boardWrap.chickBoard .die.chickPopping::before {
+  content:''; position:absolute; inset:5%; border-radius:50%;
+  z-index:3; pointer-events:none; opacity:0;
+  background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,246,197,.47) 32%,transparent 68%);
+  animation:dalmV27Flash 320ms ease-out var(--pop-delay,0ms) both;
+}
+@keyframes dalmV27Flash {
+  0%,18% { opacity:0; transform:scale(.4); }
+  50% { opacity:.74; transform:scale(.82); }
+  100% { opacity:0; transform:scale(1.7); }
+}
+#boardWrap.chickBoard .die.chickPopping::after {
+  content:''; position:absolute; inset:0; border-radius:50%;
+  z-index:4; pointer-events:none; opacity:0;
+  background:
+    radial-gradient(circle at 12% 22%,#fff9d3 0 2px,transparent 3px),
+    radial-gradient(circle at 86% 20%,#ffe18a 0 2px,transparent 3px),
+    radial-gradient(circle at 91% 72%,#fff 0 2px,transparent 3px),
+    radial-gradient(circle at 17% 82%,#ffe8a2 0 2px,transparent 3px);
+  animation:dalmV27Spark 320ms ease-out var(--pop-delay,0ms) both;
+}
+@keyframes dalmV27Spark {
+  0%,30% { opacity:0; transform:scale(.65) rotate(0deg); }
+  55% { opacity:1; transform:scale(1); }
+  100% { opacity:0; transform:scale(1.65) rotate(13deg); }
+}
+@media(prefers-reduced-motion:reduce) {
+  #boardWrap.chickBoard .die.chickPopping { animation-duration:1ms; }
+  #boardWrap.chickBoard .die.chickPopping::before,
+  #boardWrap.chickBoard .die.chickPopping::after { animation:none; }
 }
