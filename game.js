@@ -562,6 +562,16 @@
       #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,#fff3bd,#ffd36e);border-color:#fff9dc;}
       #boardWrap .chainLiveScore.bump{animation:v17ScoreBump .18s ease-out;}
       @keyframes v17ScoreBump{0%{transform:translate(-50%,-50%) scale(.86)}75%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
+
+      /* V19 Fever — compact persistent HUD, board stays playable */
+      #boardWrap .feverHud{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:min(78%,300px);z-index:38;pointer-events:none;display:flex;align-items:center;gap:9px;padding:6px 11px;border-radius:999px;background:rgba(40,40,57,.82);border:1.5px solid rgba(255,255,255,.7);box-shadow:0 3px 12px rgba(27,26,40,.2);color:white;font-weight:900;font-size:12px;white-space:nowrap;box-sizing:border-box;}
+      #boardWrap .feverHud .feverTrack{flex:1;height:9px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.26);}
+      #boardWrap .feverHud .feverFill{width:0%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffd66e,#ff8e34);transition:width .2s ease;}
+      #boardWrap.feverActive .feverHud{background:linear-gradient(100deg,#ab5911,#efad23,#ad5d0b);box-shadow:0 0 18px rgba(255,189,38,.52);}
+      #boardWrap.feverActive .feverFill{background:linear-gradient(90deg,#fffbcd,#ffe054,#fff3a2);transition:width .1s linear;}
+      #boardWrap.feverActive:after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 4px rgba(255,210,68,.82),inset 0 0 21px rgba(255,215,89,.35),0 0 18px rgba(253,191,51,.4);pointer-events:none;z-index:37;animation:v19FeverGlow .85s ease-in-out infinite alternate;}
+      @keyframes v19FeverGlow{from{opacity:.65}to{opacity:1}}
+      @media(prefers-reduced-motion:reduce){#boardWrap.feverActive:after{animation:none}}
       /* V18: high-contrast arcade lettering; no opaque card over gameplay. */
       .popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{
         z-index:48;animation:v18ComboPunch .94s cubic-bezier(.16,.8,.28,1) both;
@@ -653,7 +663,55 @@
     return b;
   }
 
+
+  // V19: Fever is stage-local. Only 5+ tile chains charge the meter.
+  const FEVER_DURATION=5000;
+  let feverCharge=0, feverUntil=0, feverTimer=null;
+  let feverHud=null, feverFill=null, feverLabel=null;
+  function setupFever(){
+    if(feverHud) return;
+    feverHud=document.createElement('div');
+    feverHud.className='feverHud';
+    feverHud.setAttribute('aria-label','피버 게이지');
+    feverHud.innerHTML='<span class="feverLabel">⚡ FEVER</span><div class="feverTrack"><div class="feverFill"></div></div><span class="feverAmount">0%</span>';
+    document.getElementById('boardWrap').appendChild(feverHud);
+    feverFill=feverHud.querySelector('.feverFill');
+    feverLabel=feverHud.querySelector('.feverAmount');
+    refreshFever();
+  }
+  function refreshFever(){
+    if(!feverHud) return;
+    const active=feverUntil>0;
+    const value=active ? Math.max(0,Math.min(100,(feverUntil-Date.now())/FEVER_DURATION*100)) : feverCharge;
+    feverFill.style.width=value+'%';
+    feverLabel.textContent=active ? Math.max(0,Math.ceil((feverUntil-Date.now())/1000))+'초 ×1.5' : feverCharge+'%';
+    document.getElementById('boardWrap').classList.toggle('feverActive',active);
+  }
+  function stopFever(){
+    feverCharge=0;feverUntil=0;
+    if(feverTimer){clearInterval(feverTimer);feverTimer=null;}
+    refreshFever();
+  }
+  function feverTick(){
+    if(!feverUntil) return;
+    if(Date.now()>=feverUntil){stopFever();return;}
+    refreshFever();
+  }
+  function gainFever(count){
+    if(count<5 || feverUntil) return;
+    feverCharge=Math.min(100,feverCharge+Math.min(60,20+(count-5)*10));
+    if(feverCharge>=100){
+      feverCharge=0;feverUntil=Date.now()+FEVER_DURATION;
+      if(feverTimer) clearInterval(feverTimer);
+      feverTimer=setInterval(feverTick,80);
+      showToast('⚡ FEVER TIME! 점수 ×1.5');
+      vibrate([35,45,55]);
+    }
+    refreshFever();
+  }
+
   function newStageBoard(){
+    stopFever();
     stageScore = 0;
     movesLeft = movesBudget();
     board = fillRandomBoard();
@@ -1011,7 +1069,10 @@
     poppingInProgress=true;
     const chickPop=currentStage().type==='chick';
     const reward=(!isBonus && chickPop) ? chainReward(cells.length) : null;
-    const gained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
+    // Only tile pops during an already-active Fever gain the bonus.
+    const baseGained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
+    const gained=feverUntil && Date.now()<feverUntil ? Math.round(baseGained*1.5) : baseGained;
+    if(!isBonus && chickPop) gainFever(cells.length);
     stageScore+=gained;
     updateHud();
     pulseHudScore(false);
@@ -1110,6 +1171,7 @@
   }
 
   function showStageClear(){
+    stopFever();
     pauseStageTimer();
     const st = currentStage();
     const ratio = stageScore / st.target;
@@ -1156,6 +1218,7 @@
 
   const CONTINUE_COST = 50;
   function showStageFail(){
+    stopFever();
     pauseStageTimer();
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
@@ -1673,6 +1736,7 @@
   });
 
   injectFunUpgradeStyles();
+  setupFever();
   buildGrid();
   tickHeartRegen();
   newStageBoard();
