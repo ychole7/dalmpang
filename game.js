@@ -562,6 +562,8 @@
       #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,#fff3bd,#ffd36e);border-color:#fff9dc;}
       #boardWrap .chainLiveScore.bump{animation:v17ScoreBump .18s ease-out;}
       @keyframes v17ScoreBump{0%{transform:translate(-50%,-50%) scale(.86)}75%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
+
+      /* V20 tile indicators */
       /* V18: high-contrast arcade lettering; no opaque card over gameplay. */
       .popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{
         z-index:48;animation:v18ComboPunch .94s cubic-bezier(.16,.8,.28,1) both;
@@ -621,6 +623,10 @@
         70%{opacity:1;transform:translateY(0) scale(1)}
         100%{opacity:0;transform:translateY(-30px) scale(1.12)}
       }
+      /* V20: compact effects stay inside each tile, without obscuring the theme art. */
+      #boardWrap .die .v20Special{position:absolute;right:1px;top:1px;z-index:6;width:27%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:clamp(10px,3vw,17px);font-weight:1000;color:white;pointer-events:none;border:1.5px solid #fff;box-shadow:0 2px 5px rgba(44,20,65,.35);text-shadow:0 1px 2px rgba(23,18,40,.3)}
+      #boardWrap .die .v20-rainbow{background:conic-gradient(#ff79a4,#ffd35d,#8fe790,#66c8ff,#b18bff,#ff79a4);box-shadow:0 0 8px rgba(150,126,250,.5),0 2px 4px rgba(40,20,60,.2)}
+      #boardWrap .die .v20-bomb{background:radial-gradient(circle at 35% 25%,#ffdd6a,#ff702d 48%,#a63231 100%);box-shadow:0 0 8px rgba(255,109,45,.35),0 2px 5px rgba(48,20,20,.25)}
       @keyframes v17ComboIn{0%{opacity:0;transform:scale(.65) translateY(16px)}19%{opacity:1;transform:scale(1.12) translateY(0)}37%{transform:scale(1)}73%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1) translateY(-13px)}}
       @media(prefers-reduced-motion:reduce){#boardWrap .chickChainTip.impact{animation:none}.popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{animation:v17ComboFade .78s ease-out both}@keyframes v17ComboFade{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}}
     `;
@@ -653,10 +659,41 @@
     return b;
   }
 
+
+  // V20: stage-local special tiles; no Fever mechanics.
+  const specials=new Map();
+  const skey=(r,c)=>r+','+c;
+  function createSpecials(){
+    specials.clear();
+    if(currentStage().type!=='chick') return;
+    const cells=[];
+    for(let r=1;r<ROWS-1;r++) for(let c=0;c<COLS;c++) if(board[r][c]!==null)cells.push({r,c});
+    for(let i=cells.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
+    if(cells[0])specials.set(skey(cells[0].r,cells[0].c),'rainbow');
+    if(cells[1])specials.set(skey(cells[1].r,cells[1].c),'bomb');
+  }
+  function specialAt(r,c){return specials.get(skey(r,c));}
+  function chainColor(){
+    const ordinary=chain.find(p=>specialAt(p.r,p.c)!=='rainbow');
+    return ordinary ? board[ordinary.r][ordinary.c] : null;
+  }
+  function addBombSplash(cells){
+    const removed=new Map(cells.map(p=>[skey(p.r,p.c),p]));
+    // Bombs explode in a 3×3 area only when deliberately included in the chain.
+    const bombs=cells.filter(p=>specialAt(p.r,p.c)==='bomb');
+    bombs.forEach(p=>{
+      for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+        let r=p.r+dr,c=p.c+dc;
+        if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null)removed.set(skey(r,c),{r,c});
+      }
+    });
+    return {cells:Array.from(removed.values()),bonus:removed.size-cells.length,exploded:bombs.length};
+  }
   function newStageBoard(){
     stageScore = 0;
     movesLeft = movesBudget();
     board = fillRandomBoard();
+    createSpecials();
     startNewStageTimer();
     updateHud();
     render();
@@ -710,7 +747,11 @@
         const v = board[r][c];
         const el = cellEls[r][c];
         if(v===null){ el.style.visibility='hidden'; }
-        else { el.style.visibility='visible'; el.dataset.v=v; el.innerHTML = renderSymbolHTML(stage, v); }
+        else {
+          el.style.visibility='visible'; el.dataset.v=v;
+          const special=specialAt(r,c);
+          el.innerHTML=renderSymbolHTML(stage,v)+(special ? '<span class="v20Special v20-'+special+'" aria-hidden="true">'+(special==='bomb'?'✹':'✦')+'</span>' : '');
+        }
         el.classList.remove('selected','popping','chickPopping','chainBump');
         el.style.removeProperty('--pop-delay');
         el.classList.toggle('imgTile', stage.type==='img6' && stage.prefix==='face');
@@ -888,8 +929,8 @@
   }
 
   function extendChain(r,c){
-    const value = board[chain[0].r][chain[0].c];
-    if(board[r][c] !== value) return;
+    const value=chainColor();
+    if(specialAt(r,c)!=='rainbow' && value!==null && board[r][c]!==value) return;
     const last = chain[chain.length-1];
     if(chain.length>=2){
       const prev = chain[chain.length-2];
@@ -987,6 +1028,7 @@
       for(let r=0;r<missing;r++) board[r][c]=randSymbolIdx();
       kept.forEach((entry,i)=>{const dest=missing+i;board[dest][c]=entry.v;sourceRows[dest][c]=entry.r;});
     }
+    createSpecials();
     render();
     const motions=[];
     for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
@@ -1009,9 +1051,14 @@
   function popCells(cells, isBonus){
     if(poppingInProgress) return;
     poppingInProgress=true;
+    const originalCount=cells.length;
+    const splash=(!isBonus && currentStage().type==='chick') ? addBombSplash(cells) : {cells,bonus:0,exploded:0};
+    cells=splash.cells;
     const chickPop=currentStage().type==='chick';
-    const reward=(!isBonus && chickPop) ? chainReward(cells.length) : null;
-    const gained=isBonus ? cells.length*15 : (reward ? reward.score : cells.length*cells.length*10);
+    const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
+    // Score comes from the original chain; bomb splash awards 35 points per extra tile.
+    const baseGained=isBonus ? cells.length*15 : (reward ? reward.score+splash.bonus*35 : cells.length*cells.length*10);
+    const gained=baseGained;
     stageScore+=gained;
     updateHud();
     pulseHudScore(false);
@@ -1024,7 +1071,8 @@
     totalPops++;
     localStorage.setItem('sp_total_tiles',totalTilesRemoved);
     localStorage.setItem('sp_total_pops',totalPops);
-    triggerPopEffect(cells.length,gained);
+    triggerPopEffect(originalCount,gained);
+    if(splash.exploded)showToast('💥 폭탄! 주변 ' + splash.bonus + '개 추가 제거');
     shakeBoard(cells.length);
     vibrateForCombo(cells.length);
     const wrap=document.getElementById('boardWrap');
@@ -1039,6 +1087,7 @@
       setTimeout(()=>burst.remove(),800);
     }
     cells.forEach(({r,c},i)=>{
+      specials.delete(skey(r,c));
       const el=cellEls[r][c];
       el.classList.remove('selected','chainBump');
       el.style.setProperty('--pop-delay',chickPop?Math.min(i*34,240)+'ms':'0ms');
@@ -1083,7 +1132,7 @@
           for(let dc=-1;dc<=1;dc++){
             if(dr===0&&dc===0) continue;
             const nr=r+dr, nc=c+dc;
-            if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && board[nr][nc]===v) return true;
+            if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && (board[nr][nc]===v || specialAt(r,c)==='rainbow' || specialAt(nr,nc)==='rainbow')) return true;
           }
         }
       }
@@ -1107,6 +1156,7 @@
     }
     let idx=0;
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) board[r][c]=flat[idx++];
+    createSpecials();
   }
 
   function showStageClear(){
