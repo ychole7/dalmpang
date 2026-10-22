@@ -689,8 +689,9 @@
   }
   let chainTip=null;
   function updateChainTip(){
-    // Guidance appears only on longer chains, leaving regular play uncluttered.
-    if(currentStage().type!=='chick' || chain.length<5){
+    // V17: A visible, low-pressure countdown to the existing 5/8-link bonuses.
+    // No scoring, movement, or progression rules change.
+    if(currentStage().type!=='chick' || chain.length<3){
       if(chainTip) chainTip.hidden=true;
     }else{
       if(!chainTip){
@@ -700,8 +701,13 @@
       }
       const count=chain.length;
       const reward=chainReward(count);
-      chainTip.dataset.tier=count>=8?'legend':'bonus';
-      chainTip.textContent=count>=8 ? '✨ 대박 연결! ×'+reward.multiplier : '✨ 연속 연결 ×'+reward.multiplier;
+      chainTip.dataset.tier=count>=8?'legend':count>=5?'bonus':'ready';
+      if(count===3) chainTip.textContent='🎯 2개 더 연결하면 보너스!';
+      else if(count===4) chainTip.textContent='🔥 1개만 더! ×1.25';
+      else if(count===5) chainTip.textContent='✨ 보너스 달성! ×'+reward.multiplier;
+      else if(count===6) chainTip.textContent='✨ 2개 더 연결하면 ×1.6';
+      else if(count===7) chainTip.textContent='🔥 1개만 더! ×1.6';
+      else chainTip.textContent='🌟 대박 연결! ×'+reward.multiplier;
       chainTip.hidden=false;
     }
     setChainPreviewBonus(chain.length>=2 ? chainReward(chain.length).score : 0);
@@ -823,6 +829,10 @@
     if(!isAdjacent(last,{r,c})) return;
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
+    // V17: tactile milestone confirmation only when first reaching a bonus tier.
+    if(currentStage().type==='chick' && (chain.length===5 || chain.length===8)){
+      vibrate(chain.length===8 ? [18,35,36] : 22);
+    }
     if(currentStage().type==='chick'){
       const tile=cellEls[r][c];
       tile.classList.remove('chainBump');
