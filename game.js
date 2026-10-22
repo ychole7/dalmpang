@@ -504,41 +504,38 @@
     });
   }
 
+  // V17: keep the board visible while dragging; celebrate the actual release.
   function triggerPopEffect(count, gained){
-    const t = comboTierFor(count);
-    let popHTML = '';
-    let sub = '연결 '+count+'개!';
-    if(t){
-      popHTML = '<img class="line0" src="'+t.img+'" alt="'+t.key+'">';
-      sub = t.sub+' '+count+'개 연속 터트렸어요!';
+    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS,'v17-nice','v17-great','v17-amazing');
+    if(count<5) return;
+    const level=count>=8 ? 'amazing' : count===7 ? 'great' : 'nice';
+    const title=level==='amazing' ? 'AMAZING!' : level==='great' ? 'GREAT!' : 'NICE!';
+    popTextEl.innerHTML='<div class="v17ComboWord">'+title+'</div><div class="v17ComboScore">+'+fmt(gained)+'</div>';
+    popParticlesEl.innerHTML='';
+    const symbols=['✦','✧','★'];
+    const n=level==='amazing'?16:level==='great'?12:8;
+    const dist=level==='amazing'?120:level==='great'?95:70;
+    for(let i=0;i<n;i++){
+      const spark=document.createElement('span');
+      spark.textContent=symbols[i%symbols.length];
+      const angle=2*Math.PI*i/n+(Math.random()-.5)*.25;
+      const radius=dist*(.55+Math.random()*.5);
+      spark.style.setProperty('--dx',Math.cos(angle)*radius+'px');
+      spark.style.setProperty('--dy',Math.sin(angle)*radius+'px');
+      spark.style.animationDelay=Math.round(Math.random()*75)+'ms';
+      popParticlesEl.appendChild(spark);
     }
-    popTextEl.innerHTML = popHTML+'<div class="line1">'+sub+'</div><div class="line2">+'+fmt(gained)+'</div>';
-    if(t){
-      const flash = document.getElementById('boardFlash');
-      flash.className = 'flash-'+t.key;
+    if(count>=8){
+      const flash=document.getElementById('boardFlash');
+      flash.className='flash-amazing';
       void flash.offsetWidth;
       flash.classList.add('show');
     }
-    popParticlesEl.innerHTML = '';
-    const symbols = ['⭐','✨','🌟'];
-    const cap = t ? (26 + COMBO_TIERS.length - COMBO_TIERS.indexOf(t)) : 18;
-    const n = Math.min(cap, 8 + count);
-    const distBase = t ? 55 + (COMBO_TIERS.length - COMBO_TIERS.indexOf(t))*5 : 50;
-    for(let i=0;i<n;i++){
-      const s = document.createElement('span');
-      s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-      const angle = Math.random()*Math.PI*2;
-      const dist = distBase + Math.random()*90;
-      s.style.setProperty('--dx', Math.cos(angle)*dist+'px');
-      s.style.setProperty('--dy', Math.sin(angle)*dist+'px');
-      s.style.animationDelay = Math.floor(Math.random()*120)+'ms';
-      popParticlesEl.appendChild(s);
-    }
-    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS);
-    if(t) popEffectEl.classList.add('tier-'+t.key);
+    popEffectEl.classList.add('v17-'+level);
     void popEffectEl.offsetWidth;
     popEffectEl.classList.add('show');
   }
+
 
   // 게임 화면을 벗어날 때(업적/상점 이동) 애니메이션이 중간에 멈췄다가
   // 다시 돌아왔을 때 처음부터 재생되며 "그레잇" 등 이펙트가 반복 재생되는 걸 막기 위한 정리
@@ -550,32 +547,34 @@
     wrap.classList.remove('shaking');
   }
 
+  // V17: replace intrusive center banner with unobtrusive floating hint.
   function injectFunUpgradeStyles(){
     if(document.getElementById('dalmpangFunUpgradeStyles')) return;
     const style=document.createElement('style');
     style.id='dalmpangFunUpgradeStyles';
     style.textContent = `
-      #boardWrap .chickChainTip{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:45;pointer-events:none;min-width:180px;max-width:calc(100% - 24px);padding:8px 14px 10px;border-radius:18px;text-align:center;color:#fff;background:linear-gradient(180deg,rgba(255,183,77,.96) 0%,rgba(255,124,0,.96) 100%);border:2px solid rgba(255,255,255,.65);box-shadow:0 12px 28px rgba(255,132,0,.34),0 4px 10px rgba(0,0,0,.18);backdrop-filter:blur(4px);}
+      #boardWrap .chickChainTip{position:absolute;z-index:45;pointer-events:none;transform:translateX(-50%);white-space:nowrap;padding:6px 12px;border-radius:999px;font-size:clamp(12px,3.2vw,14px);font-weight:900;line-height:1.2;color:white;border:1px solid rgba(255,255,255,.85);background:linear-gradient(180deg,rgba(255,173,66,.96),rgba(244,116,45,.95));box-shadow:0 3px 12px rgba(94,54,17,.24),inset 0 1px 0 rgba(255,255,255,.3);}
       #boardWrap .chickChainTip[hidden]{display:none!important;}
-      #boardWrap .chickChainTip.impact{animation:dalmpangTipPop .36s cubic-bezier(.2,.9,.2,1);}
-      #boardWrap .chickChainTip .tipBadge{display:inline-block;margin-bottom:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.06em;background:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
-      #boardWrap .chickChainTip .tipMain{font-size:24px;line-height:1.02;font-weight:1000;letter-spacing:-.04em;text-shadow:0 2px 0 rgba(0,0,0,.1),0 5px 12px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip .tipSub{margin-top:3px;font-size:12px;line-height:1.15;font-weight:800;opacity:.97;letter-spacing:-.02em;}
-      #boardWrap .chickChainTip[data-tier="prep"]{background:linear-gradient(180deg,#6cd5ff 0%,#338cff 100%);box-shadow:0 12px 28px rgba(51,140,255,.33),0 4px 10px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip[data-tier="bonusSoon"]{background:linear-gradient(180deg,#ffb84f 0%,#ff7a00 100%);box-shadow:0 12px 28px rgba(255,132,0,.34),0 4px 10px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip[data-tier="bonusOn"]{background:linear-gradient(180deg,#ffe46a 0%,#ffb300 100%);box-shadow:0 12px 28px rgba(255,179,0,.38),0 4px 10px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip[data-tier="jackpotSoon"]{background:linear-gradient(180deg,#a37cff 0%,#6f46ff 100%);box-shadow:0 12px 30px rgba(111,70,255,.38),0 4px 10px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip[data-tier="jackpot"]{background:linear-gradient(180deg,#ff79c9 0%,#7a4dff 100%);box-shadow:0 14px 34px rgba(148,78,255,.42),0 4px 10px rgba(0,0,0,.18);}
-      #boardWrap .chickChainTip[data-tier="jackpot"] .tipMain,#boardWrap .chickChainTip[data-tier="bonusOn"] .tipMain{animation:dalmpangGlow 1s ease-in-out infinite alternate;}
-      #boardWrap .chainLiveScore{position:absolute;z-index:44;pointer-events:none;transform:translate(-50%,-50%);padding:6px 12px;border-radius:999px;background:rgba(34,24,10,.78);border:2px solid rgba(255,255,255,.25);color:#fff;font-size:18px;font-weight:1000;letter-spacing:-.03em;box-shadow:0 8px 18px rgba(0,0,0,.18);text-shadow:0 2px 0 rgba(0,0,0,.18);}
-      #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,rgba(255,189,65,.96) 0%,rgba(255,124,0,.96) 100%);border-color:rgba(255,255,255,.58);box-shadow:0 10px 20px rgba(255,132,0,.3);}
-      #boardWrap .chainLiveScore.bump{animation:dalmpangScoreBump .24s ease-out;}
-      @keyframes dalmpangTipPop{0%{opacity:0;transform:translateX(-50%) scale(.75) translateY(-8px);}65%{opacity:1;transform:translateX(-50%) scale(1.06) translateY(0);}100%{opacity:1;transform:translateX(-50%) scale(1) translateY(0);}}
-      @keyframes dalmpangScoreBump{0%{transform:translate(-50%,-50%) scale(.72);}70%{transform:translate(-50%,-50%) scale(1.08);}100%{transform:translate(-50%,-50%) scale(1);}}
-      @keyframes dalmpangGlow{0%{filter:drop-shadow(0 0 0 rgba(255,255,255,0));}100%{filter:drop-shadow(0 0 10px rgba(255,255,255,.55));}}
+      #boardWrap .chickChainTip[data-tier="great"]{background:linear-gradient(180deg,rgba(169,123,255,.96),rgba(111,75,226,.95));box-shadow:0 3px 13px rgba(88,57,178,.27);}
+      #boardWrap .chickChainTip.impact{animation:v17HintIn .22s ease-out both;}
+      @keyframes v17HintIn{from{opacity:0;transform:translate(-50%,6px) scale(.82)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+      #boardWrap .chainLiveScore{position:absolute;z-index:44;pointer-events:none;transform:translate(-50%,-50%);min-width:0;white-space:nowrap;padding:4px 9px;border-radius:999px;font-size:clamp(13px,3.4vw,16px);font-weight:1000;color:#79471b;border:1px solid rgba(255,255,255,.95);background:rgba(255,246,215,.93);box-shadow:0 3px 11px rgba(64,45,28,.15);}
+      #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,#fff3bd,#ffd36e);border-color:#fff9dc;}
+      #boardWrap .chainLiveScore.bump{animation:v17ScoreBump .18s ease-out;}
+      @keyframes v17ScoreBump{0%{transform:translate(-50%,-50%) scale(.86)}75%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
+      .popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{z-index:48;animation:v17ComboIn .78s cubic-bezier(.16,.8,.3,1) both;}
+      .popEffect.v17-nice .popText,.popEffect.v17-great .popText,.popEffect.v17-amazing .popText{gap:2px;}
+      .popEffect .v17ComboWord{font-size:clamp(38px,11vw,62px);line-height:1.05;font-weight:1000;letter-spacing:-.06em;-webkit-text-stroke:2px white;paint-order:stroke fill;text-shadow:0 3px 0 rgba(116,65,18,.28),0 6px 16px rgba(100,58,18,.2);}
+      .popEffect.v17-nice .v17ComboWord{color:#ffb521;}
+      .popEffect.v17-great .v17ComboWord{color:#9b70ed;}
+      .popEffect.v17-amazing .v17ComboWord{color:#ff7fae;font-size:clamp(42px,12vw,68px);filter:drop-shadow(0 0 9px rgba(255,237,126,.9));}
+      .popEffect .v17ComboScore{font-size:clamp(19px,5.8vw,29px);line-height:1.15;font-weight:1000;color:#fff;text-shadow:0 2px 2px rgba(68,44,28,.65),0 3px 11px rgba(60,40,20,.5);}
+      @keyframes v17ComboIn{0%{opacity:0;transform:scale(.65) translateY(16px)}19%{opacity:1;transform:scale(1.12) translateY(0)}37%{transform:scale(1)}73%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1) translateY(-13px)}}
+      @media(prefers-reduced-motion:reduce){#boardWrap .chickChainTip.impact{animation:none}.popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{animation:v17ComboFade .78s ease-out both}@keyframes v17ComboFade{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}}
     `;
     document.head.appendChild(style);
   }
+
 
   function buildGrid(){
     gridEl.innerHTML = '';
@@ -711,17 +710,10 @@
     chainScorePreviewEl.classList.add('bump');
   }
   let chainTip=null;
-  function chainTipMessage(count){
-    if(count>=8) return { tier:'jackpot', badge:'JACKPOT', main:'🌟 대박 연결!', sub:'연결 보너스 ×1.6 발동!' };
-    if(count===7) return { tier:'jackpotSoon', badge:'ALMOST', main:'🚀 한 개만 더!', sub:'8개 연결 시 ×1.6 대박 보너스' };
-    if(count>=5) return { tier:'bonusOn', badge:'BONUS', main:'✨ 보너스 달성!', sub:'연결 보너스 ×1.25 발동!' };
-    if(count===4) return { tier:'bonusSoon', badge:'CHANCE', main:'🔥 한 개만 더!', sub:'5개 연결 시 ×1.25 보너스' };
-    if(count===3) return { tier:'prep', badge:'READY', main:'🎯 두 개만 더!', sub:'5개부터 보너스가 시작돼요' };
-    return null;
-  }
   function updateChainTip(){
-    const info = currentStage().type==='chick' ? chainTipMessage(chain.length) : null;
-    if(!info){
+    const count=chain.length;
+    const show=currentStage().type==='chick' && (count===4 || count===7);
+    if(!show){
       if(chainTip) chainTip.hidden=true;
     }else{
       if(!chainTip){
@@ -729,16 +721,22 @@
         chainTip.className='chickChainTip';
         document.getElementById('boardWrap').appendChild(chainTip);
       }
-      chainTip.dataset.tier=info.tier;
-      chainTip.innerHTML='<div class="tipBadge">'+info.badge+'</div><div class="tipMain">'+info.main+'</div><div class="tipSub">'+info.sub+'</div>';
+      const p=chain[count-1];
+      const center=cellCenter(p.r,p.c);
+      const wrap=document.getElementById('boardWrap');
+      chainTip.style.left=Math.max(67,Math.min(wrap.clientWidth-67,center.x))+'px';
+      chainTip.style.top=Math.max(8,center.y-87)+'px';
+      chainTip.dataset.tier=count===7?'great':'nice';
+      chainTip.textContent='✦ 한 개만 더!';
       chainTip.hidden=false;
       chainTip.classList.remove('impact');
       void chainTip.offsetWidth;
       chainTip.classList.add('impact');
     }
-    setChainPreviewBonus(chain.length>=2 ? chainReward(chain.length).score : 0);
+    setChainPreviewBonus(count>=2 ? chainReward(count).score : 0);
     updateChainScorePreview();
   }
+
 
   // V13: compact candy connection path; keep the working V12 DOM renderer.
   let chainPathEl = null;
@@ -979,7 +977,7 @@
     vibrateForCombo(cells.length);
     const wrap=document.getElementById('boardWrap');
     const mid=cells[Math.floor(cells.length/2)];
-    if(chickPop && mid){
+    if(chickPop && mid && cells.length<5){
       const center=cellCenter(mid.r,mid.c);
       const burst=document.createElement('div');
       burst.className='chickBurst chainFinalScore';
