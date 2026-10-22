@@ -1,11 +1,11 @@
-/* Dalmpang V22: image-backed premium wood board skin.
+/* Dalmpang V24: image-backed premium wood board skin.
    Visual changes only: do not change board grid, lineLayer, touch coordinates, or JS. */
 #boardWrap, #boardWrap.chickBoard {
   background: #b77c48 url('assets/images/board_frame.png') center / 100% 100% no-repeat;
   border: 0; border-radius: 23px; padding: 4.5%;
   box-shadow: 0 5px 0 rgba(100,54,27,.25), 0 9px 16px rgba(74,46,30,.14);
 }
-#boardWrap #grid, #boardWrap.chickBoard #grid { gap: .65%; }
+#boardWrap #grid, #boardWrap.chickBoard #grid { gap: .38%; }
 #boardWrap .die, #boardWrap.chickBoard .die, #boardWrap .die.imgTile {
   background: url('assets/images/tile_base.png') center / 100% 100% no-repeat;
   border: 0; border-radius: 10px;
@@ -14,10 +14,11 @@
 }
 #boardWrap .die::after, #boardWrap.chickBoard .die::after { content:none; }
 #boardWrap .die > img, #boardWrap.chickBoard .die img.chickSymbol {
-  display:block; width: 108%; height:108%; max-width:none; max-height:none;
+  display:block; width: 114.5%; height:114.5%; max-width:none; max-height:none;
   flex-shrink:0; object-fit:contain; pointer-events:none;
   filter: drop-shadow(0 2px 2px rgba(92,59,38,.09));
 }
+/* Keep the larger art clear of the touch targets: tile boxes and grid coordinates are unchanged. */
 /* Never overscale sprites that already include a special tile background. */
 #boardWrap .die > img.specialTileArt, #boardWrap.chickBoard .die > img.specialTileArt {
   width:100%; height:100%; max-width:100%; max-height:100%;
@@ -34,5 +35,5 @@
 }
 @media(max-width:390px){
   #boardWrap,#boardWrap.chickBoard{padding:4.2%;}
-  #boardWrap #grid,#boardWrap.chickBoard #grid{gap:.52%;}
+  #boardWrap #grid,#boardWrap.chickBoard #grid{gap:.30%;}
 }
