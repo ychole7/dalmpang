@@ -59,9 +59,7 @@
   const CAT_EASY = { name:'고양이 마을 · Easy', type:'chick', setId:'cat', difficulty:1 };
   const BEAR_EASY = { name:'곰돌이 마을 · Easy', type:'chick', setId:'bear', difficulty:1 };
   const PIG_EASY = { name:'아기돼지 마을 · Easy', type:'chick', setId:'pig', difficulty:1 };
-  const PENGUIN_EASY = { name:'펭귄 마을 · Easy', type:'chick', setId:'penguin', difficulty:1 };
-  const KOALA_EASY = { name:'코알라 숲 · Easy', type:'chick', setId:'koala', difficulty:1 };
-  const TEST_THEME_ROTATION = [CHICK_STAGE, STRAWBERRY_EASY, DOG_EASY, FLOWER_EASY, RABBIT_EASY, CAT_EASY, BEAR_EASY, PIG_EASY, PENGUIN_EASY, KOALA_EASY];
+  const TEST_THEME_ROTATION = [CHICK_STAGE, STRAWBERRY_EASY, DOG_EASY, FLOWER_EASY, RABBIT_EASY, CAT_EASY, BEAR_EASY, PIG_EASY];
   const CHICK_NORMAL = { name:'병아리 마을 · Normal', type:'chick', setId:'normal', difficulty:3 };
   const CHICK_HARD = { name:'병아리 마을 · Hard', type:'chick', setId:'hard', difficulty:5 };
   const CHICK_OBSERVE = { name:'병아리 마을 · 관찰 미션', type:'chick', setId:'hard', difficulty:5 };
@@ -242,11 +240,9 @@
         const isCat = stage.setId === 'cat';
         const isBear = stage.setId === 'bear';
         const isPig = stage.setId === 'pig';
-        const isPenguin = stage.setId === 'penguin';
-        const isKoala = stage.setId === 'koala';
         const rabbitNames = ['happy','wink','laugh','surprise','grumpy','sleepy'];
-        const filename = isKoala ? 'koala_easy_'+(v+1) : isPenguin ? 'penguin_easy_'+(v+1) : isPig ? 'pig_easy_'+(v+1) : isBear ? 'bear_easy_'+(v+1) : isCat ? 'cat_easy_'+(v+1) : isRabbit ? 'rabbit_'+String(v+1).padStart(2,'0')+'_'+rabbitNames[v] : (isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : isFlower ? 'flower_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : ''))+(v+1);
-        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+'.png" alt="'+(isKoala ? '코알라' : isPenguin ? '펭귄' : isPig ? '아기돼지' : isBear ? '곰돌이' : isCat ? '고양이' : isRabbit ? '토끼' : isStrawberry ? '딸기' : isDog ? '강아지' : isFlower ? '꽃' : '병아리')+'">';
+        const filename = isPig ? 'pig_easy_'+(v+1) : isBear ? 'bear_easy_'+(v+1) : isCat ? 'cat_easy_'+(v+1) : isRabbit ? 'rabbit_'+String(v+1).padStart(2,'0')+'_'+rabbitNames[v] : (isStrawberry ? 'strawberry_easy_' : isDog ? 'dog_easy_' : isFlower ? 'flower_easy_' : 'chick_'+(stage.setId && stage.setId !== 'easy' ? stage.setId+'_' : ''))+(v+1);
+        return '<img class="chickSymbol" draggable="false" src="assets/images/'+filename+'.png" alt="'+(isPig ? '아기돼지' : isBear ? '곰돌이' : isCat ? '고양이' : isRabbit ? '토끼' : isStrawberry ? '딸기' : isDog ? '강아지' : isFlower ? '꽃' : '병아리')+'">';
       }
       case 'dice-std': return svgPipsCombo(STD_DICE[v]);
       case 'img6':     return '<img src="assets/images/'+stage.prefix+'_'+(v+1)+'.png" style="width:108%;height:108%;object-fit:contain;">';
@@ -322,8 +318,8 @@
       const band = bandFor(i);
       const pool = POOL_SORTED.slice(0, band.unlock);
       let base;
-      // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat, 7 bear, 8 pig, 9 penguin, 10 koala).
-      // Stage 1–50 cycles all ten themes; existing stage progression is unchanged.
+      // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat, 7 bear).
+      // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       if(i < 50) base=TEST_THEME_ROTATION[i % TEST_THEME_ROTATION.length];
       else base=pool[i % pool.length];
       const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
@@ -479,10 +475,10 @@
     }
   }
 
-  // Optional theme preview: ?preview=chick|strawberry|dog|flower|rabbit|cat|bear|pig|penguin|koala.
+  // Optional theme preview: ?preview=chick|strawberry|dog|flower|rabbit|cat|bear.
   // No changes to saved progress, scores, or stage difficulty.
   const previewTheme = new URLSearchParams(window.location.search).get('preview');
-  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : previewTheme === 'flower' ? FLOWER_EASY : previewTheme === 'rabbit' ? RABBIT_EASY : previewTheme === 'cat' ? CAT_EASY : previewTheme === 'bear' ? BEAR_EASY : previewTheme === 'pig' ? PIG_EASY : previewTheme === 'penguin' ? PENGUIN_EASY : previewTheme === 'koala' ? KOALA_EASY : previewTheme === 'chick' ? CHICK_STAGE : null;
+  const previewStage = previewTheme === 'dog' ? DOG_EASY : previewTheme === 'strawberry' ? STRAWBERRY_EASY : previewTheme === 'flower' ? FLOWER_EASY : previewTheme === 'rabbit' ? RABBIT_EASY : previewTheme === 'cat' ? CAT_EASY : previewTheme === 'bear' ? BEAR_EASY : previewTheme === 'pig' ? PIG_EASY : previewTheme === 'chick' ? CHICK_STAGE : null;
   function currentStage(){
     const stage = STAGES[stageIndex % STAGES.length];
     return previewStage ? Object.assign({}, stage, previewStage, { target:stage.target, timeLimit:stage.timeLimit }) : stage;
@@ -552,6 +548,33 @@
     flash.classList.remove('show');
     const wrap = document.getElementById('boardWrap');
     wrap.classList.remove('shaking');
+  }
+
+  function injectFunUpgradeStyles(){
+    if(document.getElementById('dalmpangFunUpgradeStyles')) return;
+    const style=document.createElement('style');
+    style.id='dalmpangFunUpgradeStyles';
+    style.textContent = `
+      #boardWrap .chickChainTip{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:45;pointer-events:none;min-width:180px;max-width:calc(100% - 24px);padding:8px 14px 10px;border-radius:18px;text-align:center;color:#fff;background:linear-gradient(180deg,rgba(255,183,77,.96) 0%,rgba(255,124,0,.96) 100%);border:2px solid rgba(255,255,255,.65);box-shadow:0 12px 28px rgba(255,132,0,.34),0 4px 10px rgba(0,0,0,.18);backdrop-filter:blur(4px);}
+      #boardWrap .chickChainTip[hidden]{display:none!important;}
+      #boardWrap .chickChainTip.impact{animation:dalmpangTipPop .36s cubic-bezier(.2,.9,.2,1);}
+      #boardWrap .chickChainTip .tipBadge{display:inline-block;margin-bottom:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.06em;background:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+      #boardWrap .chickChainTip .tipMain{font-size:24px;line-height:1.02;font-weight:1000;letter-spacing:-.04em;text-shadow:0 2px 0 rgba(0,0,0,.1),0 5px 12px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip .tipSub{margin-top:3px;font-size:12px;line-height:1.15;font-weight:800;opacity:.97;letter-spacing:-.02em;}
+      #boardWrap .chickChainTip[data-tier="prep"]{background:linear-gradient(180deg,#6cd5ff 0%,#338cff 100%);box-shadow:0 12px 28px rgba(51,140,255,.33),0 4px 10px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip[data-tier="bonusSoon"]{background:linear-gradient(180deg,#ffb84f 0%,#ff7a00 100%);box-shadow:0 12px 28px rgba(255,132,0,.34),0 4px 10px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip[data-tier="bonusOn"]{background:linear-gradient(180deg,#ffe46a 0%,#ffb300 100%);box-shadow:0 12px 28px rgba(255,179,0,.38),0 4px 10px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip[data-tier="jackpotSoon"]{background:linear-gradient(180deg,#a37cff 0%,#6f46ff 100%);box-shadow:0 12px 30px rgba(111,70,255,.38),0 4px 10px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip[data-tier="jackpot"]{background:linear-gradient(180deg,#ff79c9 0%,#7a4dff 100%);box-shadow:0 14px 34px rgba(148,78,255,.42),0 4px 10px rgba(0,0,0,.18);}
+      #boardWrap .chickChainTip[data-tier="jackpot"] .tipMain,#boardWrap .chickChainTip[data-tier="bonusOn"] .tipMain{animation:dalmpangGlow 1s ease-in-out infinite alternate;}
+      #boardWrap .chainLiveScore{position:absolute;z-index:44;pointer-events:none;transform:translate(-50%,-50%);padding:6px 12px;border-radius:999px;background:rgba(34,24,10,.78);border:2px solid rgba(255,255,255,.25);color:#fff;font-size:18px;font-weight:1000;letter-spacing:-.03em;box-shadow:0 8px 18px rgba(0,0,0,.18);text-shadow:0 2px 0 rgba(0,0,0,.18);}
+      #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,rgba(255,189,65,.96) 0%,rgba(255,124,0,.96) 100%);border-color:rgba(255,255,255,.58);box-shadow:0 10px 20px rgba(255,132,0,.3);}
+      #boardWrap .chainLiveScore.bump{animation:dalmpangScoreBump .24s ease-out;}
+      @keyframes dalmpangTipPop{0%{opacity:0;transform:translateX(-50%) scale(.75) translateY(-8px);}65%{opacity:1;transform:translateX(-50%) scale(1.06) translateY(0);}100%{opacity:1;transform:translateX(-50%) scale(1) translateY(0);}}
+      @keyframes dalmpangScoreBump{0%{transform:translate(-50%,-50%) scale(.72);}70%{transform:translate(-50%,-50%) scale(1.08);}100%{transform:translate(-50%,-50%) scale(1);}}
+      @keyframes dalmpangGlow{0%{filter:drop-shadow(0 0 0 rgba(255,255,255,0));}100%{filter:drop-shadow(0 0 10px rgba(255,255,255,.55));}}
+    `;
+    document.head.appendChild(style);
   }
 
   function buildGrid(){
@@ -688,10 +711,17 @@
     chainScorePreviewEl.classList.add('bump');
   }
   let chainTip=null;
+  function chainTipMessage(count){
+    if(count>=8) return { tier:'jackpot', badge:'JACKPOT', main:'🌟 대박 연결!', sub:'연결 보너스 ×1.6 발동!' };
+    if(count===7) return { tier:'jackpotSoon', badge:'ALMOST', main:'🚀 한 개만 더!', sub:'8개 연결 시 ×1.6 대박 보너스' };
+    if(count>=5) return { tier:'bonusOn', badge:'BONUS', main:'✨ 보너스 달성!', sub:'연결 보너스 ×1.25 발동!' };
+    if(count===4) return { tier:'bonusSoon', badge:'CHANCE', main:'🔥 한 개만 더!', sub:'5개 연결 시 ×1.25 보너스' };
+    if(count===3) return { tier:'prep', badge:'READY', main:'🎯 두 개만 더!', sub:'5개부터 보너스가 시작돼요' };
+    return null;
+  }
   function updateChainTip(){
-    // V17: A visible, low-pressure countdown to the existing 5/8-link bonuses.
-    // No scoring, movement, or progression rules change.
-    if(currentStage().type!=='chick' || chain.length<3){
+    const info = currentStage().type==='chick' ? chainTipMessage(chain.length) : null;
+    if(!info){
       if(chainTip) chainTip.hidden=true;
     }else{
       if(!chainTip){
@@ -699,16 +729,12 @@
         chainTip.className='chickChainTip';
         document.getElementById('boardWrap').appendChild(chainTip);
       }
-      const count=chain.length;
-      const reward=chainReward(count);
-      chainTip.dataset.tier=count>=8?'legend':count>=5?'bonus':'ready';
-      if(count===3) chainTip.textContent='🎯 2개 더 연결하면 보너스!';
-      else if(count===4) chainTip.textContent='🔥 1개만 더! ×1.25';
-      else if(count===5) chainTip.textContent='✨ 보너스 달성! ×'+reward.multiplier;
-      else if(count===6) chainTip.textContent='✨ 2개 더 연결하면 ×1.6';
-      else if(count===7) chainTip.textContent='🔥 1개만 더! ×1.6';
-      else chainTip.textContent='🌟 대박 연결! ×'+reward.multiplier;
+      chainTip.dataset.tier=info.tier;
+      chainTip.innerHTML='<div class="tipBadge">'+info.badge+'</div><div class="tipMain">'+info.main+'</div><div class="tipSub">'+info.sub+'</div>';
       chainTip.hidden=false;
+      chainTip.classList.remove('impact');
+      void chainTip.offsetWidth;
+      chainTip.classList.add('impact');
     }
     setChainPreviewBonus(chain.length>=2 ? chainReward(chain.length).score : 0);
     updateChainScorePreview();
@@ -829,10 +855,6 @@
     if(!isAdjacent(last,{r,c})) return;
     chain.push({r,c});
     cellEls[r][c].classList.add('selected');
-    // V17: tactile milestone confirmation only when first reaching a bonus tier.
-    if(currentStage().type==='chick' && (chain.length===5 || chain.length===8)){
-      vibrate(chain.length===8 ? [18,35,36] : 22);
-    }
     if(currentStage().type==='chick'){
       const tile=cellEls[r][c];
       tile.classList.remove('chainBump');
@@ -1600,6 +1622,7 @@
     setActiveTab('achieve');
   });
 
+  injectFunUpgradeStyles();
   buildGrid();
   tickHeartRegen();
   newStageBoard();
