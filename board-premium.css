@@ -1,60 +1,38 @@
-/* Dalmpang board skin V21 — visual-only; preserve V16+ chain/score logic. */
-/* Loaded after style.css. Do not modify the grid, overlay coordinates or hit boxes. */
-#boardWrap,
-#boardWrap.chickBoard {
-  background:
-    linear-gradient(135deg,rgba(255,246,216,.65),transparent 18%,rgba(74,39,20,.15) 76%,rgba(255,224,165,.36)),
-    linear-gradient(105deg,#c58a55 0%,#a76a39 4%,#8c532e 8%,#a97140 48%,#87502e 94%,#dca572 100%);
-  border: 3px solid #9b6034;
-  border-radius: 23px;
-  padding: 2.1%;
-  box-shadow:
-    inset 0 2px 1px rgba(255,240,201,.85),
-    inset 0 0 0 2px rgba(104,59,28,.4),
-    inset 0 4px 10px rgba(80,40,20,.26),
-    0 4px 0 rgba(99,53,28,.55),
-    0 9px 16px rgba(74,46,30,.19);
+/* Dalmpang V22: image-backed premium wood board skin.
+   Visual changes only: do not change board grid, lineLayer, touch coordinates, or JS. */
+#boardWrap, #boardWrap.chickBoard {
+  background: #b77c48 url('assets/images/board_frame.png') center / 100% 100% no-repeat;
+  border: 0; border-radius: 23px; padding: 4.5%;
+  box-shadow: 0 5px 0 rgba(100,54,27,.25), 0 9px 16px rgba(74,46,30,.14);
 }
-#boardWrap #grid,
-#boardWrap.chickBoard #grid { gap: .65%; }
-#boardWrap .die,
-#boardWrap.chickBoard .die,
-#boardWrap .die.imgTile {
-  background: linear-gradient(158deg,#fffdf2 0%,#fff5e3 38%,#f5e4c9 81%,#ead1ae 100%);
-  border: 1px solid #e1bc8e;
-  border-radius: 10px;
-  box-shadow:
-    inset 0 1px 2px rgba(255,255,255,.94),
-    inset 0 -2px 3px rgba(141,98,53,.12),
-    0 2px 0 rgba(100,62,37,.35),
-    0 3px 5px rgba(51,32,20,.13);
-  /* Preserve children clipping; selection/impact animation controls transform. */
+#boardWrap #grid, #boardWrap.chickBoard #grid { gap: .65%; }
+#boardWrap .die, #boardWrap.chickBoard .die, #boardWrap .die.imgTile {
+  background: url('assets/images/tile_base.png') center / 100% 100% no-repeat;
+  border: 0; border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(92,55,30,.09);
   overflow: hidden;
 }
-#boardWrap .die > img,
-#boardWrap.chickBoard .die img.chickSymbol {
-  display: block;
-  width: 112%;
-  height: 112%;
-  max-width: none;
-  max-height: none;
-  flex-shrink: 0;
-  object-fit: contain;
-  pointer-events: none;
-  filter: drop-shadow(0 2px 2px rgba(92,59,38,.10));
+#boardWrap .die::after, #boardWrap.chickBoard .die::after { content:none; }
+#boardWrap .die > img, #boardWrap.chickBoard .die img.chickSymbol {
+  display:block; width: 108%; height:108%; max-width:none; max-height:none;
+  flex-shrink:0; object-fit:contain; pointer-events:none;
+  filter: drop-shadow(0 2px 2px rgba(92,59,38,.09));
 }
-/* Special artwork is already a full-tile sprite; avoid enlarging its borders. */
-#boardWrap .die > img.specialTileArt,
-#boardWrap.chickBoard .die > img.specialTileArt {
-  width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+/* Never overscale sprites that already include a special tile background. */
+#boardWrap .die > img.specialTileArt, #boardWrap.chickBoard .die > img.specialTileArt {
+  width:100%; height:100%; max-width:100%; max-height:100%;
 }
-/* Reuse existing V14-V20 selected classes and animations, without redefining them. */
-#boardWrap .die.selected,
-#boardWrap.chickBoard .die.selected {
-  border-color: #f1c571;
-  box-shadow: 0 0 0 2px rgba(255,224,155,.62), 0 0 12px rgba(255,189,83,.46);
+#boardWrap .die.selected, #boardWrap.chickBoard .die.selected {
+  border:0; outline:2px solid #ffdb76; outline-offset:-2px;
+  box-shadow: 0 0 0 2px rgba(255,220,138,.55), 0 0 13px rgba(255,194,71,.47);
+  filter: brightness(1.035); z-index:7;
 }
-@media(max-width:390px) {
-  #boardWrap,#boardWrap.chickBoard { padding: 1.8%; border-width: 2px; }
-  #boardWrap #grid,#boardWrap.chickBoard #grid { gap: .52%; }
+#boardWrap .die.selected::before, #boardWrap.chickBoard .die.selected::before {
+  content:''; position:absolute; inset:0; border:0; border-radius:10px;
+  background:url('assets/images/tile_selected.png') center / 100% 100% no-repeat;
+  pointer-events:none; z-index:2;
+}
+@media(max-width:390px){
+  #boardWrap,#boardWrap.chickBoard{padding:4.2%;}
+  #boardWrap #grid,#boardWrap.chickBoard #grid{gap:.52%;}
 }
