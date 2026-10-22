@@ -1,4 +1,4 @@
-/* Dalmpang V24: image-backed premium wood board skin.
+/* Dalmpang V26: image-backed premium wood board skin.
    Visual changes only: do not change board grid, lineLayer, touch coordinates, or JS. */
 #boardWrap, #boardWrap.chickBoard {
   background: #b77c48 url('assets/images/board_frame.png') center / 100% 100% no-repeat;
@@ -14,7 +14,7 @@
 }
 #boardWrap .die::after, #boardWrap.chickBoard .die::after { content:none; }
 #boardWrap .die > img, #boardWrap.chickBoard .die img.chickSymbol {
-  display:block; width: 114.5%; height:114.5%; max-width:none; max-height:none;
+  display:block; width: var(--dp-symbol-size, 114.5%); height: var(--dp-symbol-size, 114.5%); max-width:none; max-height:none;
   flex-shrink:0; object-fit:contain; pointer-events:none;
   filter: drop-shadow(0 2px 2px rgba(92,59,38,.09));
 }
@@ -42,41 +42,31 @@
    game.js owns the same chickPopping class, --pop-delay and 530ms gravity timer.
    No layout, grid hitboxes, selection line or score logic changes. */
 #boardWrap.chickBoard .die.chickPopping {
-  overflow:visible;
-  isolation:isolate;
-  pointer-events:none;
-  transform-origin:50% 55%;
+  overflow:visible; isolation:isolate; pointer-events:none; transform-origin:50% 55%;
   animation:dalmV271Pop 345ms cubic-bezier(.19,.78,.24,1) var(--pop-delay,0ms) both;
 }
 @keyframes dalmV271Pop {
-  0%   { transform:scale(1); opacity:1; filter:brightness(1); }
-  18%  { transform:scale(.87,1.09); opacity:1; filter:brightness(1.08); }
-  43%  { transform:scale(1.16,.91); opacity:1; filter:brightness(1.2); }
-  59%  { transform:scale(1.23); opacity:1; filter:brightness(1.38) drop-shadow(0 0 6px #ffeab5); }
-  74%  { transform:scale(1.12); opacity:.95; filter:brightness(1.45); }
-  100% { transform:scale(.16) rotate(7deg); opacity:0; filter:brightness(1.6); }
+  0% {transform:scale(1);opacity:1;filter:brightness(1)}
+  18% {transform:scale(.87,1.09);opacity:1;filter:brightness(1.08)}
+  43% {transform:scale(1.16,.91);opacity:1;filter:brightness(1.2)}
+  59% {transform:scale(1.23);opacity:1;filter:brightness(1.38) drop-shadow(0 0 6px #ffeab5)}
+  74% {transform:scale(1.12);opacity:.95;filter:brightness(1.45)}
+  100% {transform:scale(.16) rotate(7deg);opacity:0;filter:brightness(1.6)}
 }
-/* Flash + expanding soft ring: pseudo elements do not intercept input. */
 #boardWrap.chickBoard .die.chickPopping::before {
-  content:''; position:absolute; inset:-14%; z-index:4;
-  pointer-events:none; border-radius:35%; opacity:0;
-  background:radial-gradient(circle,
-    rgba(255,255,255,.96) 0%,rgba(255,251,211,.88) 16%,
-    rgba(255,212,108,.36) 39%,transparent 66%);
+  content:'';position:absolute;inset:-14%;z-index:4;pointer-events:none;border-radius:35%;opacity:0;
+  background:radial-gradient(circle,rgba(255,255,255,.96) 0%,rgba(255,251,211,.88) 16%,rgba(255,212,108,.36) 39%,transparent 66%);
   box-shadow:0 0 0 2px rgba(255,248,206,.45);
   animation:dalmV271Flash 345ms ease-out var(--pop-delay,0ms) both;
 }
 @keyframes dalmV271Flash {
-  0%,30% { opacity:0;transform:scale(.35); }
-  51% { opacity:.85;transform:scale(.66); }
-  73% { opacity:1;transform:scale(1.06); }
-  100% { opacity:0;transform:scale(1.45); }
+  0%,30% {opacity:0;transform:scale(.35)}
+  51% {opacity:.85;transform:scale(.66)}
+  73% {opacity:1;transform:scale(1.06)}
+  100% {opacity:0;transform:scale(1.45)}
 }
-/* Eight small sparkle points, expanding beyond the tile silhouette.
-   The stagger comes entirely from the original --pop-delay on each tile. */
 #boardWrap.chickBoard .die.chickPopping::after {
-  content:'';position:absolute;inset:-34%;z-index:5;opacity:0;
-  border-radius:50%;pointer-events:none;
+  content:'';position:absolute;inset:-34%;z-index:5;opacity:0;border-radius:50%;pointer-events:none;
   background:
     radial-gradient(circle at 50% 2%,#fff 0 2px,#ffd66c 3px,transparent 5px),
     radial-gradient(circle at 81% 14%,#fff 0 1px,#ffd66c 2px,transparent 4px),
@@ -98,4 +88,23 @@
   #boardWrap.chickBoard .die.chickPopping{animation-duration:1ms}
   #boardWrap.chickBoard .die.chickPopping::before,
   #boardWrap.chickBoard .die.chickPopping::after{animation:none}
+}
+
+/* V31 — Theme art scale controls. Values are CSS only: do not resize the PNGs.
+   114.5% is the currently deployed image size, so first application is visually unchanged.
+   Edit the per-theme --dp-symbol-size and --dp-symbol-y values below.
+   To nudge vertically, use --dp-symbol-y: -2px or 2px (default 0px).
+   These rules act only on ordinary theme art; specialTileArt remains exactly 100%.
+   All six images in a theme inherit the same values. */
+#boardWrap img.chickSymbol[src*="chick_"]       { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="strawberry_easy_"] { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="dog_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; } /* Stage 3: peach */
+#boardWrap img.chickSymbol[src*="flower_easy_"] { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="rabbit_"]      { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="cat_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="bear_easy_"]   { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="pig_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+/* Position adjustment never moves the tile box or input hit target. */
+#boardWrap .die > img.chickSymbol:not(.specialTileArt) {
+  margin-top:var(--dp-symbol-y,0px);
 }
