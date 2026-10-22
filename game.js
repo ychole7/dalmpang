@@ -510,7 +510,7 @@
     if(count<5) return;
     const level=count>=8 ? 'amazing' : count===7 ? 'great' : 'nice';
     const title=level==='amazing' ? 'AMAZING!' : level==='great' ? 'GREAT!' : 'NICE!';
-    popTextEl.innerHTML='<div class="v17ComboWord">'+title+'</div><div class="v17ComboScore">+'+fmt(gained)+'</div>';
+    popTextEl.innerHTML='<div class="v18ComboHalo"></div><div class="v17ComboWord" data-text="'+title+'">'+title+'</div><div class="v17ComboScore">+'+fmt(gained)+'</div>';
     popParticlesEl.innerHTML='';
     const symbols=['✦','✧','★'];
     const n=level==='amazing'?16:level==='great'?12:8;
@@ -562,13 +562,65 @@
       #boardWrap .chainLiveScore.bonus{background:linear-gradient(180deg,#fff3bd,#ffd36e);border-color:#fff9dc;}
       #boardWrap .chainLiveScore.bump{animation:v17ScoreBump .18s ease-out;}
       @keyframes v17ScoreBump{0%{transform:translate(-50%,-50%) scale(.86)}75%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
-      .popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{z-index:48;animation:v17ComboIn .78s cubic-bezier(.16,.8,.3,1) both;}
-      .popEffect.v17-nice .popText,.popEffect.v17-great .popText,.popEffect.v17-amazing .popText{gap:2px;}
-      .popEffect .v17ComboWord{font-size:clamp(38px,11vw,62px);line-height:1.05;font-weight:1000;letter-spacing:-.06em;-webkit-text-stroke:2px white;paint-order:stroke fill;text-shadow:0 3px 0 rgba(116,65,18,.28),0 6px 16px rgba(100,58,18,.2);}
-      .popEffect.v17-nice .v17ComboWord{color:#ffb521;}
-      .popEffect.v17-great .v17ComboWord{color:#9b70ed;}
-      .popEffect.v17-amazing .v17ComboWord{color:#ff7fae;font-size:clamp(42px,12vw,68px);filter:drop-shadow(0 0 9px rgba(255,237,126,.9));}
-      .popEffect .v17ComboScore{font-size:clamp(19px,5.8vw,29px);line-height:1.15;font-weight:1000;color:#fff;text-shadow:0 2px 2px rgba(68,44,28,.65),0 3px 11px rgba(60,40,20,.5);}
+      /* V18: high-contrast arcade lettering; no opaque card over gameplay. */
+      .popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{
+        z-index:48;animation:v18ComboPunch .94s cubic-bezier(.16,.8,.28,1) both;
+        isolation:isolate;
+      }
+      .popEffect.v17-nice .popText,.popEffect.v17-great .popText,.popEffect.v17-amazing .popText{
+        position:relative;gap:1px;transform:translateY(-2%);
+        overflow:visible;
+      }
+      .popEffect .v18ComboHalo{
+        position:absolute;width:min(86vw,360px);height:140px;
+        top:50%;left:50%;transform:translate(-50%,-58%);
+        background:radial-gradient(ellipse,rgba(32,21,67,.48) 0%,rgba(44,24,62,.26) 33%,transparent 72%);
+        filter:blur(10px);z-index:-1;pointer-events:none;
+      }
+      .popEffect .v17ComboWord{
+        position:relative;display:block;white-space:nowrap;
+        font-family:system-ui,-apple-system,"Arial Rounded MT Bold",sans-serif;
+        font-size:clamp(53px,14.8vw,82px);
+        line-height:1.1;font-weight:1000;letter-spacing:-.065em;
+        -webkit-text-stroke:clamp(3px,.8vw,5px) #56330e;
+        paint-order:stroke fill;
+        text-shadow:0 3px 0 #fff6d4,0 7px 0 #743f18,0 10px 0 rgba(47,29,30,.75),0 16px 17px rgba(35,22,37,.65);
+        filter:drop-shadow(0 0 7px rgba(255,255,255,.85));
+      }
+      .popEffect .v17ComboWord:after{
+        content:attr(data-text);position:absolute;left:0;top:0;width:100%;
+        color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.9);
+        pointer-events:none;opacity:.9;
+      }
+      .popEffect.v17-nice .v17ComboWord{
+        color:#ffcb32;-webkit-text-stroke-color:#90511d;
+        text-shadow:0 3px 0 #fffbd7,0 7px 0 #b76a11,0 10px 0 #663811,0 15px 17px rgba(30,20,40,.62);
+      }
+      .popEffect.v17-great .v17ComboWord{
+        color:#c08aff;-webkit-text-stroke-color:#52328b;
+        text-shadow:0 3px 0 #fff2ff,0 7px 0 #7647cc,0 10px 0 #442870,0 15px 19px rgba(32,19,73,.7);
+      }
+      .popEffect.v17-amazing .v17ComboWord{
+        color:#ff7aa7;font-size:clamp(49px,12.4vw,72px);
+        -webkit-text-stroke-color:#8c235e;
+        text-shadow:0 3px 0 #fff2c4,0 7px 0 #f34498,0 11px 0 #7b245e,0 17px 20px rgba(36,11,55,.75);
+        filter:drop-shadow(0 0 9px rgba(255,213,78,.9));
+      }
+      .popEffect .v17ComboScore{
+        margin-top:6px;font-size:clamp(25px,7vw,38px);line-height:1.05;
+        font-weight:1000;color:#fff;
+        -webkit-text-stroke:1.2px rgba(60,34,85,.8);
+        paint-order:stroke fill;
+        text-shadow:0 3px 0 #b36b18,0 5px 12px rgba(26,12,39,.78);
+      }
+      @keyframes v18ComboPunch{
+        0%{opacity:0;transform:translateY(18px) scale(.46) rotate(-5deg)}
+        17%{opacity:1;transform:translateY(-5px) scale(1.22) rotate(2deg)}
+        29%{transform:translateY(0) scale(.96) rotate(-1deg)}
+        41%{transform:translateY(0) scale(1.04)}
+        70%{opacity:1;transform:translateY(0) scale(1)}
+        100%{opacity:0;transform:translateY(-30px) scale(1.12)}
+      }
       @keyframes v17ComboIn{0%{opacity:0;transform:scale(.65) translateY(16px)}19%{opacity:1;transform:scale(1.12) translateY(0)}37%{transform:scale(1)}73%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1) translateY(-13px)}}
       @media(prefers-reduced-motion:reduce){#boardWrap .chickChainTip.impact{animation:none}.popEffect.v17-nice,.popEffect.v17-great,.popEffect.v17-amazing{animation:v17ComboFade .78s ease-out both}@keyframes v17ComboFade{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}}
     `;
