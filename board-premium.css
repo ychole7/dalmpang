@@ -38,50 +38,64 @@
   #boardWrap #grid,#boardWrap.chickBoard #grid{gap:.30%;}
 }
 
-/* V27 — release-only soft candy pop. The existing game.js sets chickPopping
-   and --pop-delay; its score, line layers, hit tests, and 530ms gravity stay intact.
-   Pseudo elements are clipped inside each tile and never intercept touch. */
+/* V27.1 — stronger per-tile candy POP on RELEASE only.
+   game.js owns the same chickPopping class, --pop-delay and 530ms gravity timer.
+   No layout, grid hitboxes, selection line or score logic changes. */
 #boardWrap.chickBoard .die.chickPopping {
-  animation: dalmV27Pop 320ms cubic-bezier(.20,.70,.30,1) var(--pop-delay,0ms) both;
-  transform-origin:center center;
-  pointer-events:none;
+  overflow:visible;
   isolation:isolate;
+  pointer-events:none;
+  transform-origin:50% 55%;
+  animation:dalmV271Pop 345ms cubic-bezier(.19,.78,.24,1) var(--pop-delay,0ms) both;
 }
-@keyframes dalmV27Pop {
+@keyframes dalmV271Pop {
   0%   { transform:scale(1); opacity:1; filter:brightness(1); }
-  27%  { transform:scale(.92,1.08); opacity:1; filter:brightness(1.08); }
-  53%  { transform:scale(1.17,.88); opacity:1; filter:brightness(1.25) drop-shadow(0 0 5px rgba(255,239,180,.8)); }
-  73%  { transform:scale(1.20); opacity:.92; filter:brightness(1.45); }
-  100% { transform:scale(.22) rotate(7deg); opacity:0; filter:brightness(1.5); }
+  18%  { transform:scale(.87,1.09); opacity:1; filter:brightness(1.08); }
+  43%  { transform:scale(1.16,.91); opacity:1; filter:brightness(1.2); }
+  59%  { transform:scale(1.23); opacity:1; filter:brightness(1.38) drop-shadow(0 0 6px #ffeab5); }
+  74%  { transform:scale(1.12); opacity:.95; filter:brightness(1.45); }
+  100% { transform:scale(.16) rotate(7deg); opacity:0; filter:brightness(1.6); }
 }
+/* Flash + expanding soft ring: pseudo elements do not intercept input. */
 #boardWrap.chickBoard .die.chickPopping::before {
-  content:''; position:absolute; inset:5%; border-radius:50%;
-  z-index:3; pointer-events:none; opacity:0;
-  background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,246,197,.47) 32%,transparent 68%);
-  animation:dalmV27Flash 320ms ease-out var(--pop-delay,0ms) both;
+  content:''; position:absolute; inset:-14%; z-index:4;
+  pointer-events:none; border-radius:35%; opacity:0;
+  background:radial-gradient(circle,
+    rgba(255,255,255,.96) 0%,rgba(255,251,211,.88) 16%,
+    rgba(255,212,108,.36) 39%,transparent 66%);
+  box-shadow:0 0 0 2px rgba(255,248,206,.45);
+  animation:dalmV271Flash 345ms ease-out var(--pop-delay,0ms) both;
 }
-@keyframes dalmV27Flash {
-  0%,18% { opacity:0; transform:scale(.4); }
-  50% { opacity:.74; transform:scale(.82); }
-  100% { opacity:0; transform:scale(1.7); }
+@keyframes dalmV271Flash {
+  0%,30% { opacity:0;transform:scale(.35); }
+  51% { opacity:.85;transform:scale(.66); }
+  73% { opacity:1;transform:scale(1.06); }
+  100% { opacity:0;transform:scale(1.45); }
 }
+/* Eight small sparkle points, expanding beyond the tile silhouette.
+   The stagger comes entirely from the original --pop-delay on each tile. */
 #boardWrap.chickBoard .die.chickPopping::after {
-  content:''; position:absolute; inset:0; border-radius:50%;
-  z-index:4; pointer-events:none; opacity:0;
+  content:'';position:absolute;inset:-34%;z-index:5;opacity:0;
+  border-radius:50%;pointer-events:none;
   background:
-    radial-gradient(circle at 12% 22%,#fff9d3 0 2px,transparent 3px),
-    radial-gradient(circle at 86% 20%,#ffe18a 0 2px,transparent 3px),
-    radial-gradient(circle at 91% 72%,#fff 0 2px,transparent 3px),
-    radial-gradient(circle at 17% 82%,#ffe8a2 0 2px,transparent 3px);
-  animation:dalmV27Spark 320ms ease-out var(--pop-delay,0ms) both;
+    radial-gradient(circle at 50% 2%,#fff 0 2px,#ffd66c 3px,transparent 5px),
+    radial-gradient(circle at 81% 14%,#fff 0 1px,#ffd66c 2px,transparent 4px),
+    radial-gradient(circle at 98% 49%,#fff8b4 0 2px,transparent 4px),
+    radial-gradient(circle at 84% 85%,#fff 0 2px,#ffc85b 3px,transparent 5px),
+    radial-gradient(circle at 50% 98%,#fff 0 2px,transparent 5px),
+    radial-gradient(circle at 16% 86%,#ffdb7e 0 2px,transparent 5px),
+    radial-gradient(circle at 2% 48%,#fff 0 2px,#ffda77 3px,transparent 5px),
+    radial-gradient(circle at 15% 14%,#fff1b0 0 2px,transparent 5px);
+  animation:dalmV271Sparks 345ms cubic-bezier(.15,.7,.22,1) var(--pop-delay,0ms) both;
 }
-@keyframes dalmV27Spark {
-  0%,30% { opacity:0; transform:scale(.65) rotate(0deg); }
-  55% { opacity:1; transform:scale(1); }
-  100% { opacity:0; transform:scale(1.65) rotate(13deg); }
+@keyframes dalmV271Sparks {
+  0%,37% {opacity:0;transform:scale(.35) rotate(-8deg)}
+  57% {opacity:1;transform:scale(.63) rotate(0deg)}
+  87% {opacity:1;transform:scale(1) rotate(9deg)}
+  100% {opacity:0;transform:scale(1.14) rotate(12deg)}
 }
-@media(prefers-reduced-motion:reduce) {
-  #boardWrap.chickBoard .die.chickPopping { animation-duration:1ms; }
+@media(prefers-reduced-motion:reduce){
+  #boardWrap.chickBoard .die.chickPopping{animation-duration:1ms}
   #boardWrap.chickBoard .die.chickPopping::before,
-  #boardWrap.chickBoard .die.chickPopping::after { animation:none; }
+  #boardWrap.chickBoard .die.chickPopping::after{animation:none}
 }
