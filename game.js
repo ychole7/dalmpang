@@ -1052,6 +1052,532 @@
     if(!required.every(type=>allowed.includes(type))) throw new Error('Stage mission configuration invalid: '+(Number(key)+1));
   }
 
+  // V65: stages 601–700 (zero-based indices 600–699), keep earlier stages untouched.
+  const V65_STAGES = [
+    ['rabbit', 12990, 36, []], // 601
+    ['rabbit', 13010, 36, ['ice','star']], // 602
+    ['flower', 13300, 35, ['ice','star']], // 603
+    ['flower', 13320, 35, ['bomb','stone']], // 604
+    ['cat', 13340, 35, ['ice','bomb','stone']], // 605
+    ['cat', 13360, 35, ['bomb','stone']], // 606
+    ['strawberry', 13390, 35, ['gift','rainbow']], // 607
+    ['strawberry', 13410, 35, ['gift','rainbow']], // 608
+    ['bear', 13430, 35, ['gift','rainbow']], // 609
+    ['bear', 13460, 35, ['star','bomb']], // 610
+    ['pig', 13480, 35, ['star','bomb']], // 611
+    ['pig', 13500, 35, ['star','bomb']], // 612
+    ['dog', 13530, 35, ['ice','bomb']], // 613
+    ['dog', 13550, 35, ['ice','bomb']], // 614
+    ['chick', 13710, 35, ['stone','bomb','ice']], // 615
+    ['strawberry', 13740, 35, ['gift','star']], // 616
+    ['rabbit', 13620, 35, ['gift','star']], // 617
+    ['rabbit', 13640, 35, ['gift','star']], // 618
+    ['chick', 13660, 35, ['rainbow','ice']], // 619
+    ['chick', 13690, 36, ['gift','rainbow','ice']], // 620
+    ['chick', 13510, 36, []], // 621
+    ['strawberry', 13530, 36, ['star','rainbow']], // 622
+    ['strawberry', 13820, 35, ['star','rainbow']], // 623
+    ['strawberry', 13840, 35, ['star','rainbow']], // 624
+    ['rabbit', 13860, 35, ['rainbow','ice','gift']], // 625
+    ['rabbit', 13880, 35, ['ice','gift']], // 626
+    ['rabbit', 13910, 35, ['ice','gift']], // 627
+    ['dog', 13930, 35, ['ice','star']], // 628
+    ['dog', 13950, 35, ['ice','star']], // 629
+    ['dog', 13980, 35, ['bomb','ice','star']], // 630
+    ['bear', 14000, 35, ['bomb','stone']], // 631
+    ['bear', 14020, 35, ['bomb','stone']], // 632
+    ['bear', 14050, 35, ['bomb','stone']], // 633
+    ['cat', 14070, 35, ['gift','rainbow']], // 634
+    ['cat', 14230, 35, ['ice','gift','rainbow']], // 635
+    ['cat', 14260, 35, ['gift','rainbow']], // 636
+    ['bear', 14140, 35, ['star','bomb']], // 637
+    ['bear', 14160, 35, ['star','bomb']], // 638
+    ['pig', 14180, 35, ['star','bomb']], // 639
+    ['pig', 14210, 36, ['gift','ice','bomb']], // 640
+    ['dog', 14030, 37, []], // 641
+    ['dog', 14050, 37, ['gift','star']], // 642
+    ['chick', 14340, 36, ['rainbow','ice']], // 643
+    ['chick', 14360, 36, ['rainbow','ice']], // 644
+    ['strawberry', 14380, 36, ['star','rainbow','ice']], // 645
+    ['rabbit', 14400, 36, ['stone','bomb','gift']], // 646
+    ['dog', 14430, 36, ['stone','bomb','gift']], // 647
+    ['dog', 14450, 36, ['stone','bomb','gift']], // 648
+    ['flower', 14470, 36, ['star','rainbow']], // 649
+    ['flower', 14500, 36, ['stone','bomb','star','rainbow']], // 650
+    ['bear', 14520, 36, ['star','rainbow']], // 651
+    ['bear', 14540, 36, ['ice','gift']], // 652
+    ['cat', 14570, 36, ['ice','gift']], // 653
+    ['cat', 14590, 36, ['ice','gift']], // 654
+    ['pig', 14750, 36, ['rainbow','ice','star']], // 655
+    ['pig', 14780, 36, ['ice','star']], // 656
+    ['pig', 14660, 36, ['ice','star']], // 657
+    ['dog', 14680, 36, ['bomb','stone']], // 658
+    ['dog', 14700, 36, ['bomb','stone']], // 659
+    ['dog', 14730, 37, ['ice','bomb','stone']], // 660
+    ['strawberry', 14550, 37, []], // 661
+    ['strawberry', 14570, 37, ['star','bomb']], // 662
+    ['strawberry', 14860, 36, ['star','bomb']], // 663
+    ['rabbit', 14880, 36, ['ice','bomb']], // 664
+    ['rabbit', 14900, 36, ['bomb','ice']], // 665
+    ['rabbit', 14920, 36, ['ice','bomb']], // 666
+    ['dog', 14950, 36, ['gift','star']], // 667
+    ['dog', 14970, 36, ['gift','star']], // 668
+    ['dog', 14990, 36, ['gift','star']], // 669
+    ['flower', 15020, 36, ['gift','rainbow','ice']], // 670
+    ['flower', 15040, 36, ['rainbow','ice']], // 671
+    ['flower', 15060, 36, ['rainbow','ice']], // 672
+    ['strawberry', 15090, 36, ['stone','bomb','gift']], // 673
+    ['strawberry', 15110, 36, ['stone','bomb','gift']], // 674
+    ['rabbit', 15270, 36, ['star','stone','bomb','gift']], // 675
+    ['dog', 15300, 36, ['star','rainbow']], // 676
+    ['flower', 15180, 36, ['star','rainbow']], // 677
+    ['flower', 15200, 36, ['star','rainbow']], // 678
+    ['bear', 15220, 36, ['ice','gift']], // 679
+    ['bear', 15250, 37, ['stone','bomb','ice','gift']], // 680
+    ['cat', 15070, 38, []], // 681
+    ['cat', 15090, 38, ['bomb','stone']], // 682
+    ['pig', 15380, 37, ['bomb','stone']], // 683
+    ['pig', 15400, 37, ['bomb','stone']], // 684
+    ['chick', 15420, 37, ['ice','gift','rainbow']], // 685
+    ['chick', 15440, 37, ['gift','rainbow']], // 686
+    ['rabbit', 15470, 37, ['gift','rainbow']], // 687
+    ['rabbit', 15490, 37, ['star','bomb']], // 688
+    ['flower', 15510, 37, ['star','bomb']], // 689
+    ['flower', 15540, 37, ['rainbow','star','bomb']], // 690
+    ['bear', 15560, 37, ['ice','bomb']], // 691
+    ['bear', 15580, 37, ['ice','bomb']], // 692
+    ['bear', 15610, 37, ['ice','bomb']], // 693
+    ['pig', 15630, 37, ['gift','star']], // 694
+    ['pig', 15790, 37, ['gift','star']], // 695
+    ['pig', 15820, 37, ['gift','star']], // 696
+    ['dog', 15700, 37, ['rainbow','ice']], // 697
+    ['dog', 15720, 37, ['rainbow','ice']], // 698
+    ['dog', 15740, 37, ['rainbow','ice']], // 699
+    ['chick', 15770, 38, ['stone','bomb','gift']], // 700
+  ];
+  const V65_MISSIONS = {
+    604:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 605
+    609:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 610
+    614:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 615
+    619:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 620
+    624:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 625
+    629:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 630
+    634:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 635
+    639:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 640
+    644:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 645
+    649:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 650
+    654:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 655
+    659:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 660
+    664:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 665
+    669:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 670
+    674:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 675
+    679:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 680
+    684:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 685
+    689:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 690
+    694:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 695
+    699:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 700
+  };
+  // Validate configuration shape and mission-special availability before starting.
+  if(V65_STAGES.length!==100) throw new Error("V65 stage count invalid");
+  for(const [key, mission] of Object.entries(V65_MISSIONS)){
+    const allowed=V65_STAGES[Number(key)-600]?.[3]||[];
+    const needed=mission.kind==='bombStone'?['stone','bomb']:[mission.kind];
+    if(!needed.every(type=>allowed.includes(type))) throw new Error('Stage mission configuration invalid: '+(Number(key)+1));
+  }
+
+  // V66: curated stage definitions, zero-based slots 700–799.
+  const V66_STAGES = [
+    ['chick',7980,29,['star']], // 701
+    ['chick',8000,29,['bomb','stone']], // 702
+    ['strawberry',8250,28,['bomb','stone']], // 703
+    ['strawberry',8280,28,['bomb','stone']], // 704
+    ['dog',8300,28,['stone','bomb','star','ice']], // 705
+    ['dog',8320,28,['star','ice']], // 706
+    ['flower',8530,28,['star','ice']], // 707
+    ['pig',8560,28,['star','ice']], // 708
+    ['rabbit',8580,28,['gift','rainbow']], // 709
+    ['rabbit',8420,29,['rainbow','gift']], // 710
+    ['cat',8230,29,['gift','rainbow']], // 711
+    ['cat',8260,29,['gift','rainbow']], // 712
+    ['bear',8500,28,['bomb','star']], // 713
+    ['bear',8520,28,['star']], // 714
+    ['bear',8550,28,['star','bomb']], // 715
+    ['pig',8580,28,['bomb','star']], // 716
+    ['chick',8780,28,['rainbow','ice']], // 717
+    ['chick',8800,28,['rainbow','ice']], // 718
+    ['strawberry',8830,28,['rainbow','ice']], // 719
+    ['dog',8680,29,['bomb','rainbow','ice']], // 720
+    ['flower',8480,29,['gift','bomb','stone']], // 721
+    ['bear',8500,29,['gift','bomb','stone']], // 722
+    ['rabbit',8750,28,['gift','bomb','stone']], // 723
+    ['rabbit',8780,28,['star','rainbow']], // 724
+    ['cat',8800,28,['ice','bomb','gift']], // 725
+    ['cat',8820,28,['ice','bomb','gift']], // 726
+    ['bear',9030,28,['star']], // 727
+    ['bear',9060,28,['ice','bomb','gift']], // 728
+    ['cat',9080,28,['stone','bomb','ice']], // 729
+    ['pig',8920,29,['bomb','stone','ice']], // 730
+    ['chick',8730,29,['stone','bomb','ice']], // 731
+    ['chick',8760,29,['stone','bomb','ice']], // 732
+    ['strawberry',9000,28,['gift','star']], // 733
+    ['strawberry',9020,28,['gift','star']], // 734
+    ['dog',9050,28,['gift','star']], // 735
+    ['rabbit',9080,28,['gift','star']], // 736
+    ['flower',9280,28,['bomb','stone']], // 737
+    ['flower',9300,28,['bomb','stone']], // 738
+    ['cat',9330,28,['bomb','stone']], // 739
+    ['cat',9180,29,['stone','bomb']], // 740
+    ['bear',8980,30,['star','ice']], // 741
+    ['bear',9000,30,['star','ice']], // 742
+    ['rabbit',9250,29,['star','ice']], // 743
+    ['pig',9280,29,['star','ice']], // 744
+    ['chick',9300,29,['star','gift','rainbow']], // 745
+    ['chick',9320,29,['gift','rainbow']], // 746
+    ['strawberry',9530,29,['bomb','star']], // 747
+    ['strawberry',9560,29,['bomb','star']], // 748
+    ['dog',9580,29,['rainbow','ice']], // 749
+    ['flower',9420,30,['rainbow','ice']], // 750
+    ['flower',9230,30,['rainbow','ice']], // 751
+    ['flower',9260,30,['rainbow','ice']], // 752
+    ['rabbit',9500,29,['star']], // 753
+    ['rabbit',9520,29,['gift','bomb','stone']], // 754
+    ['cat',9550,29,['ice','gift','bomb','stone']], // 755
+    ['cat',9580,29,['gift','bomb','stone']], // 756
+    ['dog',9780,29,['star','rainbow']], // 757
+    ['pig',9800,29,['star','rainbow']], // 758
+    ['chick',9830,29,['star','rainbow']], // 759
+    ['chick',9680,30,['gift','star','rainbow']], // 760
+    ['strawberry',9480,30,['ice','bomb','gift']], // 761
+    ['strawberry',9500,30,['ice','bomb','gift']], // 762
+    ['dog',9750,29,['ice','bomb','gift']], // 763
+    ['dog',9780,29,['ice','bomb','gift']], // 764
+    ['flower',9800,29,['stone','bomb','ice']], // 765
+    ['flower',9820,29,['star']], // 766
+    ['rabbit',10030,29,['stone','bomb','ice']], // 767
+    ['rabbit',10060,29,['stone','bomb','ice']], // 768
+    ['cat',10080,29,['gift','star']], // 769
+    ['cat',9920,30,['rainbow','bomb','stone']], // 770
+    ['strawberry',9730,30,['bomb','stone']], // 771
+    ['bear',9760,30,['bomb','stone']], // 772
+    ['pig',10000,29,['star','ice']], // 773
+    ['pig',10020,29,['star','ice']], // 774
+    ['chick',10050,29,['star','ice']], // 775
+    ['chick',10080,29,['star','ice']], // 776
+    ['dog',10280,29,['gift','rainbow']], // 777
+    ['strawberry',10300,29,['gift','rainbow']], // 778
+    ['flower',10330,29,['star']], // 779
+    ['flower',10180,30,['bomb','gift','rainbow']], // 780
+    ['rabbit',9980,31,['bomb','star']], // 781
+    ['rabbit',10000,31,['bomb','star']], // 782
+    ['cat',10250,30,['bomb','star']], // 783
+    ['cat',10280,30,['bomb','star']], // 784
+    ['chick',10300,30,['ice','rainbow']], // 785
+    ['bear',10320,30,['rainbow','ice']], // 786
+    ['pig',10530,30,['rainbow','ice']], // 787
+    ['pig',10560,30,['rainbow','ice']], // 788
+    ['chick',10580,30,['gift','bomb','stone']], // 789
+    ['chick',10420,31,['bomb','gift','stone']], // 790
+    ['strawberry',10230,31,['gift','bomb','stone']], // 791
+    ['pig',10260,31,['star']], // 792
+    ['dog',10500,30,['ice','bomb','gift']], // 793
+    ['dog',10520,30,['ice','bomb','gift']], // 794
+    ['flower',10550,30,['gift','ice','bomb']], // 795
+    ['rabbit',10580,30,['ice','bomb','gift']], // 796
+    ['cat',10780,30,['stone','bomb','ice']], // 797
+    ['cat',10800,30,['stone','bomb','ice']], // 798
+    ['pig',10830,30,['stone','bomb','ice']], // 799
+    ['bear',10680,31,['stone','bomb','ice']], // 800
+  ];
+  const V66_MISSIONS = {
+    704:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 705
+    709:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 710
+    714:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 715
+    719:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 720
+    724:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 725
+    729:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 730
+    734:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 735
+    739:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 740
+    744:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 745
+    749:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 750
+    754:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 755
+    759:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 760
+    764:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 765
+    769:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 770
+    774:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 775
+    779:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 780
+    784:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 785
+    789:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 790
+    794:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 795
+    799:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 800
+  };
+  if(V66_STAGES.length!==100) throw new Error('V66 stage count invalid');
+  for(const [key,mission] of Object.entries(V66_MISSIONS)){
+    const allowed=V66_STAGES[Number(key)-700]?.[3]||[];
+    const needed=mission.kind==='bombStone'?['stone','bomb']:[mission.kind];
+    if(!needed.every(type=>allowed.includes(type))) throw new Error('Stage mission configuration invalid: '+(Number(key)+1));
+  }
+  // V67: curated stage definitions, zero-based slots 800–899.
+  const V67_STAGES = [
+    ['cat',10480,31,['star']], // 801
+    ['cat',10510,31,['bomb','star']], // 802
+    ['bear',10760,30,['bomb','star']], // 803
+    ['bear',10790,30,['bomb','star']], // 804
+    ['pig',10820,30,['rainbow','ice']], // 805
+    ['pig',10850,30,['rainbow','ice']], // 806
+    ['chick',11060,30,['rainbow','ice']], // 807
+    ['rabbit',11090,30,['rainbow','ice']], // 808
+    ['strawberry',11120,30,['gift','bomb','stone']], // 809
+    ['strawberry',10970,31,['ice','gift','bomb','stone']], // 810
+    ['dog',10780,31,['gift','bomb','stone']], // 811
+    ['dog',10810,31,['gift','bomb','stone']], // 812
+    ['flower',11060,30,['star','rainbow']], // 813
+    ['flower',11090,30,['star']], // 814
+    ['flower',11120,30,['gift','star','rainbow']], // 815
+    ['rabbit',11150,30,['star','rainbow']], // 816
+    ['cat',11360,30,['ice','bomb','gift']], // 817
+    ['cat',11390,30,['ice','bomb','gift']], // 818
+    ['bear',11420,30,['ice','bomb','gift']], // 819
+    ['pig',11270,31,['stone','bomb','ice','gift']], // 820
+    ['chick',11080,31,['stone','bomb','ice']], // 821
+    ['flower',11110,31,['stone','bomb','ice']], // 822
+    ['strawberry',11360,30,['stone','bomb','ice']], // 823
+    ['strawberry',11390,30,['gift','star']], // 824
+    ['dog',11420,30,['rainbow','bomb','stone']], // 825
+    ['dog',11450,30,['bomb','stone']], // 826
+    ['flower',11660,30,['star']], // 827
+    ['flower',11690,30,['bomb','stone']], // 828
+    ['dog',11720,30,['star','ice']], // 829
+    ['rabbit',11570,31,['star','ice']], // 830
+    ['cat',11380,31,['star','ice']], // 831
+    ['cat',11410,31,['star','ice']], // 832
+    ['bear',11660,30,['gift','rainbow']], // 833
+    ['bear',11690,30,['gift','rainbow']], // 834
+    ['pig',11720,30,['bomb','gift','rainbow']], // 835
+    ['strawberry',11750,30,['gift','rainbow']], // 836
+    ['chick',11960,30,['bomb','star']], // 837
+    ['chick',11990,30,['bomb','star']], // 838
+    ['dog',12020,30,['bomb','star']], // 839
+    ['dog',11870,31,['ice','bomb','star']], // 840
+    ['flower',11680,32,['rainbow','ice']], // 841
+    ['flower',11710,32,['rainbow','ice']], // 842
+    ['strawberry',11960,31,['rainbow','ice']], // 843
+    ['rabbit',11990,31,['rainbow','ice']], // 844
+    ['cat',12020,31,['bomb','gift','stone']], // 845
+    ['cat',12050,31,['gift','bomb','stone']], // 846
+    ['bear',12260,31,['star','rainbow']], // 847
+    ['bear',12290,31,['star','rainbow']], // 848
+    ['pig',12320,31,['ice','bomb','gift']], // 849
+    ['chick',12170,32,['gift','ice','bomb']], // 850
+    ['chick',11980,32,['ice','bomb','gift']], // 851
+    ['chick',12010,32,['ice','bomb','gift']], // 852
+    ['strawberry',12260,31,['star']], // 853
+    ['strawberry',12290,31,['stone','bomb','ice']], // 854
+    ['dog',12320,31,['stone','bomb','ice']], // 855
+    ['dog',12350,31,['stone','bomb','ice']], // 856
+    ['pig',12560,31,['gift','star']], // 857
+    ['rabbit',12590,31,['gift','star']], // 858
+    ['cat',12620,31,['gift','star']], // 859
+    ['cat',12470,32,['star','gift']], // 860
+    ['bear',12280,32,['bomb','stone']], // 861
+    ['bear',12310,32,['bomb','stone']], // 862
+    ['pig',12560,31,['bomb','stone']], // 863
+    ['pig',12590,31,['bomb','stone']], // 864
+    ['chick',12620,31,['rainbow','star','ice']], // 865
+    ['chick',12650,31,['star']], // 866
+    ['strawberry',12860,31,['star','ice']], // 867
+    ['strawberry',12890,31,['star','ice']], // 868
+    ['dog',12920,31,['gift','rainbow']], // 869
+    ['dog',12770,32,['ice','bomb','star']], // 870
+    ['bear',12580,32,['bomb','star']], // 871
+    ['flower',12610,32,['bomb','star']], // 872
+    ['rabbit',12860,31,['rainbow','ice']], // 873
+    ['rabbit',12890,31,['rainbow','ice']], // 874
+    ['cat',12920,31,['gift','rainbow','ice']], // 875
+    ['cat',12950,31,['rainbow','ice']], // 876
+    ['pig',13160,31,['gift','bomb','stone']], // 877
+    ['bear',13190,31,['gift','bomb','stone']], // 878
+    ['chick',13220,31,['star']], // 879
+    ['chick',13070,32,['stone','bomb','gift']], // 880
+    ['strawberry',12880,33,['star','rainbow']], // 881
+    ['strawberry',12910,33,['star','rainbow']], // 882
+    ['dog',13160,32,['star','rainbow']], // 883
+    ['dog',13190,32,['star','rainbow']], // 884
+    ['cat',13220,32,['rainbow','ice','bomb','gift']], // 885
+    ['flower',13250,32,['ice','bomb','gift']], // 886
+    ['rabbit',13460,32,['ice','bomb','gift']], // 887
+    ['rabbit',13490,32,['ice','bomb','gift']], // 888
+    ['cat',13520,32,['stone','bomb','ice']], // 889
+    ['cat',13370,33,['star','stone','bomb','ice']], // 890
+    ['bear',13180,33,['stone','bomb','ice']], // 891
+    ['rabbit',13210,33,['star']], // 892
+    ['pig',13460,32,['bomb','stone']], // 893
+    ['pig',13490,32,['bomb','stone']], // 894
+    ['chick',13520,32,['bomb','stone']], // 895
+    ['strawberry',13550,32,['bomb','stone']], // 896
+    ['dog',13760,32,['star','ice']], // 897
+    ['dog',13790,32,['star','ice']], // 898
+    ['rabbit',13820,32,['star','ice']], // 899
+    ['flower',13670,33,['ice','star']], // 900
+  ];
+  const V67_MISSIONS = {
+    804:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 805
+    809:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 810
+    814:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 815
+    819:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 820
+    824:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 825
+    829:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 830
+    834:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 835
+    839:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 840
+    844:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 845
+    849:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 850
+    854:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 855
+    859:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 860
+    864:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 865
+    869:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 870
+    874:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 875
+    879:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 880
+    884:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 885
+    889:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 890
+    894:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 895
+    899:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 900
+  };
+  if(V67_STAGES.length!==100) throw new Error('V67 stage count invalid');
+  for(const [key,mission] of Object.entries(V67_MISSIONS)){
+    const allowed=V67_STAGES[Number(key)-800]?.[3]||[];
+    const needed=mission.kind==='bombStone'?['stone','bomb']:[mission.kind];
+    if(!needed.every(type=>allowed.includes(type))) throw new Error('Stage mission configuration invalid: '+(Number(key)+1));
+  }
+  // V68: curated stage definitions, zero-based slots 900–999.
+  const V68_STAGES = [
+    ['dog',12980,33,['star']], // 901
+    ['dog',13020,33,['star','rainbow']], // 902
+    ['flower',13270,32,['star','rainbow']], // 903
+    ['flower',13300,32,['star','rainbow']], // 904
+    ['rabbit',13340,32,['gift','ice','bomb']], // 905
+    ['rabbit',13380,32,['ice','bomb','gift']], // 906
+    ['cat',13590,32,['ice','bomb','gift']], // 907
+    ['strawberry',13620,32,['ice','bomb','gift']], // 908
+    ['bear',13660,32,['stone','bomb','ice']], // 909
+    ['bear',13520,33,['stone','bomb','ice']], // 910
+    ['pig',13330,33,['stone','bomb','ice']], // 911
+    ['pig',13360,33,['stone','bomb','ice']], // 912
+    ['chick',13620,32,['gift','star']], // 913
+    ['chick',13660,32,['star']], // 914
+    ['chick',13690,32,['star','gift']], // 915
+    ['strawberry',13720,32,['gift','star']], // 916
+    ['dog',13940,32,['bomb','stone']], // 917
+    ['dog',13980,32,['bomb','stone']], // 918
+    ['flower',14010,32,['bomb','stone']], // 919
+    ['rabbit',13860,33,['rainbow','bomb','stone']], // 920
+    ['cat',13680,33,['star','ice']], // 921
+    ['chick',13720,33,['star','ice']], // 922
+    ['bear',13970,32,['star','ice']], // 923
+    ['bear',14000,32,['gift','rainbow']], // 924
+    ['pig',14040,32,['ice','bomb','star']], // 925
+    ['pig',14080,32,['bomb','star']], // 926
+    ['chick',14290,32,['star']], // 927
+    ['chick',14320,32,['bomb','star']], // 928
+    ['pig',14360,32,['rainbow','ice']], // 929
+    ['strawberry',14220,33,['gift','rainbow','ice']], // 930
+    ['dog',14030,33,['rainbow','ice']], // 931
+    ['dog',14060,33,['rainbow','ice']], // 932
+    ['flower',14320,32,['gift','bomb','stone']], // 933
+    ['flower',14360,32,['gift','bomb','stone']], // 934
+    ['rabbit',14390,32,['stone','bomb','gift']], // 935
+    ['bear',14420,32,['gift','bomb','stone']], // 936
+    ['cat',14640,32,['star','rainbow']], // 937
+    ['cat',14680,32,['star','rainbow']], // 938
+    ['pig',14710,32,['star','rainbow']], // 939
+    ['pig',14560,33,['rainbow','star']], // 940
+    ['chick',14380,34,['ice','bomb','gift']], // 941
+    ['chick',14420,34,['ice','bomb','gift']], // 942
+    ['bear',14670,33,['ice','bomb','gift']], // 943
+    ['strawberry',14700,33,['ice','bomb','gift']], // 944
+    ['dog',14740,33,['star','stone','bomb','ice']], // 945
+    ['dog',14780,33,['stone','bomb','ice']], // 946
+    ['flower',14990,33,['gift','star']], // 947
+    ['flower',15020,33,['gift','star']], // 948
+    ['rabbit',15060,33,['bomb','stone']], // 949
+    ['cat',14920,34,['bomb','stone']], // 950
+    ['cat',14730,34,['bomb','stone']], // 951
+    ['cat',14760,34,['bomb','stone']], // 952
+    ['bear',15020,33,['star']], // 953
+    ['bear',15060,33,['star','ice']], // 954
+    ['pig',15090,33,['ice','star']], // 955
+    ['pig',15120,33,['star','ice']], // 956
+    ['rabbit',15340,33,['gift','rainbow']], // 957
+    ['strawberry',15380,33,['gift','rainbow']], // 958
+    ['dog',15410,33,['gift','rainbow']], // 959
+    ['dog',15260,34,['bomb','gift','rainbow']], // 960
+    ['flower',15080,34,['bomb','star']], // 961
+    ['flower',15120,34,['bomb','star']], // 962
+    ['rabbit',15370,33,['bomb','star']], // 963
+    ['rabbit',15400,33,['bomb','star']], // 964
+    ['cat',15440,33,['gift','rainbow','ice']], // 965
+    ['cat',15480,33,['star']], // 966
+    ['bear',15690,33,['rainbow','ice']], // 967
+    ['bear',15720,33,['rainbow','ice']], // 968
+    ['pig',15760,33,['gift','bomb','stone']], // 969
+    ['pig',15620,34,['stone','bomb','star','rainbow']], // 970
+    ['flower',15430,34,['star','rainbow']], // 971
+    ['chick',15460,34,['star','rainbow']], // 972
+    ['strawberry',15720,33,['ice','bomb','gift']], // 973
+    ['strawberry',15760,33,['ice','bomb','gift']], // 974
+    ['dog',15790,33,['star','ice','bomb','gift']], // 975
+    ['dog',15820,33,['ice','bomb','gift']], // 976
+    ['rabbit',16040,33,['stone','bomb','ice']], // 977
+    ['flower',16080,33,['stone','bomb','ice']], // 978
+    ['cat',16110,33,['star']], // 979
+    ['cat',15960,34,['rainbow','stone','bomb','ice']], // 980
+    ['bear',15780,34,['gift','star']], // 981
+    ['bear',15820,34,['gift','star']], // 982
+    ['pig',16070,34,['gift','star']], // 983
+    ['pig',16100,34,['gift','star']], // 984
+    ['dog',16140,34,['ice','bomb','stone']], // 985
+    ['chick',16180,34,['bomb','stone']], // 986
+    ['strawberry',16390,34,['bomb','stone']], // 987
+    ['strawberry',16420,34,['bomb','stone']], // 988
+    ['dog',16460,34,['star','ice']], // 989
+    ['dog',16320,34,['gift','star','ice']], // 990
+    ['flower',16130,34,['star','ice']], // 991
+    ['strawberry',16160,34,['star']], // 992
+    ['rabbit',16420,34,['bomb','star']], // 993
+    ['rabbit',16460,34,['bomb','star']], // 994
+    ['cat',16490,34,['stone','bomb','star']], // 995
+    ['bear',16520,34,['bomb','star']], // 996
+    ['pig',16740,34,['rainbow','ice']], // 997
+    ['pig',16780,34,['rainbow','ice']], // 998
+    ['strawberry',16810,34,['rainbow','ice']], // 999
+    ['chick',16660,34,['rainbow','ice']], // 1000
+  ];
+  const V68_MISSIONS = {
+    904:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 905
+    909:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 910
+    914:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 915
+    919:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 920
+    924:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 925
+    929:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 930
+    934:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 935
+    939:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 940
+    944:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 945
+    949:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 950
+    954:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 955
+    959:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // 960
+    964:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 965
+    969:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 970
+    974:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // 975
+    979:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 980
+    984:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // 985
+    989:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // 990
+    994:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // 995
+    999:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // 1000
+  };
+  if(V68_STAGES.length!==100) throw new Error('V68 stage count invalid');
+  for(const [key,mission] of Object.entries(V68_MISSIONS)){
+    const allowed=V68_STAGES[Number(key)-900]?.[3]||[];
+    const needed=mission.kind==='bombStone'?['stone','bomb']:[mission.kind];
+    if(!needed.every(type=>allowed.includes(type))) throw new Error('Stage mission configuration invalid: '+(Number(key)+1));
+  }
   const v42Missions={
       5:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
       12:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
@@ -1069,7 +1595,11 @@
       ...V61_MISSIONS,
       ...V62_MISSIONS,
       ...V63_MISSIONS,
-      ...V64_MISSIONS
+      ...V64_MISSIONS,
+      ...V65_MISSIONS,
+      ...V66_MISSIONS,
+      ...V67_MISSIONS,
+      ...V68_MISSIONS
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
@@ -1135,6 +1665,10 @@
       if(i>=300 && i<400) return v41Map[V62_STAGES[i-300][0]];
       if(i>=400 && i<500) return v41Map[V63_STAGES[i-400][0]];
       if(i>=500 && i<600) return v41Map[V64_STAGES[i-500][0]];
+      if(i>=600 && i<700) return v41Map[V65_STAGES[i-600][0]];
+      if(i>=700 && i<800) return v41Map[V66_STAGES[i-700][0]];
+      if(i>=800 && i<900) return v41Map[V67_STAGES[i-800][0]];
+      if(i>=900 && i<1000) return v41Map[V68_STAGES[i-900][0]];
       const named=v41Themes[i];
       if(named) return v41Map[named];
       // Deterministic irregular 1-3 stage clusters, no random theme drift on retries.
@@ -1152,6 +1686,10 @@
       if(i<400)return V62_STAGES[i-300][1];
       if(i<500)return V63_STAGES[i-400][1];
       if(i<600)return V64_STAGES[i-500][1];
+      if(i<700)return V65_STAGES[i-600][1];
+      if(i<800)return V66_STAGES[i-700][1];
+      if(i<900)return V67_STAGES[i-800][1];
+      if(i<1000)return V68_STAGES[i-900][1];
       return Math.round((2400+(i-30)*45)/10)*10;
     }
     function v41Moves(i){
@@ -1166,6 +1704,10 @@
       if(i<400)return V62_STAGES[i-300][2];
       if(i<500)return V63_STAGES[i-400][2];
       if(i<600)return V64_STAGES[i-500][2];
+      if(i<700)return V65_STAGES[i-600][2];
+      if(i<800)return V66_STAGES[i-700][2];
+      if(i<900)return V67_STAGES[i-800][2];
+      if(i<1000)return V68_STAGES[i-900][2];
       return 18+Math.min(6,Math.floor((i-30)/50));
     }
     function v41AllowedSpecials(i){
@@ -1177,6 +1719,10 @@
       if(i<400)return V62_STAGES[i-300][3];
       if(i<500)return V63_STAGES[i-400][3];
       if(i<600)return V64_STAGES[i-500][3];
+      if(i<700)return V65_STAGES[i-600][3];
+      if(i<800)return V66_STAGES[i-700][3];
+      if(i<900)return V67_STAGES[i-800][3];
+      if(i<1000)return V68_STAGES[i-900][3];
       const unlocked=i<40?['stone','bomb','star','ice']:i<55?['stone','bomb','star','ice','gift']:SPECIAL_TYPES;
       // Beyond stage 30 progressively allow 1-3 specials, not six at once.
       return Array.from({length:Math.min(3,1+Math.floor((i-30)/15))},(_,n)=>unlocked[(i*3+n*2)%unlocked.length]);
@@ -1198,7 +1744,7 @@
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       base=v41Stage(i);
       const target = v41StageTarget(i);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: i<600 ? null : band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<1000 ? null : band.timeLimit }));
     }
     return arr;
   }
@@ -2191,6 +2737,9 @@
       localStorage.setItem('sp_patterns_cleared', JSON.stringify(patternsCleared));
     }
 
+    if(stageIndex>=TOTAL_STAGES-1){
+      document.getElementById('nextStageBtn').textContent='🎉 1,000스테이지 완주!';
+    }
     clearOverlay.classList.add('show');
     vibrate([40,40,40,40,80]);
   }
@@ -2211,6 +2760,11 @@
   }
 
   document.getElementById('nextStageBtn').addEventListener('click', ()=>{
+    if(stageIndex>=TOTAL_STAGES-1){
+      // Final stage: do not silently wrap to stage 1.
+      showToast('🎉 1,000스테이지 전체 클리어! 축하해요!');
+      return;
+    }
     clearOverlay.classList.remove('show');
     stageIndex++;
     localStorage.setItem('sp_stage_index', stageIndex);
