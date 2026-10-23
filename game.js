@@ -312,7 +312,105 @@
     const v41Map={chick:CHICK_STAGE,strawberry:STRAWBERRY_EASY,dog:DOG_EASY,flower:FLOWER_EASY,rabbit:RABBIT_EASY,cat:CAT_EASY,bear:BEAR_EASY,pig:PIG_EASY};
     const v41Specials=[[], [], [], [], [], ["star"], [], [], [], ["stone"], ["stone"], ["star"], ["bomb"], ["bomb"], ["bomb", "star"], ["stone", "bomb"], ["stone"], ["ice"], ["ice"], ["stone", "ice"], ["gift"], ["gift", "star"], ["bomb", "gift"], ["stone", "bomb"], ["ice", "star"], ["rainbow"], ["rainbow", "star"], ["stone", "ice", "rainbow"], ["bomb", "gift", "rainbow"], ["stone", "bomb", "star", "ice", "gift", "rainbow"]];
     // V42 objective missions: zero-based stage slots, score target AND mission required.
-    const v42Missions={
+    // V58: curated stages 31–50; zero-based stage indices.
+  // Replays have the same challenge definition, while tile layouts remain varied.
+  const V58_STAGES = [
+    ['rabbit', 2100, 18, []],                      // 31 — cooldown
+    ['rabbit', 2220, 18, ['star']],                // 32
+    ['flower', 2350, 18, ['star']],                // 33
+    ['flower', 2250, 18, ['ice']],                 // 34 — ice mission
+    ['flower', 2420, 19, ['ice','star']],          // 35
+    ['cat', 2500, 19, ['bomb']],                   // 36
+    ['cat', 2350, 19, ['bomb','stone']],           // 37 — stone mission
+    ['pig', 2600, 19, ['star','bomb']],            // 38
+    ['pig', 2450, 18, ['gift']],                   // 39
+    ['bear', 2650, 19, ['gift','star']],           // 40 — gift mission
+    ['bear', 2570, 19, ['stone','bomb']],          // 41
+    ['strawberry', 2780, 20, ['ice','star']],      // 42
+    ['strawberry', 2680, 19, ['ice','star']],      // 43 — ice mission
+    ['strawberry', 2870, 20, ['bomb','gift']],     // 44
+    ['dog', 2950, 20, ['bomb','stone']],           // 45
+    ['dog', 2800, 20, ['stone','bomb']],           // 46 — stone mission
+    ['chick', 3050, 21, ['star','gift']],          // 47
+    ['chick', 2920, 20, ['star','bomb']],          // 48 — star mission
+    ['rabbit', 3080, 21, ['rainbow','ice']],       // 49
+    ['rabbit', 3000, 21, ['rainbow','star']],      // 50 — rainbow mission
+  ];
+  const V58_MISSIONS = {
+    33:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+    36:{kind:'bombStone',need:1,label:'💥 돌멩이 1개 제거'},
+    39:{kind:'gift',need:1,label:'🎁 선물 1개 열기'},
+    42:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+    45:{kind:'bombStone',need:1,label:'💥 돌멩이 1개 제거'},
+    47:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
+    49:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}
+  };
+  // V59: deliberate 51-100 content; zero-based index 50-99.
+  const V59_STAGES = [
+    ['cat', 2870, 22, []], // 51
+    ['cat', 3110, 21, ['star']], // 52
+    ['cat', 3170, 21, ['star']], // 53
+    ['flower', 3220, 21, ['ice']], // 54
+    ['flower', 3280, 21, ['ice']], // 55
+    ['bear', 3330, 21, ['ice']], // 56
+    ['bear', 3200, 21, ['bomb']], // 57
+    ['bear', 3250, 21, ['bomb']], // 58
+    ['strawberry', 3310, 21, ['bomb']], // 59
+    ['strawberry', 3370, 21, ['bomb', 'gift']], // 60
+    ['dog', 3240, 22, []], // 61
+    ['dog', 3480, 21, ['gift']], // 62
+    ['dog', 3340, 21, ['stone', 'bomb']], // 63
+    ['rabbit', 3400, 21, ['stone', 'bomb']], // 64
+    ['rabbit', 3450, 21, ['gift', 'stone', 'bomb']], // 65
+    ['pig', 3510, 21, ['rainbow']], // 66
+    ['pig', 3570, 22, ['rainbow']], // 67
+    ['pig', 3620, 22, ['rainbow']], // 68
+    ['chick', 3490, 22, ['ice', 'star']], // 69
+    ['chick', 3540, 22, ['stone', 'bomb', 'ice', 'star']], // 70
+    ['flower', 3420, 23, []], // 71
+    ['flower', 3650, 22, ['gift', 'bomb']], // 72
+    ['flower', 3710, 22, ['gift', 'bomb']], // 73
+    ['cat', 3770, 22, ['gift', 'bomb']], // 74
+    ['cat', 3630, 22, ['rainbow', 'stone', 'bomb']], // 75
+    ['strawberry', 3690, 22, ['stone', 'bomb']], // 76
+    ['strawberry', 3740, 22, ['stone', 'bomb']], // 77
+    ['strawberry', 3800, 22, ['rainbow', 'star']], // 78
+    ['bear', 3850, 22, ['rainbow', 'star']], // 79
+    ['bear', 3910, 22, ['star', 'rainbow']], // 80
+    ['dog', 3590, 23, []], // 81
+    ['dog', 3830, 22, ['star']], // 82
+    ['dog', 3890, 23, ['star']], // 83
+    ['pig', 3940, 23, ['ice']], // 84
+    ['pig', 4000, 23, ['ice']], // 85
+    ['rabbit', 4050, 23, ['ice']], // 86
+    ['rabbit', 3920, 23, ['bomb']], // 87
+    ['rabbit', 3970, 23, ['bomb']], // 88
+    ['chick', 4030, 23, ['bomb']], // 89
+    ['chick', 4090, 23, ['stone', 'bomb', 'gift']], // 90
+    ['flower', 3960, 24, []], // 91
+    ['flower', 4200, 23, ['gift']], // 92
+    ['flower', 4060, 23, ['stone', 'bomb']], // 93
+    ['strawberry', 4120, 23, ['stone', 'bomb']], // 94
+    ['strawberry', 4170, 23, ['gift', 'stone', 'bomb']], // 95
+    ['cat', 4230, 23, ['rainbow']], // 96
+    ['cat', 4290, 23, ['rainbow']], // 97
+    ['cat', 4340, 23, ['rainbow']], // 98
+    ['bear', 4210, 24, ['ice', 'star']], // 99
+    ['bear', 4260, 24, ['rainbow', 'ice', 'star']], // 100
+  ];
+  const V59_MISSIONS={
+    54:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+    59:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
+    64:{kind:'gift',need:1,label:'🎁 선물 1개 열기'},
+    69:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'},
+    74:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'},
+    79:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
+    84:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+    89:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'},
+    94:{kind:'gift',need:1,label:'🎁 선물 1개 열기'},
+    99:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'},
+  };
+  const v42Missions={
       5:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
       12:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
       17:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
@@ -322,7 +420,9 @@
       15:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
       19:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
       23:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
-      27:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}
+      27:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+      ...V58_MISSIONS,
+      ...V59_MISSIONS
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
@@ -356,7 +456,7 @@
     // This operates on the actual board/specials model, never on overlay images.
     function v43RestoreMissionTile(){
       const m=v42Mission();
-      if(!m || v42MissionDone() || currentStage().type!=='chick')return;
+      if(!m || v42MissionDone() || (stageSlot()<50 && currentStage().type!=='chick'))return;
       const kind=m.kind==='bombStone'?'stone':m.kind;
       if(m.kind==='bombStone'){
         ensureStoneBombMissionPair();
@@ -381,6 +481,8 @@
       render();
     }
     function v41Stage(i){
+      if(i>=30 && i<50) return v41Map[V58_STAGES[i-30][0]];
+      if(i>=50 && i<100) return v41Map[V59_STAGES[i-50][0]];
       const named=v41Themes[i];
       if(named) return v41Map[named];
       // Deterministic irregular 1-3 stage clusters, no random theme drift on retries.
@@ -391,6 +493,8 @@
     function v41StageTarget(i){
       if(i<3)return [450,520,620][i];
       if(i<30)return Math.round((680+(i-3)*57)/10)*10;
+      if(i<50)return V58_STAGES[i-30][1];
+      if(i<100)return V59_STAGES[i-50][1];
       return Math.round((2400+(i-30)*45)/10)*10;
     }
     function v41Moves(i){
@@ -398,10 +502,14 @@
       if(i<10)return 17;
       if(i<20)return 17;
       if(i<30)return 18;
+      if(i<50)return V58_STAGES[i-30][2];
+      if(i<100)return V59_STAGES[i-50][2];
       return 18+Math.min(6,Math.floor((i-30)/50));
     }
     function v41AllowedSpecials(i){
       if(i<30)return v41Specials[i];
+      if(i<50)return V58_STAGES[i-30][3];
+      if(i<100)return V59_STAGES[i-50][3];
       const unlocked=i<40?['stone','bomb','star','ice']:i<55?['stone','bomb','star','ice','gift']:SPECIAL_TYPES;
       // Beyond stage 30 progressively allow 1-3 specials, not six at once.
       return Array.from({length:Math.min(3,1+Math.floor((i-30)/15))},(_,n)=>unlocked[(i*3+n*2)%unlocked.length]);
@@ -423,7 +531,7 @@
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       base=v41Stage(i);
       const target = v41StageTarget(i);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: i<30 ? null : band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<100 ? null : band.timeLimit }));
     }
     return arr;
   }
@@ -827,7 +935,7 @@
   function createSpecials(){
     specials.clear();
     const stage=currentStage();
-    if(stage.type!=='chick')return;
+    if(stage.type!=='chick' && stageSlot()<50)return;
     const requested=v41AllowedSpecials(stageSlot());
     if(!requested || !requested.length)return;
     const cells=[];
@@ -1224,7 +1332,7 @@
   // 기존 DOM 셀을 유지하되, 떨어질 원래 행을 기억해 자연스럽게 낙하시킨다.
   function gravityAndAnimateChicks(){
     const stage=currentStage();
-    if(stage.type!=='chick'){
+    if(stage.type!=='chick' && stageSlot()<50){
       applyGravity(); render(); return Promise.resolve();
     }
     const sourceRows=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
@@ -1261,10 +1369,10 @@
     if(poppingInProgress) return;
     poppingInProgress=true;
     const originalCount=cells.length;
-    const splash=(!isBonus && currentStage().type==='chick') ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
+    const splash=(!isBonus && (currentStage().type==='chick' || stageSlot()>=50)) ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
     cells=splash.cells;
     if(!isBonus)v42MissionProgress(splash,cells.slice());
-    const chickPop=currentStage().type==='chick';
+    const chickPop=currentStage().type==='chick' || stageSlot()>=50;
     const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
     // Score comes from the original chain; bomb splash awards 35 points per extra tile.
     const baseGained=isBonus ? cells.length*15 : (reward ? reward.score+splash.bonus*35 : cells.length*cells.length*10);
@@ -1340,7 +1448,7 @@
   }
 
   function hasAnyMove(){
-    if(currentStage().type==='chick')return hasOpenPair();
+    if(currentStage().type==='chick' || stageSlot()>=50)return hasOpenPair();
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const v = board[r][c];
