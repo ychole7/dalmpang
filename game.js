@@ -535,6 +535,131 @@
     194:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 195
     199:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 200
   };
+  // V61: individually configured stage challenges 201–300.
+  const V61_STAGES = [
+    ['cat',6070,28,['ice','star']], // 201
+    ['cat',6090,27,['ice','star']], // 202
+    ['flower',6300,27,['ice','star']], // 203
+    ['flower',6320,27,['bomb','gift']], // 204
+    ['pig',6350,27,['ice','bomb','gift']], // 205
+    ['pig',6370,27,['bomb','gift']], // 206
+    ['rabbit',6390,27,['stone','bomb']], // 207
+    ['rabbit',6600,27,['stone','bomb']], // 208
+    ['dog',6620,27,['stone','bomb']], // 209
+    ['dog',6470,28,['stone','bomb','rainbow','star']], // 210
+    ['bear',6310,28,['rainbow','star']], // 211
+    ['strawberry',6330,27,['rainbow','star']], // 212
+    ['chick',6540,27,['gift','ice']], // 213
+    ['chick',6560,27,['gift','ice']], // 214
+    ['rabbit',6590,27,['gift','ice']], // 215
+    ['rabbit',6610,27,['rainbow','bomb']], // 216
+    ['pig',6630,27,['rainbow','bomb']], // 217
+    ['pig',6840,27,['rainbow','bomb']], // 218
+    ['flower',6860,27,['stone','bomb','star']], // 219
+    ['flower',6710,28,['rainbow','stone','bomb','star']], // 220
+    ['cat',6550,28,['ice','rainbow']], // 221
+    ['cat',6570,27,['star','gift']], // 222
+    ['bear',6780,27,['star','gift']], // 223
+    ['bear',6800,27,['star','gift']], // 224
+    ['dog',6830,27,['star','ice']], // 225
+    ['dog',6850,27,['ice','star']], // 226
+    ['chick',6870,27,['ice','star']], // 227
+    ['chick',7080,27,['bomb','gift']], // 228
+    ['cat',7100,27,['bomb','gift']], // 229
+    ['cat',6950,28,['bomb','gift']], // 230
+    ['flower',6790,29,['stone','bomb']], // 231
+    ['flower',6810,28,['stone','bomb']], // 232
+    ['pig',7020,28,['stone','bomb']], // 233
+    ['rabbit',7040,28,['rainbow','star']], // 234
+    ['dog',7070,28,['ice','rainbow','star']], // 235
+    ['dog',7090,28,['rainbow','star']], // 236
+    ['bear',7110,28,['gift','ice']], // 237
+    ['bear',7320,28,['gift','ice']], // 238
+    ['strawberry',7340,28,['gift','ice']], // 239
+    ['strawberry',7190,29,['gift','rainbow','bomb']], // 240
+    ['chick',7030,29,['stone','bomb','star']], // 241
+    ['chick',7050,28,['stone','bomb','star']], // 242
+    ['rabbit',7260,28,['ice','rainbow']], // 243
+    ['rabbit',7280,28,['ice','rainbow']], // 244
+    ['flower',7310,28,['stone','bomb','ice','rainbow']], // 245
+    ['flower',7330,28,['star','gift']], // 246
+    ['cat',7350,28,['star','gift']], // 247
+    ['cat',7560,28,['star','gift']], // 248
+    ['strawberry',7580,28,['ice','star']], // 249
+    ['strawberry',7430,29,['rainbow','ice','star']], // 250
+    ['bear',7270,29,['ice','star']], // 251
+    ['bear',7290,28,['bomb','gift']], // 252
+    ['dog',7500,28,['bomb','gift']], // 253
+    ['dog',7520,28,['bomb','gift']], // 254
+    ['chick',7550,28,['star','stone','bomb']], // 255
+    ['cat',7570,28,['stone','bomb']], // 256
+    ['flower',7590,28,['stone','bomb']], // 257
+    ['flower',7800,28,['rainbow','star']], // 258
+    ['pig',7820,28,['rainbow','star']], // 259
+    ['pig',7670,29,['ice','rainbow','star']], // 260
+    ['rabbit',7510,30,['rainbow','bomb']], // 261
+    ['rabbit',7530,29,['rainbow','bomb']], // 262
+    ['dog',7740,29,['rainbow','bomb']], // 263
+    ['dog',7760,29,['stone','bomb','star']], // 264
+    ['bear',7790,29,['bomb','stone','star']], // 265
+    ['bear',7810,29,['stone','bomb','star']], // 266
+    ['chick',7830,29,['ice','rainbow']], // 267
+    ['chick',8040,29,['ice','rainbow']], // 268
+    ['rabbit',8060,29,['ice','rainbow']], // 269
+    ['rabbit',7910,30,['gift','star']], // 270
+    ['pig',7750,30,['star','gift']], // 271
+    ['pig',7770,29,['star','gift']], // 272
+    ['flower',7980,29,['ice','star']], // 273
+    ['flower',8000,29,['ice','star']], // 274
+    ['cat',8030,29,['stone','bomb','ice','star']], // 275
+    ['cat',8050,29,['bomb','gift']], // 276
+    ['strawberry',8070,29,['bomb','gift']], // 277
+    ['bear',8280,29,['bomb','gift']], // 278
+    ['dog',8300,29,['stone','bomb']], // 279
+    ['dog',8150,30,['rainbow','stone','bomb']], // 280
+    ['chick',7990,30,['rainbow','star']], // 281
+    ['chick',8010,29,['gift','ice']], // 282
+    ['cat',8220,29,['gift','ice']], // 283
+    ['cat',8240,29,['gift','ice']], // 284
+    ['flower',8270,29,['ice','rainbow','bomb']], // 285
+    ['flower',8290,29,['rainbow','bomb']], // 286
+    ['pig',8310,29,['rainbow','bomb']], // 287
+    ['pig',8520,29,['stone','bomb','star']], // 288
+    ['dog',8540,29,['stone','bomb','star']], // 289
+    ['dog',8390,30,['star','stone','bomb']], // 290
+    ['bear',8230,31,['ice','rainbow']], // 291
+    ['bear',8250,30,['ice','rainbow']], // 292
+    ['strawberry',8460,30,['ice','rainbow']], // 293
+    ['strawberry',8480,30,['star','gift']], // 294
+    ['chick',8510,30,['stone','bomb','star','gift']], // 295
+    ['chick',8530,30,['star','gift']], // 296
+    ['rabbit',8550,30,['ice','star']], // 297
+    ['rabbit',8760,30,['ice','star']], // 298
+    ['pig',8780,30,['ice','star']], // 299
+    ['flower',8630,31,['rainbow','bomb','gift']], // 300
+  ];
+  const V61_MISSIONS = {
+    204:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 205
+    209:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 210
+    214:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 215
+    219:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 220
+    224:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 225
+    229:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // Stage 230
+    234:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 235
+    239:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 240
+    244:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 245
+    249:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 250
+    254:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 255
+    259:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 260
+    264:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // Stage 265
+    269:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 270
+    274:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 275
+    279:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 280
+    284:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 285
+    289:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 290
+    294:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 295
+    299:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 300
+  };
   const v42Missions={
       5:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
       12:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
@@ -548,7 +673,8 @@
       27:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
       ...V58_MISSIONS,
       ...V59_MISSIONS,
-      ...V60_MISSIONS
+      ...V60_MISSIONS,
+      ...V61_MISSIONS
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
@@ -610,6 +736,7 @@
       if(i>=30 && i<50) return v41Map[V58_STAGES[i-30][0]];
       if(i>=50 && i<100) return v41Map[V59_STAGES[i-50][0]];
       if(i>=100 && i<200) return v41Map[V60_STAGES[i-100][0]];
+      if(i>=200 && i<300) return v41Map[V61_STAGES[i-200][0]];
       const named=v41Themes[i];
       if(named) return v41Map[named];
       // Deterministic irregular 1-3 stage clusters, no random theme drift on retries.
@@ -623,6 +750,7 @@
       if(i<50)return V58_STAGES[i-30][1];
       if(i<100)return V59_STAGES[i-50][1];
       if(i<200)return V60_STAGES[i-100][1];
+      if(i<300)return V61_STAGES[i-200][1];
       return Math.round((2400+(i-30)*45)/10)*10;
     }
     function v41Moves(i){
@@ -633,6 +761,7 @@
       if(i<50)return V58_STAGES[i-30][2];
       if(i<100)return V59_STAGES[i-50][2];
       if(i<200)return V60_STAGES[i-100][2];
+      if(i<300)return V61_STAGES[i-200][2];
       return 18+Math.min(6,Math.floor((i-30)/50));
     }
     function v41AllowedSpecials(i){
@@ -640,6 +769,7 @@
       if(i<50)return V58_STAGES[i-30][3];
       if(i<100)return V59_STAGES[i-50][3];
       if(i<200)return V60_STAGES[i-100][3];
+      if(i<300)return V61_STAGES[i-200][3];
       const unlocked=i<40?['stone','bomb','star','ice']:i<55?['stone','bomb','star','ice','gift']:SPECIAL_TYPES;
       // Beyond stage 30 progressively allow 1-3 specials, not six at once.
       return Array.from({length:Math.min(3,1+Math.floor((i-30)/15))},(_,n)=>unlocked[(i*3+n*2)%unlocked.length]);
@@ -661,7 +791,7 @@
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       base=v41Stage(i);
       const target = v41StageTarget(i);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: i<200 ? null : band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<300 ? null : band.timeLimit }));
     }
     return arr;
   }
