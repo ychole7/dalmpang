@@ -101,7 +101,7 @@
 #boardWrap img.chickSymbol[src*="dog_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; } /* Stage 3: peach */
 #boardWrap img.chickSymbol[src*="flower_easy_"] { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
 #boardWrap img.chickSymbol[src*="rabbit_"]      { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
-#boardWrap img.chickSymbol[src*="cat_easy_"]    { --dp-symbol-size:110%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="cat_easy_"]    { --dp-symbol-size:109%; --dp-symbol-y:0px; }
 #boardWrap img.chickSymbol[src*="bear_easy_"]   { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
 #boardWrap img.chickSymbol[src*="pig_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
 /* Position adjustment never moves the tile box or input hit target. */
