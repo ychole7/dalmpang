@@ -14,15 +14,63 @@
 
 
 <style id="dpMissionCardStyle">
-/* V47: Objective is inside existing target panel; board never shifts. */
-.targetCard{position:relative;}
-#dpV42Mission.dpMissionInCard{position:absolute;left:8%;right:8%;bottom:7px;height:26px!important;min-height:0!important;max-height:26px!important;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;max-width:none;padding:0 7px!important;border-radius:9px;border:1px solid #e3bc73;background:linear-gradient(180deg,#fff9e9 0%,#ffeac0 100%);box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(118,71,25,.13);color:#784613;font-size:clamp(10px,2.55vw,12px);line-height:16px;font-weight:800;white-space:nowrap;z-index:2;pointer-events:none;}
-#dpV42Mission[hidden]{display:none!important;}
-#dpV42Mission .dpMissionLabel{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#dpV42Mission .dpMissionCount{flex:none;padding:3px 6px;border-radius:7px;background:#fff6db;color:#94521a;font-size:inherit;font-variant-numeric:tabular-nums;}
-#dpV42Mission.complete{border-color:#7cbd80;background:linear-gradient(180deg,#f1ffe6,#d7f4ce);color:#307338;}
-#dpV42Mission.complete .dpMissionCount{background:#efffe9;color:#237433;}
-@media(max-width:360px){#dpV42Mission.dpMissionInCard{left:6%;right:6%;bottom:6px;height:24px!important;max-height:24px!important;padding:0 5px!important;gap:3px;}#dpV42Mission .dpMissionCount{padding:2px 3px;}}
+/* V49: Three independent HUD rows: target, progress, mission. No overlays. */
+.statsRow{height:84px!important;min-height:84px!important;align-items:stretch!important;gap:5px!important;margin-bottom:5px!important;}
+.statsRow .targetCard{height:100%!important;min-height:0!important;box-sizing:border-box!important;
+ display:grid!important;grid-template-rows:25px 10px 20px!important;row-gap:8px!important;
+ align-content:center!important;align-items:center!important;padding:8px 9px 6px!important;
+ overflow:visible;position:relative!important;}
+.statsRow .targetCard .targetBig{grid-row:1;align-self:center;margin:0!important;
+ font-size:clamp(19px,5.6vw,24px)!important;line-height:25px!important;letter-spacing:.2px;}
+.statsRow .targetCard .barTrack{grid-row:2;align-self:center;position:relative!important;
+ height:10px!important;margin:0 4px!important;width:calc(100% - 8px)!important;box-sizing:border-box;}
+.statsRow .targetCard .barFill{height:100%;}
+.statsRow .targetCard .barStar{font-size:15px!important;}
+.statsRow .targetCard #dpV42Mission.dpMissionInCard{grid-row:3;position:relative!important;
+ inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+ width:100%!important;height:20px!important;min-height:20px!important;max-height:20px!important;
+ margin:0!important;box-sizing:border-box!important;display:flex;align-items:center;justify-content:center;
+ min-width:0;max-width:100%!important;padding:0 5px!important;gap:5px;border-radius:8px;
+ border:1px solid #d9b16b;background:linear-gradient(180deg,#fff9e9,#ffebc8);
+ box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(118,71,25,.12);
+ color:#764b24;font-size:clamp(10px,2.55vw,12px);font-weight:800;line-height:18px;
+ white-space:nowrap;pointer-events:none;z-index:1;}
+.statsRow .targetCard #dpV42Mission[hidden]{display:block!important;visibility:hidden!important;}
+.statsRow .targetCard #dpV42Mission .dpMissionLabel{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.statsRow .targetCard #dpV42Mission .dpMissionCount{flex:0 0 auto;white-space:nowrap;
+ color:#8e521e;font-size:10px;background:rgba(255,255,255,.6);padding:1px 4px;border-radius:5px;font-variant-numeric:tabular-nums;}
+.statsRow .targetCard #dpV42Mission.complete{border-color:#91c17d;background:linear-gradient(180deg,#f3ffe6,#ddf4d0);color:#317342;}
+.statsRow .targetCard #dpV42Mission.complete .dpMissionCount{color:#317342;}
+.statsRow .stageBadgeMini,.statsRow .movesBadge{height:100%!important;box-sizing:border-box!important;}
+.statsRow .stageBadgeMini{display:flex;flex-direction:column;justify-content:center;min-width:58px;padding:4px 7px!important;}
+.statsRow .movesBadge{min-width:52px!important;padding:3px 4px!important;}
+@media(max-width:360px){
+ .statsRow{gap:4px!important;}
+ .statsRow .stageBadgeMini{min-width:51px;padding:3px 4px!important;}
+ .statsRow .movesBadge{min-width:48px!important;}
+ .statsRow .targetCard{padding-left:6px!important;padding-right:6px!important;}
+ .statsRow .targetCard #dpV42Mission.dpMissionInCard{font-size:10px;padding:0 3px!important;gap:2px;}
+ .statsRow .targetCard #dpV42Mission .dpMissionCount{font-size:9px;padding:1px 2px;}
+}
+
+/* V50: approved type-A HUD; score and star rating remain in JS for calculations, but no duplicate display. */
+.statsRow .stageBadgeMini{order:0;flex:0 0 55px!important;min-width:0!important;}
+.statsRow .targetCard{order:1;flex:1 1 0!important;min-width:0!important;}
+.statsRow .movesBadge{order:2;flex:0 0 59px!important;min-width:0!important;
+  justify-content:center!important;gap:4px!important;padding:6px 3px!important;}
+.statsRow .movesBadge .circle{width:39px!important;height:39px!important;font-size:17px!important;
+  font-variant-numeric:tabular-nums;box-shadow:inset 0 2px 2px rgba(255,255,255,.24),0 2px 3px rgba(23,64,109,.16);}
+.statsRow .movesBadge .lbl{order:-1;font-size:10px!important;line-height:1.1!important;
+  color:#6f5b43!important;font-weight:900!important;margin:0!important;letter-spacing:-.3px;}
+.statsRow #movesStars,.statsRow #movesScoreEcho{display:none!important;}
+.statsRow .stageBadgeMini{font-size:9px!important;line-height:1.5!important;}
+.statsRow .stageBadgeMini #stageNum{font-size:21px!important;line-height:1.2!important;}
+@media(max-width:360px){
+ .statsRow .stageBadgeMini{flex-basis:46px!important;}
+ .statsRow .movesBadge{flex-basis:51px!important;}
+ .statsRow .movesBadge .circle{width:35px!important;height:35px!important;}
+ .statsRow .movesBadge .lbl{font-size:9px!important;}
+}
 </style>
 </head>
 <body>
@@ -60,7 +108,7 @@
       <div class="stageBadgeMini"><span id="stageBadgeLbl">STAGE</span><br><span id="stageNum">01</span></div>
       <div class="movesBadge">
         <div class="circle" id="movesVal">-</div>
-        <div class="lbl" id="movesLbl">MOVES</div>
+        <div class="lbl" id="movesLbl">남은 이동</div>
         <div class="movesStars" id="movesStars">☆☆☆</div>
         <div class="movesScore" id="movesScoreEcho">0</div>
       </div>
