@@ -328,16 +328,19 @@
     function v42Mission(){return v42Missions[stageSlot()]||null;}
     function v42MissionDone(){const m=v42Mission();return !m||v42MissionCount>=m.need;}
     function v42MissionUpdate(){
-      let el=document.getElementById('dpV42Mission');
-      if(!el){
-        el=document.createElement('div');el.id='dpV42Mission';
-        el.style.cssText='margin:3px auto 1px;max-width:400px;padding:5px 9px;background:linear-gradient(135deg,#fffaf0,#ffeccc);border:1px solid #dba859;border-radius:12px;color:#724512;font-weight:800;font-size:12px;line-height:1.4;text-align:center;box-shadow:0 2px 5px #86522018;';
-        const wrap=document.getElementById('boardWrap');
-        if(wrap&&wrap.parentNode)wrap.parentNode.insertBefore(el,wrap);
-      }
+      // Mission belongs to the fixed-height score card; never insert above the board.
+      const el=document.getElementById('dpV42Mission');
+      if(!el)return;
       const m=v42Mission();
-      el.style.display=m?'block':'none';
-      if(m)el.textContent='특별 미션 · '+m.label+'  '+Math.min(v42MissionCount,m.need)+'/'+m.need+(v42MissionDone()?' ✓':'');
+      el.hidden=!m;
+      if(!m)return;
+      const done=v42MissionDone();
+      const label=el.querySelector('.dpMissionLabel');
+      const count=el.querySelector('.dpMissionCount');
+      if(label)label.textContent=m.label;
+      if(count)count.textContent=Math.min(v42MissionCount,m.need)+'/'+m.need+(done?' ✓':'');
+      el.classList.toggle('complete',done);
+      el.setAttribute('aria-label','특별 미션 '+m.label+' '+Math.min(v42MissionCount,m.need)+'/'+m.need);
     }
     function v42MissionProgress(splash,originalCells){
       const m=v42Mission();if(!m||v42MissionDone())return;
