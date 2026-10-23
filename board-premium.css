@@ -90,6 +90,56 @@
   #boardWrap.chickBoard .die.chickPopping::after{animation:none}
 }
 
+
+/* V39 — subtle, independent ambient effects for six special tiles.
+   Works both with real .specialTileArt and V36.1 .dp-special-preview overlays.
+   All animation is visual-only: no change to hit areas, board position, chain, score, or gravity. */
+#boardWrap .die img[src*="/special_"] {
+  transform-origin:50% 50%;
+  backface-visibility:hidden;
+  will-change:transform,filter;
+}
+#boardWrap .die img[src$="special_stone.png"] { animation:dpStoneAura 4.8s ease-in-out infinite; }
+#boardWrap .die img[src$="special_bomb.png"] { animation:dpBombEmber 2.1s ease-in-out infinite; }
+#boardWrap .die img[src$="special_star.png"] { animation:dpStarGleam 3.3s ease-in-out infinite; }
+#boardWrap .die img[src$="special_ice.png"] { animation:dpIceGlint 4s ease-in-out infinite; }
+#boardWrap .die img[src$="special_gift.png"] { animation:dpGiftTwinkle 3.6s ease-in-out infinite; }
+#boardWrap .die img[src$="special_rainbow.png"] { animation:dpRainbowPrism 5s ease-in-out infinite; }
+
+/* Ambient motion is intentionally small because up to six effects share the same 6x8 board. */
+@keyframes dpStoneAura {
+  0%,100% {transform:translateY(0) scale(1);filter:brightness(1) drop-shadow(0 1px 2px rgba(194,148,78,.16));}
+  50% {transform:translateY(-.5px) scale(1.008);filter:brightness(1.075) drop-shadow(0 0 5px rgba(255,195,103,.48));}
+}
+@keyframes dpBombEmber {
+  0%,100% {transform:scale(1);filter:brightness(1) drop-shadow(0 0 2px rgba(255,92,22,.35));}
+  45% {transform:scale(1.035);filter:brightness(1.13) drop-shadow(0 0 7px rgba(255,116,30,.8));}
+  65% {transform:scale(1.02);filter:brightness(1.055) drop-shadow(0 0 4px rgba(255,88,25,.46));}
+}
+@keyframes dpStarGleam {
+  0%,100% {transform:scale(1) rotate(0deg);filter:brightness(1) drop-shadow(0 0 2px rgba(255,213,75,.45));}
+  48% {transform:scale(1.042) rotate(1deg);filter:brightness(1.21) drop-shadow(0 0 8px rgba(255,223,91,.8));}
+  65% {transform:scale(1.018) rotate(0deg);filter:brightness(1.08) drop-shadow(0 0 5px rgba(255,209,64,.65));}
+}
+@keyframes dpIceGlint {
+  0%,100% {transform:translateY(0);filter:brightness(1) drop-shadow(0 0 2px rgba(54,168,255,.4));}
+  50% {transform:translateY(-1px);filter:brightness(1.13) drop-shadow(0 0 7px rgba(92,213,255,.74));}
+}
+@keyframes dpGiftTwinkle {
+  0%,100% {transform:scale(1);filter:brightness(1) drop-shadow(0 0 2px rgba(255,89,151,.35));}
+  35% {transform:scale(1.025);filter:brightness(1.13) drop-shadow(0 0 6px rgba(255,125,178,.68));}
+  60% {transform:scale(1);filter:brightness(1.02) drop-shadow(0 0 3px rgba(255,88,153,.45));}
+}
+@keyframes dpRainbowPrism {
+  0%,100% {transform:scale(1) rotate(0deg);filter:brightness(1) saturate(1.03) drop-shadow(0 0 3px rgba(184,94,255,.48));}
+  50% {transform:scale(1.045) rotate(1.5deg);filter:brightness(1.14) saturate(1.22) drop-shadow(0 0 8px rgba(129,141,255,.73));}
+}
+/* Pop/removal animations own the tile on release, not the ambient sprite. */
+#boardWrap .die.chickPopping img[src*="/special_"] {animation:none!important;will-change:auto;}
+@media (prefers-reduced-motion: reduce) {
+  #boardWrap .die img[src*="/special_"] {animation:none!important;will-change:auto;}
+}
+
 /* V31 — Theme art scale controls. Values are CSS only: do not resize the PNGs.
    114.5% is the currently deployed image size, so first application is visually unchanged.
    Edit the per-theme --dp-symbol-size and --dp-symbol-y values below.
