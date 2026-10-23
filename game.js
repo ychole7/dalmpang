@@ -410,6 +410,131 @@
     94:{kind:'gift',need:1,label:'🎁 선물 1개 열기'},
     99:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'},
   };
+  // V60: curated 101–200 stages. Each entry: theme, target, moves, special tiles.
+  const V60_STAGES = [
+    ['pig', 3950, 25, []], // 101
+    ['pig', 3970, 25, ['star']], // 102
+    ['rabbit', 4240, 24, ['star']], // 103
+    ['rabbit', 4260, 24, ['ice']], // 104
+    ['dog', 4280, 24, ['ice']], // 105
+    ['dog', 4300, 24, ['ice']], // 106
+    ['strawberry', 4330, 24, ['bomb']], // 107
+    ['strawberry', 4520, 24, ['bomb']], // 108
+    ['flower', 4540, 24, ['bomb']], // 109
+    ['cat', 4390, 25, ['bomb','gift']], // 110
+    ['bear', 4160, 25, []], // 111
+    ['bear', 4180, 25, ['stone','bomb']], // 112
+    ['chick', 4450, 24, ['rainbow']], // 113
+    ['chick', 4470, 24, ['rainbow']], // 114
+    ['rabbit', 4490, 24, ['gift','rainbow']], // 115
+    ['rabbit', 4520, 24, ['star','ice']], // 116
+    ['flower', 4540, 24, ['star','ice']], // 117
+    ['flower', 4730, 24, ['star','ice']], // 118
+    ['dog', 4750, 24, ['gift','bomb']], // 119
+    ['dog', 4600, 25, ['stone','bomb','gift']], // 120
+    ['cat', 4370, 25, []], // 121
+    ['cat', 4390, 25, ['stone','bomb','gift']], // 122
+    ['pig', 4660, 24, ['stone','bomb','gift']], // 123
+    ['pig', 4680, 24, ['stone','bomb','gift']], // 124
+    ['strawberry', 4700, 24, ['rainbow','ice','bomb']], // 125
+    ['strawberry', 4720, 24, ['ice','bomb']], // 126
+    ['chick', 4750, 24, ['ice','bomb']], // 127
+    ['bear', 4940, 24, ['rainbow','ice']], // 128
+    ['strawberry', 4960, 24, ['rainbow','ice']], // 129
+    ['strawberry', 4810, 25, ['star','rainbow','ice']], // 130
+    ['rabbit', 4580, 26, []], // 131
+    ['rabbit', 4600, 26, ['ice']], // 132
+    ['cat', 4870, 25, ['ice']], // 133
+    ['cat', 4890, 25, ['bomb']], // 134
+    ['flower', 4910, 25, ['ice','bomb']], // 135
+    ['flower', 4940, 25, ['bomb']], // 136
+    ['pig', 4960, 25, ['gift']], // 137
+    ['pig', 5150, 25, ['gift']], // 138
+    ['chick', 5170, 25, ['gift']], // 139
+    ['chick', 5020, 26, ['gift','stone','bomb']], // 140
+    ['flower', 4790, 26, []], // 141
+    ['flower', 4810, 26, ['rainbow']], // 142
+    ['rabbit', 5080, 25, ['star','ice']], // 143
+    ['rabbit', 5100, 25, ['star','ice']], // 144
+    ['strawberry', 5120, 25, ['stone','bomb','star','ice']], // 145
+    ['bear', 5140, 25, ['gift','bomb']], // 146
+    ['cat', 5170, 25, ['gift','bomb']], // 147
+    ['cat', 5360, 25, ['gift','bomb']], // 148
+    ['dog', 5380, 25, ['rainbow','star']], // 149
+    ['dog', 5230, 26, ['rainbow','star']], // 150
+    ['chick', 5000, 26, []], // 151
+    ['chick', 5020, 26, ['ice','bomb']], // 152
+    ['pig', 5290, 25, ['ice','bomb']], // 153
+    ['pig', 5310, 25, ['ice','bomb']], // 154
+    ['bear', 5330, 25, ['bomb','rainbow','ice']], // 155
+    ['bear', 5360, 25, ['rainbow','ice']], // 156
+    ['rabbit', 5380, 25, ['rainbow','ice']], // 157
+    ['rabbit', 5570, 25, ['star']], // 158
+    ['flower', 5590, 25, ['star']], // 159
+    ['flower', 5440, 26, ['star']], // 160
+    ['dog', 5210, 27, []], // 161
+    ['dog', 5230, 27, ['bomb']], // 162
+    ['strawberry', 5500, 26, ['bomb']], // 163
+    ['pig', 5520, 26, ['gift']], // 164
+    ['chick', 5540, 26, ['ice','gift']], // 165
+    ['chick', 5560, 26, ['gift']], // 166
+    ['pig', 5590, 26, ['stone','bomb']], // 167
+    ['pig', 5780, 26, ['stone','bomb']], // 168
+    ['rabbit', 5800, 26, ['stone','bomb']], // 169
+    ['rabbit', 5650, 27, ['gift','rainbow']], // 170
+    ['dog', 5420, 27, []], // 171
+    ['dog', 5440, 27, ['star','ice']], // 172
+    ['flower', 5710, 26, ['gift','bomb']], // 173
+    ['flower', 5730, 26, ['gift','bomb']], // 174
+    ['cat', 5750, 26, ['stone','bomb','gift']], // 175
+    ['cat', 5780, 26, ['rainbow','star']], // 176
+    ['bear', 5800, 26, ['rainbow','star']], // 177
+    ['bear', 5990, 26, ['rainbow','star']], // 178
+    ['chick', 6010, 26, ['stone','bomb','gift']], // 179
+    ['chick', 5860, 27, ['rainbow','stone','bomb','gift']], // 180
+    ['rabbit', 5630, 27, []], // 181
+    ['flower', 5650, 27, ['rainbow','ice']], // 182
+    ['bear', 5920, 26, ['rainbow','ice']], // 183
+    ['bear', 5940, 26, ['rainbow','ice']], // 184
+    ['dog', 5960, 26, ['star']], // 185
+    ['dog', 5980, 26, ['star']], // 186
+    ['cat', 6010, 26, ['star']], // 187
+    ['cat', 6200, 26, ['ice']], // 188
+    ['pig', 6220, 26, ['ice']], // 189
+    ['pig', 6070, 27, ['bomb','ice']], // 190
+    ['chick', 5840, 28, []], // 191
+    ['chick', 5860, 28, ['gift']], // 192
+    ['bear', 6130, 27, ['gift']], // 193
+    ['bear', 6150, 27, ['stone','bomb']], // 194
+    ['strawberry', 6170, 27, ['ice','stone','bomb']], // 195
+    ['strawberry', 6200, 27, ['stone','bomb']], // 196
+    ['rabbit', 6220, 27, ['rainbow']], // 197
+    ['rabbit', 6410, 27, ['rainbow']], // 198
+    ['cat', 6430, 27, ['rainbow']], // 199
+    ['flower', 6280, 28, ['rainbow','star','ice']], // 200
+  ];
+  const V60_MISSIONS = {
+    104:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 105
+    109:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // Stage 110
+    114:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 115
+    119:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 120
+    124:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 125
+    129:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 130
+    134:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 135
+    139:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 140
+    144:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 145
+    149:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 150
+    154:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // Stage 155
+    159:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 160
+    164:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 165
+    169:{kind:'gift',need:1,label:'🎁 선물 1개 열기'}, // Stage 170
+    174:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌 제거'}, // Stage 175
+    179:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 180
+    184:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'}, // Stage 185
+    189:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}, // Stage 190
+    194:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}, // Stage 195
+    199:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'}, // Stage 200
+  };
   const v42Missions={
       5:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
       12:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
@@ -422,7 +547,8 @@
       23:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
       27:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
       ...V58_MISSIONS,
-      ...V59_MISSIONS
+      ...V59_MISSIONS,
+      ...V60_MISSIONS
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
@@ -483,6 +609,7 @@
     function v41Stage(i){
       if(i>=30 && i<50) return v41Map[V58_STAGES[i-30][0]];
       if(i>=50 && i<100) return v41Map[V59_STAGES[i-50][0]];
+      if(i>=100 && i<200) return v41Map[V60_STAGES[i-100][0]];
       const named=v41Themes[i];
       if(named) return v41Map[named];
       // Deterministic irregular 1-3 stage clusters, no random theme drift on retries.
@@ -495,6 +622,7 @@
       if(i<30)return Math.round((680+(i-3)*57)/10)*10;
       if(i<50)return V58_STAGES[i-30][1];
       if(i<100)return V59_STAGES[i-50][1];
+      if(i<200)return V60_STAGES[i-100][1];
       return Math.round((2400+(i-30)*45)/10)*10;
     }
     function v41Moves(i){
@@ -504,12 +632,14 @@
       if(i<30)return 18;
       if(i<50)return V58_STAGES[i-30][2];
       if(i<100)return V59_STAGES[i-50][2];
+      if(i<200)return V60_STAGES[i-100][2];
       return 18+Math.min(6,Math.floor((i-30)/50));
     }
     function v41AllowedSpecials(i){
       if(i<30)return v41Specials[i];
       if(i<50)return V58_STAGES[i-30][3];
       if(i<100)return V59_STAGES[i-50][3];
+      if(i<200)return V60_STAGES[i-100][3];
       const unlocked=i<40?['stone','bomb','star','ice']:i<55?['stone','bomb','star','ice','gift']:SPECIAL_TYPES;
       // Beyond stage 30 progressively allow 1-3 specials, not six at once.
       return Array.from({length:Math.min(3,1+Math.floor((i-30)/15))},(_,n)=>unlocked[(i*3+n*2)%unlocked.length]);
@@ -531,7 +661,7 @@
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       base=v41Stage(i);
       const target = v41StageTarget(i);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: i<100 ? null : band.timeLimit }));
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<200 ? null : band.timeLimit }));
     }
     return arr;
   }
