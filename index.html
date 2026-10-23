@@ -14,123 +14,99 @@
 
 
 <style id="dpMissionCardStyle">
-/* V56: compact Type A HUD. All four center rows fit within card height. */
+/* V57 -- one coherent, phone-realistic premium HUD layout */
 .statsRow {
-  display:flex!important; align-items:stretch!important; gap:7px!important;
-  height:96px!important; min-height:96px!important;
-  margin:2px 8px 8px!important; flex:0 0 auto!important;
+  display:flex!important;align-items:stretch!important;gap:6px!important;
+  height:105px!important;min-height:105px!important;margin:2px 7px 8px!important;flex:0 0 auto!important;
 }
-.statsRow .stageBadgeMini,.statsRow .targetCard,.statsRow .movesBadge {
-  height:100%!important; min-height:0!important; box-sizing:border-box!important;
+.statsRow .stageBadgeMini,.statsRow .targetCard,.statsRow .movesBadge{box-sizing:border-box!important;height:100%!important;min-height:0!important;}
+.statsRow .stageBadgeMini{
+  order:0!important;flex:0 0 70px!important;min-width:70px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;
+  padding:8px 3px!important;border-radius:18px!important;border:2px solid #dcb273!important;
+  background:linear-gradient(#ca924a,#95541f)!important;color:white!important;
+  box-shadow:inset 0 2px 0 #ffffff42,0 3px 6px #67451a30!important;
 }
-.statsRow .stageBadgeMini {
-  order:0!important; flex:0 0 64px!important; min-width:64px!important;
-  display:flex!important; flex-direction:column!important; align-items:center!important;
-  justify-content:center!important; gap:5px!important; padding:7px 3px!important;
-  border-radius:16px!important; border:2px solid #dab071!important;
-  background:linear-gradient(#c99146,#93551f)!important; color:#fff!important;
-  box-shadow:inset 0 2px 0 #ffffff3b,0 2px 4px #6f48283b!important;
-}
-.statsRow .stageBadgeMini br{display:none!important}
-.statsRow .stageBadgeMini #stageBadgeLbl{font-size:10px!important;line-height:12px!important;letter-spacing:0!important;font-weight:900!important}
-.statsRow .stageBadgeMini #stageNum{font-size:23px!important;line-height:26px!important;font-weight:900!important}
-
+.statsRow .stageBadgeMini br{display:none!important;}
+.statsRow .stageBadgeMini #stageBadgeLbl{font-size:12px!important;font-weight:900!important;letter-spacing:0!important;line-height:13px!important;}
+.statsRow .stageBadgeMini #stageNum{font-size:29px!important;font-weight:900!important;line-height:32px!important;}
 .statsRow .targetCard{
-  order:1!important; flex:1 1 0!important; min-width:0!important;
-  display:grid!important;
-  /* 12+25+10+21 + 3*3 gap + 8+8 padding + 4 border = 97; fit 98px */
-  grid-template-rows:12px 25px 10px 21px!important;
-  row-gap:3px!important; align-content:center!important; justify-items:stretch!important;
-  padding:6px 8px!important; position:relative!important; overflow:hidden!important;
-  border:2px solid #d8c49f!important; border-radius:17px!important;
-  background:linear-gradient(#faf5ea,#f2ead9)!important;
-  box-shadow:inset 0 2px 0 #ffffffc5,0 2px 4px #654b2c21!important;
+  order:1!important;flex:1 1 0!important;min-width:0!important;
+  display:grid!important;grid-template-rows:15px 30px 13px 24px!important;row-gap:3px!important;
+  align-content:center!important;justify-items:stretch!important;
+  padding:6px 6px!important;position:relative!important;overflow:hidden!important;
+  border:2px solid #d7c29d!important;border-radius:18px!important;
+  background:linear-gradient(#faf5ea,#f3e9d8)!important;box-shadow:inset 0 2px 0 #ffffffc5,0 2px 5px #654b2c20!important;
 }
-.statsRow .targetCard #targetBadgeLbl {
+.statsRow .targetCard #targetBadgeLbl{
   position:static!important;inset:auto!important;transform:none!important;
-  grid-row:1!important;display:block!important;justify-self:center!important;align-self:center!important;
-  margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;
-  background:none!important;color:#845d35!important;font-weight:900!important;
-  font-size:10px!important;line-height:12px!important;
+  display:block!important;grid-row:1!important;justify-self:center!important;align-self:center!important;
+  margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;
+  color:#79532e!important;font-size:12px!important;font-weight:900!important;line-height:15px!important;white-space:nowrap!important;
 }
-.statsRow .targetCard #targetVal {
-  grid-row:2!important;align-self:center!important;
-  font-weight:900!important;font-size:clamp(22px,6vw,27px)!important;
-  line-height:25px!important;color:#20436d!important;
-  margin:0!important;padding:0!important;
+.statsRow .targetCard #targetVal{
+  grid-row:2!important;align-self:center!important;justify-self:center!important;
+  margin:0!important;padding:0!important;color:#20436d!important;
+  font-size:clamp(26px,7.15vw,32px)!important;line-height:30px!important;font-weight:900!important;white-space:nowrap!important;
 }
-.statsRow .targetCard .barTrack {
+.statsRow .targetCard .barTrack{
   grid-row:3!important;position:relative!important;inset:auto!important;align-self:center!important;
-  width:calc(100% - 17px)!important;height:10px!important;
-  margin:0 8px 0 9px!important;box-sizing:border-box!important;
-  border-radius:999px!important;background:#e5d8c0!important;
-  box-shadow:inset 0 1px 2px #775c4433!important;
+  width:calc(100% - 16px)!important;height:13px!important;margin:0 8px!important;box-sizing:border-box!important;
+  background:linear-gradient(#e9ddc7,#e0d1b7)!important;border-radius:999px!important;box-shadow:inset 0 1px 2px #775c4433!important;
 }
-.statsRow .targetCard .barFill {
-  height:100%!important; border-radius:999px!important;
-  background:linear-gradient(90deg,#ffbe42,#ffdb7e)!important;
+.statsRow .targetCard .barFill{
+  height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#ffb52d,#ffda65)!important;
   transition:width .3s ease!important;
 }
 .statsRow .targetCard .barStar{
-  /* Deliberately no left: JS updateHud sets this value as score rises. */
+  /* IMPORTANT: left is controlled by game.js, not CSS */
   position:absolute!important;top:50%!important;transform:translate(-50%,-50%)!important;
-  font-size:15px!important;line-height:1!important;z-index:2!important;
-  transition:left .3s ease!important;
+  font-size:17px!important;line-height:1!important;z-index:2!important;transition:left .3s ease!important;
 }
-.statsRow .targetCard #dpV42Mission.dpMissionInCard {
+.statsRow .targetCard #dpV42Mission.dpMissionInCard{
   grid-row:4!important;position:static!important;inset:auto!important;transform:none!important;
-  justify-self:center!important;display:flex!important;align-items:center!important;
-  width:calc(100% - 10px)!important;min-width:0!important;
-  height:21px!important;min-height:21px!important;max-height:21px!important;
-  margin:0!important;padding:0 6px!important;gap:4px!important;
-  box-sizing:border-box!important;border-radius:9px!important;
-  border:1px solid #d6b477!important;background:linear-gradient(#fffaf0,#ffedcf)!important;
-  box-shadow:inset 0 1px 0 #fff!important;
-  color:#754a23!important;font-size:clamp(9px,2.55vw,11px)!important;font-weight:800!important;
-  line-height:19px!important;pointer-events:none!important;
+  justify-self:center!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  width:calc(100% - 4px)!important;min-width:0!important;height:24px!important;min-height:24px!important;max-height:24px!important;
+  margin:0!important;padding:0 5px!important;gap:3px!important;box-sizing:border-box!important;
+  border-radius:10px!important;border:1px solid #d6b477!important;
+  background:linear-gradient(#fffaf0,#ffedcf)!important;box-shadow:inset 0 1px 0 #fff!important;
+  font-size:clamp(10px,2.55vw,12px)!important;line-height:22px!important;font-weight:800!important;color:#734a25!important;
+  pointer-events:none!important;
 }
-.statsRow .targetCard #dpV42Mission[hidden]{display:flex!important;visibility:hidden!important}
+.statsRow .targetCard #dpV42Mission[hidden]{display:flex!important;visibility:hidden!important;}
 .statsRow .targetCard #dpV42Mission .dpMissionLabel{
-  flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important;
-  overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important;
+  flex:0 1 auto!important;min-width:0!important;text-overflow:ellipsis!important;overflow:hidden!important;white-space:nowrap!important;
 }
 .statsRow .targetCard #dpV42Mission .dpMissionCount{
-  flex:0 0 auto!important;font-variant-numeric:tabular-nums!important;
-  font-size:10px!important;padding:0 3px!important;border-radius:5px!important;
-  background:#ffffffa8!important;color:#865021!important;
+  flex:0 0 auto!important;font-variant-numeric:tabular-nums!important;font-size:11px!important;
+  padding:0 4px!important;border-radius:5px!important;background:#ffffffb5!important;color:#855025!important;
 }
-.statsRow .targetCard #dpV42Mission.complete {
-  background:linear-gradient(#f3ffe9,#dcf1d2)!important;border-color:#91c07f!important;color:#327240!important;
-}
-.statsRow .targetCard #dpV42Mission.complete .dpMissionCount{color:#327240!important}
-
+.statsRow .targetCard #dpV42Mission.complete{background:linear-gradient(#f4ffe9,#dcefce)!important;border-color:#91be7e!important;color:#31733d!important;}
+.statsRow .targetCard #dpV42Mission.complete .dpMissionCount{color:#31733d!important;}
 .statsRow .movesBadge{
-  order:2!important;flex:0 0 78px!important;min-width:78px!important;
-  display:flex!important;flex-direction:column!important;align-items:center!important;
-  justify-content:center!important;gap:7px!important;padding:7px 4px!important;
-  border-radius:16px!important;border:2px solid #d8c49f!important;
-  background:linear-gradient(#faf5ea,#f2ead9)!important;
-  box-shadow:inset 0 2px 0 #ffffffc5,0 2px 4px #654b2c21!important;
+  order:2!important;flex:0 0 79px!important;min-width:79px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+  padding:8px 4px!important;border-radius:18px!important;border:2px solid #d7c29d!important;
+  background:linear-gradient(#faf5ea,#f3e9d8)!important;box-shadow:inset 0 2px 0 #ffffffc5,0 2px 5px #654b2c20!important;
 }
-.statsRow .movesBadge .lbl{
-  order:-1!important;margin:0!important;font-size:10px!important;line-height:12px!important;
-  font-weight:900!important;color:#7a5937!important;white-space:nowrap!important;
-}
+.statsRow .movesBadge .lbl{order:-1!important;margin:0!important;color:#775332!important;font-size:12px!important;line-height:14px!important;font-weight:900!important;white-space:nowrap!important;}
 .statsRow .movesBadge .circle{
-  width:46px!important;height:46px!important;min-height:46px!important;flex:0 0 46px!important;
-  border-radius:50%!important;font-size:20px!important;font-weight:900!important;
-  background:linear-gradient(#5db4fe,#267ad6)!important;color:#fff!important;
-  border:2px solid #ffffffa8!important;
+  flex:0 0 50px!important;width:50px!important;height:50px!important;min-height:50px!important;
+  border-radius:50%!important;color:white!important;font-size:24px!important;font-weight:900!important;
+  background:linear-gradient(#5db4fe,#267ad6)!important;border:2px solid #ffffffa8!important;
   box-shadow:inset 0 2px 2px #ffffff42,0 2px 5px #204a852d!important;
 }
-.statsRow #movesStars,.statsRow #movesScoreEcho{display:none!important}
+.statsRow #movesStars,.statsRow #movesScoreEcho{display:none!important;}
 @media(max-width:380px){
-  .statsRow{height:94px!important;min-height:94px!important;gap:5px!important;margin-left:6px!important;margin-right:6px!important}
-  .statsRow .stageBadgeMini{flex-basis:58px!important;min-width:58px!important}
-  .statsRow .movesBadge{flex-basis:70px!important;min-width:70px!important}
-  .statsRow .targetCard{padding:6px 5px!important;row-gap:2px!important;grid-template-rows:12px 25px 10px 20px!important}
-  .statsRow .targetCard #dpV42Mission.dpMissionInCard{width:calc(100% - 4px)!important;padding:0 3px!important}
-  .statsRow .movesBadge .circle{width:43px!important;height:43px!important;min-height:43px!important;flex-basis:43px!important}
+  .statsRow{height:101px!important;min-height:101px!important;gap:4px!important;margin-left:5px!important;margin-right:5px!important;}
+  .statsRow .stageBadgeMini{flex-basis:62px!important;min-width:62px!important;}
+  .statsRow .movesBadge{flex-basis:72px!important;min-width:72px!important;}
+  .statsRow .targetCard{padding:5px 4px!important;grid-template-rows:14px 29px 12px 23px!important;row-gap:3px!important;}
+  .statsRow .targetCard #targetBadgeLbl{font-size:11px!important;}
+  .statsRow .targetCard #dpV42Mission.dpMissionInCard{height:23px!important;min-height:23px!important;max-height:23px!important;padding:0 3px!important;}
+  .statsRow .targetCard #dpV42Mission .dpMissionCount{font-size:10px!important;padding:0 2px!important;}
+  .statsRow .movesBadge .lbl{font-size:11px!important;}
+  .statsRow .movesBadge .circle{width:46px!important;height:46px!important;min-height:46px!important;flex-basis:46px!important;}
 }
 </style>
 </head>
