@@ -318,7 +318,11 @@
       17:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
       20:{kind:'gift',need:1,label:'🎁 선물상자 1개 열기'},
       25:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'},
-      29:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}
+      29:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
+      15:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
+      19:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+      23:{kind:'bombStone',need:1,label:'💥 폭탄으로 돌멩이 제거'},
+      27:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'}
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
@@ -339,6 +343,7 @@
       const m=v42Mission();if(!m||v42MissionDone())return;
       const count=m.kind==='star'?(splash.star?1:0):
         m.kind==='bomb'?splash.exploded:
+        m.kind==='bombStone'?splash.stonesRemoved:
         m.kind==='ice'?splash.thawed:
         m.kind==='gift'?splash.giftCount:
         m.kind==='rainbow'?(originalCells.some(p=>specialAt(p.r,p.c)==='rainbow')?1:0):0;
@@ -349,7 +354,11 @@
     function v43RestoreMissionTile(){
       const m=v42Mission();
       if(!m || v42MissionDone() || currentStage().type!=='chick')return;
-      const kind=m.kind;
+      const kind=m.kind==='bombStone'?'stone':m.kind;
+      if(m.kind==='bombStone'){
+        ensureStoneBombMissionPair();
+        return;
+      }
       for(const type of specials.values())if(type===kind)return;
       const positions=[];
       for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++){
@@ -786,6 +795,32 @@
     }
     return false;
   }
+  // V46: a guaranteed reachable bomb/stone pair for obstacle objectives.
+  // Rebuilds only the mission pair; normal stages retain V41 placement balance.
+  function ensureStoneBombMissionPair(){
+    const m=v42Mission();
+    if(!m || m.kind!=='bombStone' || v42MissionDone())return;
+    const stone={r:3,c:2}, bomb={r:3,c:3}, helper={r:3,c:4};
+    // Clear stray specials in the reserved mission lane, preserving other tiles.
+    for(const p of [stone,bomb,helper])specials.delete(skey(p.r,p.c));
+    // If the player already has a stone and an adjacent bomb, keep that pair.
+    let existing=false;
+    for(const [key,type] of specials){
+      if(type!=='stone')continue;
+      const [r,c]=key.split(',').map(Number);
+      for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+        if(!dr&&!dc)continue;
+        if(specialAt(r+dr,c+dc)==='bomb')existing=true;
+      }
+    }
+    if(existing)return;
+    const symbol=board[bomb.r][bomb.c]===null?0:board[bomb.r][bomb.c];
+    for(const p of [stone,bomb,helper])if(board[p.r][p.c]===null)board[p.r][p.c]=symbol;
+    board[bomb.r][bomb.c]=symbol;
+    board[helper.r][helper.c]=symbol;
+    specials.set(skey(stone.r,stone.c),'stone');
+    specials.set(skey(bomb.r,bomb.c),'bomb');
+  }
   function createSpecials(){
     specials.clear();
     const stage=currentStage();
@@ -814,6 +849,10 @@
       }
       if(!placed)console.warn('[Dalmpang V43] Could not place special',type);
     }
+    ensureStoneBombMissionPair();
+    if(v42Mission() && v42Mission().kind==='ice' && ![...specials.values()].includes('ice')){
+      specials.set(skey(3,2),'ice');
+    }
   }
   function specialAt(r,c){return specials.get(skey(r,c));}
   function chainColor(){
@@ -829,6 +868,7 @@
         if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null)removed.set(skey(r,c),{r,c});
       }
     });
+    const stonesRemoved=[...removed.keys()].filter(key=>specials.get(key)==='stone').length;
     const giftTriggered=new Set();
     const thawed=new Set();
     // Adjacent successful connections break ice; gifts open for coin rewards.
@@ -845,7 +885,7 @@
     return {
       cells:[...removed.values()],bonus:removed.size-chainCells.length,exploded:bombs.length,
       star:chainCells.some(p=>specialAt(p.r,p.c)==='star'),giftCount:giftTriggered.size+chainCells.filter(p=>specialAt(p.r,p.c)==='gift').length,
-      thawed:thawed.size
+      thawed:thawed.size,stonesRemoved
     };
   }
   function newStageBoard(){
