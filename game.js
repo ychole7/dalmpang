@@ -306,6 +306,95 @@
     { from:350, unlock:POOL_SORTED.length, targetMul:3.30, timeLimit:50 },
     { from:550, unlock:POOL_SORTED.length, targetMul:3.90, timeLimit:45 }
   ];
+
+    // V41: Stage-specific theme and difficulty; no 8-theme fixed rotation.
+    const v41Themes=["chick","chick","chick","strawberry","strawberry","rabbit","flower","flower","flower","dog","dog","chick","cat","cat","cat","bear","bear","pig","pig","pig","strawberry","strawberry","rabbit","rabbit","rabbit","flower","flower","cat","cat","chick"];
+    const v41Map={chick:CHICK_STAGE,strawberry:STRAWBERRY_EASY,dog:DOG_EASY,flower:FLOWER_EASY,rabbit:RABBIT_EASY,cat:CAT_EASY,bear:BEAR_EASY,pig:PIG_EASY};
+    const v41Specials=[[], [], [], [], [], ["star"], [], [], [], ["stone"], ["stone"], ["star"], ["bomb"], ["bomb"], ["bomb", "star"], ["stone", "bomb"], ["stone"], ["ice"], ["ice"], ["stone", "ice"], ["gift"], ["gift", "star"], ["bomb", "gift"], ["stone", "bomb"], ["ice", "star"], ["rainbow"], ["rainbow", "star"], ["stone", "ice", "rainbow"], ["bomb", "gift", "rainbow"], ["stone", "bomb", "star", "ice", "gift", "rainbow"]];
+    // V42 objective missions: zero-based stage slots, score target AND mission required.
+    const v42Missions={
+      5:{kind:'star',need:1,label:'⭐ 황금별 1회 사용'},
+      12:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'},
+      17:{kind:'ice',need:1,label:'🧊 얼음 1개 해제'},
+      20:{kind:'gift',need:1,label:'🎁 선물상자 1개 열기'},
+      25:{kind:'rainbow',need:1,label:'🌈 무지개 1회 연결'},
+      29:{kind:'bomb',need:1,label:'💣 폭탄 1회 발동'}
+    };
+    let v42MissionCount=0;
+    function v42Mission(){return v42Missions[stageSlot()]||null;}
+    function v42MissionDone(){const m=v42Mission();return !m||v42MissionCount>=m.need;}
+    function v42MissionUpdate(){
+      let el=document.getElementById('dpV42Mission');
+      if(!el){
+        el=document.createElement('div');el.id='dpV42Mission';
+        el.style.cssText='margin:3px auto 1px;max-width:400px;padding:5px 9px;background:linear-gradient(135deg,#fffaf0,#ffeccc);border:1px solid #dba859;border-radius:12px;color:#724512;font-weight:800;font-size:12px;line-height:1.4;text-align:center;box-shadow:0 2px 5px #86522018;';
+        const wrap=document.getElementById('boardWrap');
+        if(wrap&&wrap.parentNode)wrap.parentNode.insertBefore(el,wrap);
+      }
+      const m=v42Mission();
+      el.style.display=m?'block':'none';
+      if(m)el.textContent='특별 미션 · '+m.label+'  '+Math.min(v42MissionCount,m.need)+'/'+m.need+(v42MissionDone()?' ✓':'');
+    }
+    function v42MissionProgress(splash,originalCells){
+      const m=v42Mission();if(!m||v42MissionDone())return;
+      const count=m.kind==='star'?(splash.star?1:0):
+        m.kind==='bomb'?splash.exploded:
+        m.kind==='ice'?splash.thawed:
+        m.kind==='gift'?splash.giftCount:
+        m.kind==='rainbow'?(originalCells.some(p=>specialAt(p.r,p.c)==='rainbow')?1:0):0;
+      if(count>0){v42MissionCount=Math.min(m.need,v42MissionCount+count);v42MissionUpdate();}
+    }
+    // Ensure a required mission object remains obtainable until its objective is complete.
+    // This operates on the actual board/specials model, never on overlay images.
+    function v43RestoreMissionTile(){
+      const m=v42Mission();
+      if(!m || v42MissionDone() || currentStage().type!=='chick')return;
+      const kind=m.kind;
+      for(const type of specials.values())if(type===kind)return;
+      const positions=[];
+      for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++){
+        if(board[r][c]===null || specialAt(r,c))continue;
+        let free=false;
+        for(const dc of [-1,1])if(!specialAt(r,c+dc) && board[r][c+dc]!==null)free=true;
+        if(free)positions.push({r,c});
+      }
+      if(!positions.length)return;
+      const p=positions[Math.floor(Math.random()*positions.length)];
+      specials.set(skey(p.r,p.c),kind);
+      if(kind==='star'||kind==='bomb'||kind==='gift'||kind==='rainbow'){
+        const nc=!specialAt(p.r,p.c+1)?p.c+1:p.c-1;
+        board[p.r][nc]=board[p.r][p.c];
+      }
+      if(!hasOpenPair())specials.delete(skey(p.r,p.c));
+      render();
+    }
+    function v41Stage(i){
+      const named=v41Themes[i];
+      if(named) return v41Map[named];
+      // Deterministic irregular 1-3 stage clusters, no random theme drift on retries.
+      const groups=['rabbit','bear','flower','dog','cat','strawberry','pig','chick','flower','cat','rabbit','pig','bear','strawberry','dog','chick'];
+      const cluster=Math.floor((i-30)/2);
+      return v41Map[groups[(cluster+Math.floor(cluster/4))%groups.length]];
+    }
+    function v41StageTarget(i){
+      if(i<3)return [450,520,620][i];
+      if(i<30)return Math.round((680+(i-3)*57)/10)*10;
+      return Math.round((2400+(i-30)*45)/10)*10;
+    }
+    function v41Moves(i){
+      if(i<3)return 18;
+      if(i<10)return 17;
+      if(i<20)return 17;
+      if(i<30)return 18;
+      return 18+Math.min(6,Math.floor((i-30)/50));
+    }
+    function v41AllowedSpecials(i){
+      if(i<30)return v41Specials[i];
+      const unlocked=i<40?['stone','bomb','star','ice']:i<55?['stone','bomb','star','ice','gift']:SPECIAL_TYPES;
+      // Beyond stage 30 progressively allow 1-3 specials, not six at once.
+      return Array.from({length:Math.min(3,1+Math.floor((i-30)/15))},(_,n)=>unlocked[(i*3+n*2)%unlocked.length]);
+    }
+  
   function bandFor(i){
     let band = DIFFICULTY_BANDS[0];
     for(let k=0;k<DIFFICULTY_BANDS.length;k++){ if(i>=DIFFICULTY_BANDS[k].from) band = DIFFICULTY_BANDS[k]; }
@@ -320,10 +409,9 @@
       let base;
       // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat, 7 bear).
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
-      if(i < 50) base=TEST_THEME_ROTATION[i % TEST_THEME_ROTATION.length];
-      else base=pool[i % pool.length];
-      const target = Math.round((250 + 300*Math.sqrt(i)) * band.targetMul);
-      arr.push(Object.assign({}, base, { target: target, timeLimit: i<50 ? null : band.timeLimit }));
+      base=v41Stage(i);
+      const target = v41StageTarget(i);
+      arr.push(Object.assign({}, base, { target: target, timeLimit: i<30 ? null : band.timeLimit }));
     }
     return arr;
   }
@@ -485,7 +573,7 @@
   }
   function stageSlot(){ return stageIndex % STAGES.length; }
   function randSymbolIdx(){ return Math.floor(Math.random()*stageSize(currentStage())); }
-  function movesBudget(){ return 16 + Math.min(16, Math.floor(stageIndex/25)); }
+  function movesBudget(){ return v41Moves(stageIndex); }
 
   function showToast(msg){
     toastEl.textContent = msg;
@@ -506,6 +594,7 @@
 
   // V17: keep the board visible while dragging; celebrate the actual release.
   function triggerPopEffect(count, gained){
+    if(document.getElementById('mainScreen').style.display==='none') return;
     popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS,'v17-nice','v17-great','v17-amazing');
     if(count<5) return;
     const level=count>=8 ? 'amazing' : count===7 ? 'great' : 'nice';
@@ -540,11 +629,20 @@
   // 게임 화면을 벗어날 때(업적/상점 이동) 애니메이션이 중간에 멈췄다가
   // 다시 돌아왔을 때 처음부터 재생되며 "그레잇" 등 이펙트가 반복 재생되는 걸 막기 위한 정리
   function resetInFlightFX(){
-    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS);
-    const flash = document.getElementById('boardFlash');
-    flash.classList.remove('show');
-    const wrap = document.getElementById('boardWrap');
-    wrap.classList.remove('shaking');
+    popEffectEl.classList.remove('show', ...COMBO_TIER_KEYS,'v17-nice','v17-great','v17-amazing');
+    popEffectEl.style.animation='none';
+    popTextEl.replaceChildren();
+    popParticlesEl.replaceChildren();
+    popEffectEl.getBoundingClientRect(); // Commit cancellation before another combo
+    popEffectEl.style.removeProperty('animation');
+    const flash=document.getElementById('boardFlash');
+    if(flash){flash.className='';flash.style.animation='none';flash.getBoundingClientRect();flash.style.removeProperty('animation');}
+    const wrap=document.getElementById('boardWrap');
+    wrap.classList.remove('shaking','is-chaining');
+    wrap.querySelectorAll('.chainFinalScore,.chickBurst').forEach(el=>el.remove());
+    if(typeof hideChainScorePreview==='function')hideChainScorePreview();
+    if(typeof clearChainPath==='function')clearChainPath();
+    if(typeof chainTip!=='undefined'&&chainTip)chainTip.hidden=true;
   }
 
   // V17: replace intrusive center banner with unobtrusive floating hint.
@@ -690,27 +788,31 @@
   }
   function createSpecials(){
     specials.clear();
-    if(currentStage().type!=='chick')return;
-    const stageNo=stageSlot()+1;
-    if(stageNo<=2)return;
-    const roll=Math.random();
-    // 0:45%, 1:35%, 2:17%, 3:3%; early stages get at most one.
-    const count=Math.min(stageNo<9?1:stageNo<17?2:3,roll<.45?0:roll<.80?1:roll<.97?2:3);
-    if(!count)return;
+    const stage=currentStage();
+    if(stage.type!=='chick')return;
+    const requested=v41AllowedSpecials(stageSlot());
+    if(!requested || !requested.length)return;
     const cells=[];
     for(let r=1;r<ROWS-1;r++)for(let c=0;c<COLS;c++)if(board[r][c]!==null)cells.push({r,c});
     for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
-    let placed=0;
-    for(const p of cells){
-      if([...specials.keys()].some(key=>{
-        const [r,c]=key.split(',').map(Number);
-        return Math.abs(r-p.r)<=1&&Math.abs(c-p.c)<=1;
-      }))continue;
-      const type=chooseSpecialType(stageNo);
-      specials.set(skey(p.r,p.c),type);
-      if(!hasOpenPair())specials.delete(skey(p.r,p.c));
-      else placed++;
-      if(placed>=count)break;
+    const occupied=new Set();
+    for(const type of requested){
+      let placed=false;
+      for(let k=0;k<cells.length;k++){
+        const p=cells[k];
+        if(occupied.has(skey(p.r,p.c)))continue;
+        if([...specials.keys()].some(key=>{const [r,c]=key.split(',').map(Number);return Math.abs(r-p.r)<=1&&Math.abs(c-p.c)<=1;}))continue;
+        specials.set(skey(p.r,p.c),type);
+        if(!hasOpenPair()){specials.delete(skey(p.r,p.c));continue;}
+        // Enable a reachable match beside activatable power tiles.
+        if(['star','bomb','gift'].includes(type)){
+          const nc=p.c>0?p.c-1:p.c+1;
+          if(!specialAt(p.r,nc))board[p.r][nc]=board[p.r][p.c];
+        }
+        occupied.add(skey(p.r,p.c));
+        placed=true;break;
+      }
+      if(!placed)console.warn('[Dalmpang V43] Could not place special',type);
     }
   }
   function specialAt(r,c){return specials.get(skey(r,c));}
@@ -747,12 +849,14 @@
     };
   }
   function newStageBoard(){
+    v42MissionCount=0;
     stageScore = 0;
     movesLeft = movesBudget();
     board = fillRandomBoard();
     createSpecials();
     startNewStageTimer();
     updateHud();
+    v42MissionUpdate();
     render();
     checkNoMoves();
   }
@@ -764,6 +868,7 @@
 
   function updateHud(previewBonus){
     const st = currentStage();
+    v42MissionUpdate();
     const bonus = previewBonus || 0;
     const shownScore = stageScore;
     stageNumEl.textContent = String(stageSlot()+1).padStart(2,'0');
@@ -1115,6 +1220,7 @@
     const originalCount=cells.length;
     const splash=(!isBonus && currentStage().type==='chick') ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
     cells=splash.cells;
+    if(!isBonus)v42MissionProgress(splash,cells.slice());
     const chickPop=currentStage().type==='chick';
     const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
     // Score comes from the original chain; bomb splash awards 35 points per extra tile.
@@ -1162,8 +1268,9 @@
     setTimeout(()=>{
       gravityAndAnimateChicks().then(()=>{
         poppingInProgress=false;
+        v43RestoreMissionTile();
         updateHud();
-        if(stageScore>=currentStage().target) showStageClear();
+        if(stageScore>=currentStage().target && v42MissionDone()) showStageClear();
         else if(movesLeft<=0) showStageFail();
         else checkNoMoves();
       }).catch(()=>{poppingInProgress=false;render();updateHud();});
@@ -1632,6 +1739,7 @@
     setActiveTab('shop');
   });
   document.getElementById('navHome').addEventListener('click', ()=>{
+    resetInFlightFX();
     document.getElementById('achievePage').classList.remove('show');
     document.getElementById('shopPage').classList.remove('show');
     document.getElementById('mainScreen').style.display = '';
