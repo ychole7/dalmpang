@@ -16,13 +16,13 @@
 <style id="dpMissionCardStyle">
 /* V47: Objective is inside existing target panel; board never shifts. */
 .targetCard{position:relative;}
-#dpV42Mission.dpMissionInCard{position:absolute;left:8%;right:8%;bottom:10px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;max-width:none;padding:5px 8px;border-radius:11px;border:1px solid #e3bc73;background:linear-gradient(180deg,#fff9e9 0%,#ffeac0 100%);box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(118,71,25,.13);color:#784613;font-size:clamp(10px,2.65vw,12px);line-height:1.1;font-weight:800;white-space:nowrap;z-index:2;pointer-events:none;}
+#dpV42Mission.dpMissionInCard{position:absolute;left:8%;right:8%;bottom:7px;height:26px!important;min-height:0!important;max-height:26px!important;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;max-width:none;padding:0 7px!important;border-radius:9px;border:1px solid #e3bc73;background:linear-gradient(180deg,#fff9e9 0%,#ffeac0 100%);box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(118,71,25,.13);color:#784613;font-size:clamp(10px,2.55vw,12px);line-height:16px;font-weight:800;white-space:nowrap;z-index:2;pointer-events:none;}
 #dpV42Mission[hidden]{display:none!important;}
 #dpV42Mission .dpMissionLabel{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #dpV42Mission .dpMissionCount{flex:none;padding:3px 6px;border-radius:7px;background:#fff6db;color:#94521a;font-size:inherit;font-variant-numeric:tabular-nums;}
 #dpV42Mission.complete{border-color:#7cbd80;background:linear-gradient(180deg,#f1ffe6,#d7f4ce);color:#307338;}
 #dpV42Mission.complete .dpMissionCount{background:#efffe9;color:#237433;}
-@media(max-width:360px){#dpV42Mission.dpMissionInCard{left:6%;right:6%;bottom:7px;padding:4px 5px;gap:3px;}#dpV42Mission .dpMissionCount{padding:2px 3px;}}
+@media(max-width:360px){#dpV42Mission.dpMissionInCard{left:6%;right:6%;bottom:6px;height:24px!important;max-height:24px!important;padding:0 5px!important;gap:3px;}#dpV42Mission .dpMissionCount{padding:2px 3px;}}
 </style>
 </head>
 <body>
