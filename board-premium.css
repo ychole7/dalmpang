@@ -103,7 +103,7 @@
 #boardWrap img.chickSymbol[src*="rabbit_"]      { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
 #boardWrap img.chickSymbol[src*="cat_easy_"]    { --dp-symbol-size:104.6%; --dp-symbol-y:0px; }
 #boardWrap img.chickSymbol[src*="bear_easy_"]   { --dp-symbol-size:108.8%; --dp-symbol-y:0px; }
-#boardWrap img.chickSymbol[src*="pig_easy_"]    { --dp-symbol-size:114.5%; --dp-symbol-y:0px; }
+#boardWrap img.chickSymbol[src*="pig_easy_"]    { --dp-symbol-size:111.5%; --dp-symbol-y:0px; }
 /* Position adjustment never moves the tile box or input hit target. */
 #boardWrap .die > img.chickSymbol:not(.specialTileArt) {
   margin-top:var(--dp-symbol-y,0px);
