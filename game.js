@@ -2125,8 +2125,7 @@
     const m=v42Mission();
     if(!m || m.kind!=='bombStone' || v42MissionDone())return;
     const stone={r:3,c:2}, bomb={r:3,c:3}, helper={r:3,c:4};
-    // Clear stray specials in the reserved mission lane, preserving other tiles.
-    for(const p of [stone,bomb,helper])specials.delete(skey(p.r,p.c));
+    // First preserve an already available stone/bomb pair; do not erase it while checking.
     // If the player already has a stone and an adjacent bomb, keep that pair.
     let existing=false;
     for(const [key,type] of specials){
@@ -2138,6 +2137,8 @@
       }
     }
     if(existing)return;
+    // Reserve a clean, reachable row only when a valid pair is missing.
+    for(const p of [stone,bomb,helper])specials.delete(skey(p.r,p.c));
     const symbol=board[bomb.r][bomb.c]===null?0:board[bomb.r][bomb.c];
     for(const p of [stone,bomb,helper])if(board[p.r][p.c]===null)board[p.r][p.c]=symbol;
     board[bomb.r][bomb.c]=symbol;
@@ -2218,6 +2219,10 @@
     movesLeft = movesBudget();
     board = fillRandomBoard();
     createSpecials();
+    // V69 QA: random placement can skip a required special because of
+    // adjacency constraints. Verify it before the player's first move.
+    // On bomb/stone missions this also restores a usable objective pair.
+    v43RestoreMissionTile();
     startNewStageTimer();
     updateHud();
     v42MissionUpdate();
@@ -2694,6 +2699,8 @@
     let idx=0;
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) board[r][c]=flat[idx++];
     createSpecials();
+    // A reshuffle must not strand a special-tile mission.
+    v43RestoreMissionTile();
   }
 
   function showStageClear(){
@@ -2762,6 +2769,7 @@
   document.getElementById('nextStageBtn').addEventListener('click', ()=>{
     if(stageIndex>=TOTAL_STAGES-1){
       // Final stage: do not silently wrap to stage 1.
+      clearOverlay.classList.remove('show');
       showToast('🎉 1,000스테이지 전체 클리어! 축하해요!');
       return;
     }
