@@ -1838,18 +1838,25 @@
   let stageTimeLeft = 0;
   let stageTimerHandle = null;
   let hearts = parseInt(localStorage.getItem('sp_hearts'), 10);
-  if(isNaN(hearts)) hearts = HEART_MAX;
+  if(!Number.isFinite(hearts)) hearts = HEART_MAX;
+  hearts = Math.max(0, Math.min(HEART_MAX, hearts));
   let heartRegenAt = parseInt(localStorage.getItem('sp_heart_regen_at'), 10);
-  if(isNaN(heartRegenAt)) heartRegenAt = 0;
-  let coins = parseInt(localStorage.getItem('sp_coins')||'0',10);
+  if(!Number.isFinite(heartRegenAt) || heartRegenAt < 0) heartRegenAt = 0;
+  let coins = Math.max(0, parseInt(localStorage.getItem('sp_coins')||'0',10) || 0);
   let totalStars = parseInt(localStorage.getItem('sp_stars')||'0',10);
   let noAdsOwned = localStorage.getItem('sp_no_ads') === '1';
   let heartPassUntil = parseInt(localStorage.getItem('sp_heart_pass_until')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
+  // V77: persist first-time completion rewards across reloads/retries.
+  // Old best-score entries count as already cleared for reward purposes.
+  const rewardedStageSlots = new Set(JSON.parse(localStorage.getItem('sp_rewarded_stage_slots')||'[]'));
+  stageBests.forEach((score, slot)=>{ if(score>0) rewardedStageSlots.add(slot); });
   let chain = [];
   let chainPreviewBonus = 0;
   let dragging = false;
   let poppingInProgress = false;
+  let stageOutcome = null; // lock clear/fail rewards and overlays
+  let activePointerId = null;
   let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
   function savePowerCounts(){ localStorage.setItem('sp_power_counts', JSON.stringify(powerCounts)); }
 
@@ -1896,17 +1903,23 @@
   }
 
   function spendHeart(){
-    if(Date.now() < heartPassUntil) return; // 하트 무제한 패스 활성 중
+    tickHeartRegen();
+    if(Date.now() < heartPassUntil) return true; // 하트 무제한 패스 활성 중
+    if(hearts<=0) return false;
     if(hearts>=HEART_MAX && !heartRegenAt){
       heartRegenAt = Date.now() + HEART_REGEN_MS;
     }
-    hearts = Math.max(0, hearts-1);
+    hearts--;
     saveHearts();
+    return true;
   }
 
   function tickHeartRegen(){
     if(hearts>=HEART_MAX){ heartRegenAt = 0; saveHearts(); return; }
-    if(!heartRegenAt) return;
+    if(!heartRegenAt){
+      heartRegenAt=Date.now()+HEART_REGEN_MS;
+      saveHearts();
+    }
     const now = Date.now();
     if(now >= heartRegenAt){
       const gained = Math.floor((now-heartRegenAt)/HEART_REGEN_MS) + 1;
@@ -2276,6 +2289,11 @@
     };
   }
   function newStageBoard(){
+    stageOutcome=null;
+    activePointerId=null;
+    dragging=false;
+    poppingInProgress=false;
+    chain=[];
     v42MissionCount=0;
     stageScore = 0;
     movesLeft = movesBudget();
@@ -2513,7 +2531,7 @@
   }
 
   function startChain(r,c){
-    if(movesLeft<=0 || poppingInProgress) return;
+    if(movesLeft<=0 || poppingInProgress || stageOutcome) return;
     if(isBlocked(r,c))return;
     chain = [{r,c}];
     setChainPreviewBonus(0);
@@ -2646,7 +2664,7 @@
   }
 
   function popCells(cells, isBonus){
-    if(poppingInProgress) return;
+    if(poppingInProgress || stageOutcome) return;
     poppingInProgress=true;
     const originalCount=cells.length;
     const splash=(!isBonus && (currentStage().type==='chick' || stageSlot()>=30)) ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
@@ -2709,7 +2727,7 @@
   }
 
   function popChain(cells){
-    if(poppingInProgress) return;
+    if(poppingInProgress || stageOutcome || movesLeft<=0) return;
     chainPreviewBonus = 0;
     movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
@@ -2766,6 +2784,8 @@
   }
 
   function showStageClear(){
+    if(stageOutcome) return;
+    stageOutcome='clear';
     pauseStageTimer();
     const st = currentStage();
     const ratio = stageScore / st.target;
@@ -2776,6 +2796,7 @@
 
     const slot = stageSlot();
     const prevBest = stageBests[slot]||0;
+    const firstReward = !rewardedStageSlots.has(slot);
     const newBest = Math.max(prevBest, stageScore);
     if(stageScore > prevBest){
       stageBests[slot] = stageScore;
@@ -2785,18 +2806,25 @@
     clearScoreValEl.textContent = fmt(stageScore);
     clearTargetValEl.textContent = fmt(st.target);
 
-    totalStars += stars;
-    localStorage.setItem('sp_stars', totalStars);
-    starsValEl.textContent = totalStars;
+    if(firstReward){
+      // Commit eligibility before writing currencies, so reload cannot claim again.
+      rewardedStageSlots.add(slot);
+      localStorage.setItem('sp_rewarded_stage_slots', JSON.stringify([...rewardedStageSlots]));
+      totalStars += stars;
+      localStorage.setItem('sp_stars', totalStars);
+      starsValEl.textContent = totalStars;
+    }
 
     const coinGain = 30*stars + Math.floor(stageIndex/20);
-    awardCoins(coinGain);
-    clearCoinGainEl.textContent = fmt(coinGain);
-    clearStarGainEl.textContent = stars;
+    if(firstReward) awardCoins(coinGain);
+    clearCoinGainEl.textContent = fmt(firstReward ? coinGain : 0);
+    clearStarGainEl.textContent = firstReward ? stars : 0;
 
-    totalStagesCleared++;
-    localStorage.setItem('sp_total_cleared', totalStagesCleared);
-    if(stars>=3){
+    if(firstReward){
+      totalStagesCleared++;
+      localStorage.setItem('sp_total_cleared', totalStagesCleared);
+    }
+    if(firstReward && stars>=3){
       perfectClears++;
       localStorage.setItem('sp_perfect_clears', perfectClears);
     }
@@ -2815,6 +2843,8 @@
 
   const CONTINUE_COST = 50;
   function showStageFail(){
+    if(stageOutcome) return;
+    stageOutcome='fail';
     pauseStageTimer();
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
@@ -2829,6 +2859,7 @@
   }
 
   document.getElementById('nextStageBtn').addEventListener('click', ()=>{
+    if(stageOutcome!=='clear') return;
     if(stageIndex>=TOTAL_STAGES-1){
       // Final stage: do not silently wrap to stage 1.
       clearOverlay.classList.remove('show');
@@ -2841,21 +2872,23 @@
     newStageBoard();
   });
   document.getElementById('retryClearBtn').addEventListener('click', ()=>{
-    if(hearts<=0 && Date.now()>=heartPassUntil){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
-    spendHeart();
+    if(stageOutcome!=='clear') return;
+    if(!spendHeart()){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
     updateHud();
     clearOverlay.classList.remove('show');
     newStageBoard();
   });
   document.getElementById('retryBtn').addEventListener('click', ()=>{
-    if(hearts<=0 && Date.now()>=heartPassUntil){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
-    spendHeart();
+    if(stageOutcome!=='fail') return;
+    if(!spendHeart()){ showToast('하트가 부족해요! 상단 + 버튼으로 충전해보세요'); return; }
     updateHud();
     failOverlay.classList.remove('show');
     newStageBoard();
   });
   document.getElementById('continueBtn').addEventListener('click', ()=>{
+    if(stageOutcome!=='fail') return;
     if(coins < CONTINUE_COST){ showToast('모이가 부족해요'); return; }
+    stageOutcome='continuing';
     coins -= CONTINUE_COST;
     localStorage.setItem('sp_coins', coins);
     coinsValEl.textContent = fmt(coins);
@@ -2863,6 +2896,7 @@
     const st = currentStage();
     if(st.timeLimit){ stageTimeLeft += Math.round(st.timeLimit/2); resumeStageTimer(); }
     failOverlay.classList.remove('show');
+    stageOutcome=null;
     updateHud();
     render();
     checkNoMoves();
@@ -2870,20 +2904,32 @@
   });
 
   gridEl.addEventListener('pointerdown', (e)=>{
+    if(dragging || stageOutcome || poppingInProgress) return;
     const cell = cellFromPoint(e.clientX,e.clientY);
     if(!cell || poppingInProgress || movesLeft<=0 || isBlocked(cell.r,cell.c)) return;
     dragging = true;
+    activePointerId=e.pointerId;
     startChain(cell.r,cell.c);
     e.preventDefault();
   });
   window.addEventListener('pointermove',(e)=>{
-    if(!dragging) return;
+    if(!dragging || e.pointerId!==activePointerId) return;
     const cell = cellFromPoint(e.clientX,e.clientY);
     if(cell) extendChain(cell.r,cell.c);
   });
-  function finishPointerChain(){
-    if(!dragging) return;
+  function finishPointerChain(e){
+    if(!dragging || e.pointerId!==activePointerId) return;
     dragging=false;
+    activePointerId=null;
+    if(e.type==='pointercancel'){
+      // A cancelled touch must not spend a move or award score.
+      chain.forEach(({r,c})=>cellEls[r][c].classList.remove('selected','chainBump'));
+      chain=[];
+      clearChainPath();
+      hideChainScorePreview();
+      document.getElementById('boardWrap').classList.remove('is-chaining');
+      return;
+    }
     endChain();
   }
   window.addEventListener('pointerup',finishPointerChain);
@@ -2891,6 +2937,7 @@
 
   // ---- power-ups ----
   document.getElementById('btnCandy').addEventListener('click', ()=>{
+    if(poppingInProgress || dragging || stageOutcome) return;
     if(powerCounts.candy<=0){ showToast('사탕 개수가 없어요'); return; }
     powerCounts.candy--;
     savePowerCounts();
@@ -2899,6 +2946,7 @@
     showToast('사탕 사용! 이동 횟수 +3');
   });
   document.getElementById('btnBomb').addEventListener('click', ()=>{
+    if(poppingInProgress || dragging || stageOutcome) return;
     if(powerCounts.bomb<=0){ showToast('폭탄 개수가 없어요'); return; }
     if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
@@ -2917,6 +2965,7 @@
     popCells(cells, true);
   });
   document.getElementById('btnShuffle').addEventListener('click', ()=>{
+    if(poppingInProgress || dragging || stageOutcome) return;
     if(powerCounts.shuffle<=0){ showToast('셔플 개수가 없어요'); return; }
     powerCounts.shuffle--;
     savePowerCounts();
@@ -2927,6 +2976,7 @@
     showToast('보드를 섞었습니다');
   });
   document.getElementById('btnRainbow').addEventListener('click', ()=>{
+    if(poppingInProgress || dragging || stageOutcome) return;
     if(powerCounts.rainbow<=0){ showToast('무지개 개수가 없어요'); return; }
     if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
@@ -3344,6 +3394,9 @@
   newStageBoard();
   window.addEventListener('resize', drawChainLine);
   setInterval(()=>{ tickHeartRegen(); renderHeartsVal(); }, 1000);
+  document.addEventListener('visibilitychange', ()=>{
+    if(!document.hidden){tickHeartRegen(); updateHud();}
+  });
 
   const splashEl = document.getElementById('splashScreen');
   if(splashEl){
