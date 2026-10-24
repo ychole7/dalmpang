@@ -3061,13 +3061,15 @@
 
   function renderShop(){
     const starList = document.getElementById('starShopList');
+    const balance = document.getElementById('shopStarBalance');
+    if(balance) balance.textContent = totalStars.toLocaleString('ko-KR');
     starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
       const iconFile = 'assets/images/powerup_' + it.key + '.png';
       const affordable = totalStars >= it.star;
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
         + '<div class="shopIcon"><img src="'+iconFile+'" alt="'+it.name+'" loading="lazy"></div>'
         + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
-        + '<button class="shopBuyBtn star" data-key="'+it.key+'" data-star="'+it.star+'">⭐ '+it.star+'</button>'
+        + '<button class="shopBuyBtn star" data-key="'+it.key+'" data-star="'+it.star+'"'+(affordable?'':' disabled aria-label="별이 부족합니다"')+'>⭐ '+it.star+'</button>'
         + '</div>';
     }).join('');
     starList.querySelectorAll('.shopBuyBtn.star').forEach(function(btn){
