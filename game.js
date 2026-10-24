@@ -2288,7 +2288,61 @@
       thawed:new Set([...thawed,...directlyRemovedIce]).size,stonesRemoved
     };
   }
+  // V79: resume only settled game states, never half-completed animations.
+  const ROUND_SAVE_KEY='sp_active_round_v1';
+  function forgetRound(){localStorage.removeItem(ROUND_SAVE_KEY);}
+  function saveRound(){
+    if(stageOutcome || poppingInProgress || dragging || board.length!==ROWS)return;
+    try{
+      localStorage.setItem(ROUND_SAVE_KEY,JSON.stringify({
+        version:1,stageIndex,stageScore,movesLeft,stageTimeLeft,
+        missionCount:v42MissionCount,board:board.map(row=>row.slice()),
+        specials:[...specials.entries()]
+      }));
+    }catch(err){console.warn('[Dalmpang] Cannot save round',err);}
+  }
+  function restoreRound(){
+    let saved;
+    try{saved=JSON.parse(localStorage.getItem(ROUND_SAVE_KEY)||'null');}
+    catch(_){forgetRound();return false;}
+    if(!saved)return false;
+    const size=stageSize(currentStage());
+    const validBoard=Array.isArray(saved.board)&&saved.board.length===ROWS
+      && saved.board.every(row=>Array.isArray(row)&&row.length===COLS
+        && row.every(v=>Number.isInteger(v)&&v>=0&&v<size));
+    const validSpecials=Array.isArray(saved.specials)
+      && saved.specials.length<=ROWS*COLS
+      && saved.specials.every(pair=>Array.isArray(pair)&&pair.length===2
+        && /^(?:[0-7]),(?:[0-5])$/.test(pair[0])
+        && SPECIAL_TYPES.includes(pair[1]));
+    if(saved.version!==1||saved.stageIndex!==stageIndex||!validBoard||!validSpecials
+       ||!Number.isSafeInteger(saved.stageScore)||saved.stageScore<0
+       ||!Number.isInteger(saved.movesLeft)||saved.movesLeft<=0
+       ||saved.movesLeft>movesBudget()+50
+       ||!Number.isInteger(saved.missionCount)||saved.missionCount<0
+       ||saved.missionCount>100
+       ||!Number.isInteger(saved.stageTimeLeft)||saved.stageTimeLeft<0){
+      forgetRound();return false;
+    }
+    board=saved.board.map(row=>row.slice());
+    specials.clear();
+    for(const [key,type] of saved.specials)specials.set(key,type);
+    stageScore=saved.stageScore;
+    movesLeft=saved.movesLeft;
+    v42MissionCount=saved.missionCount;
+    stageTimeLeft=saved.stageTimeLeft;
+    stageOutcome=null;dragging=false;poppingInProgress=false;
+    activePointerId=null;chain=[];chainPreviewBonus=0;
+    v43RestoreMissionTile();
+    resumeStageTimer();
+    updateHud();
+    render();
+    checkNoMoves();
+    saveRound();
+    return true;
+  }
   function newStageBoard(){
+    forgetRound();
     stageOutcome=null;
     activePointerId=null;
     dragging=false;
@@ -2308,6 +2362,7 @@
     v42MissionUpdate();
     render();
     checkNoMoves();
+    saveRound();
   }
 
   function formatTime(sec){
@@ -2722,7 +2777,8 @@
         if(stageScore>=currentStage().target && v42MissionDone()) showStageClear();
         else if(movesLeft<=0) showStageFail();
         else checkNoMoves();
-      }).catch(()=>{poppingInProgress=false;render();updateHud();});
+        if(!stageOutcome)saveRound();
+      }).catch(()=>{poppingInProgress=false;render();updateHud();saveRound();});
     },chickPop?530:260);
   }
 
@@ -2765,7 +2821,7 @@
   function checkNoMoves(){
     if(!hasAnyMove()){
       showToast('연결 가능한 조합이 없어 다시 섞습니다');
-      setTimeout(()=>{ reshuffleInPlace(); render(); checkNoMoves(); }, 500);
+      setTimeout(()=>{ if(stageOutcome)return; reshuffleInPlace(); render(); checkNoMoves(); saveRound(); }, 500);
     }
   }
 
@@ -2786,6 +2842,7 @@
   function showStageClear(){
     if(stageOutcome) return;
     stageOutcome='clear';
+    forgetRound();
     pauseStageTimer();
     const st = currentStage();
     const ratio = stageScore / st.target;
@@ -2845,6 +2902,7 @@
   function showStageFail(){
     if(stageOutcome) return;
     stageOutcome='fail';
+    forgetRound();
     pauseStageTimer();
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
@@ -2900,6 +2958,7 @@
     updateHud();
     render();
     checkNoMoves();
+    saveRound();
     showToast('🪙 '+CONTINUE_COST+'으로 5무브 추가!');
   });
 
@@ -3391,7 +3450,8 @@
   injectFunUpgradeStyles();
   buildGrid();
   tickHeartRegen();
-  newStageBoard();
+  if(!restoreRound())newStageBoard();
+  window.addEventListener('pagehide',saveRound);
   window.addEventListener('resize', drawChainLine);
   setInterval(()=>{ tickHeartRegen(); renderHeartsVal(); }, 1000);
   document.addEventListener('visibilitychange', ()=>{
