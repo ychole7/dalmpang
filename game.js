@@ -3002,6 +3002,7 @@
     savePowerCounts();
     movesLeft += 3;
     updateHud();
+    saveRound();
     showToast('사탕 사용! 이동 횟수 +3');
   });
   document.getElementById('btnBomb').addEventListener('click', ()=>{
@@ -3032,6 +3033,7 @@
     reshuffleInPlace();
     render();
     checkNoMoves();
+    saveRound();
     showToast('보드를 섞었습니다');
   });
   document.getElementById('btnRainbow').addEventListener('click', ()=>{
