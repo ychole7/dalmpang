@@ -2290,6 +2290,40 @@
   }
   // V79: resume only settled game states, never half-completed animations.
   const ROUND_SAVE_KEY='sp_active_round_v1';
+  // Persist a pending power-up until the resolved board has been saved.
+  // If the app closes mid-animation, restore the spent power-up on next launch.
+  const PENDING_POWER_KEY='sp_pending_power_v1';
+  function beginPendingPower(type){
+    // Record the pre-spend inventory so an interruption before the deduction
+    // cannot manufacture an additional item when the game resumes.
+    localStorage.setItem(PENDING_POWER_KEY,JSON.stringify({
+      stageIndex,type,beforeCount:Math.max(0,Number(powerCounts[type])||0),
+      roundScore:stageScore,roundMoves:movesLeft
+    }));
+  }
+  function settlePendingPower(){localStorage.removeItem(PENDING_POWER_KEY);}
+  function recoverPendingPower(){
+    const raw=localStorage.getItem(PENDING_POWER_KEY);
+    if(!raw)return;
+    localStorage.removeItem(PENDING_POWER_KEY);
+    try{
+      const pending=JSON.parse(raw);
+      if(pending.stageIndex!==stageIndex || !['bomb','rainbow'].includes(pending.type))return;
+      const before=Number(pending.beforeCount);
+      if(!Number.isSafeInteger(before)||before<1) return;
+      let saved=null;
+      try{saved=JSON.parse(localStorage.getItem(ROUND_SAVE_KEY)||'null');}catch(_){}
+      // If the completed power-up was already committed to the saved round,
+      // do not also refund its cost. Older V87 pending records have no
+      // beforeCount, so intentionally fail closed rather than mint an item.
+      const committed= saved && saved.stageIndex===stageIndex &&
+        Number.isFinite(pending.roundScore)&&Number.isFinite(pending.roundMoves)&&
+        (saved.stageScore!==pending.roundScore || saved.movesLeft!==pending.roundMoves);
+      if(committed)return;
+      const now=Math.max(0,Number(powerCounts[pending.type])||0);
+      if(now<before){powerCounts[pending.type]=before;savePowerCounts();}
+    }catch(err){console.warn('[Dalmpang] Pending item recovery skipped',err);}
+  }
   function forgetRound(){localStorage.removeItem(ROUND_SAVE_KEY);}
   function saveRound(){
     if(stageOutcome || poppingInProgress || dragging || board.length!==ROWS)return;
@@ -2343,6 +2377,7 @@
   }
   function newStageBoard(){
     forgetRound();
+    settlePendingPower();
     stageOutcome=null;
     activePointerId=null;
     dragging=false;
@@ -2778,7 +2813,8 @@
         else if(movesLeft<=0) showStageFail();
         else checkNoMoves();
         if(!stageOutcome)saveRound();
-      }).catch(()=>{poppingInProgress=false;render();updateHud();saveRound();});
+        settlePendingPower();
+      }).catch(()=>{poppingInProgress=false;render();updateHud();saveRound();settlePendingPower();});
     },chickPop?530:260);
   }
 
@@ -2843,6 +2879,7 @@
     if(stageOutcome) return;
     stageOutcome='clear';
     forgetRound();
+    settlePendingPower();
     pauseStageTimer();
     const st = currentStage();
     const ratio = stageScore / st.target;
@@ -2903,6 +2940,7 @@
     if(stageOutcome) return;
     stageOutcome='fail';
     forgetRound();
+    settlePendingPower();
     pauseStageTimer();
     const st = currentStage();
     failTargetValEl.textContent = fmt(st.target);
@@ -3018,6 +3056,7 @@
       const r=center.r+dr, c=center.c+dc;
       if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null) cells.push({r,c});
     }
+    beginPendingPower('bomb');
     powerCounts.bomb--;
     savePowerCounts();
     movesLeft = Math.max(0, movesLeft-1);
@@ -3047,6 +3086,7 @@
     const value = board[pick.r][pick.c];
     const cells=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===value) cells.push({r,c});
+    beginPendingPower('rainbow');
     powerCounts.rainbow--;
     savePowerCounts();
     movesLeft = Math.max(0, movesLeft-1);
@@ -3362,6 +3402,7 @@
   injectFunUpgradeStyles();
   buildGrid();
   tickHeartRegen();
+  recoverPendingPower();
   if(!restoreRound())newStageBoard();
   window.addEventListener('pagehide',saveRound);
   window.addEventListener('resize', drawChainLine);
