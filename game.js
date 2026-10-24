@@ -3107,9 +3107,10 @@
     renderShopTabs();
     const starList = document.getElementById('starShopList');
     starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
+      const iconFile = 'assets/images/powerup_' + it.key + '.png';
       const affordable = totalStars >= it.star;
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
-        + '<div class="shopIcon">'+it.icon+'</div>'
+        + '<div class="shopIcon"><img src="'+iconFile+'" alt="'+it.name+'" loading="lazy"></div>'
         + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
         + '<button class="shopBuyBtn star" data-key="'+it.key+'" data-star="'+it.star+'">⭐ '+it.star+'</button>'
         + '</div>';
