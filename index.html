@@ -109,6 +109,29 @@
   .statsRow .movesBadge .circle{width:46px!important;height:46px!important;min-height:46px!important;flex-basis:46px!important;}
 }
 </style>
+<style id="dpStarShopRefinement">
+/* V80: star shop presentation only. Existing game/currency logic is unchanged. */
+#shopPage .achieveFrame{overflow-y:auto;overscroll-behavior:contain;}
+#shopPage #starShopSection.show{display:block;}
+#shopPage #starShopSection .shopIntro{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 8px 12px;padding:9px 13px;background:linear-gradient(180deg,#fff9e9,#f9e5b9);border:1.5px solid #ebc984;border-radius:13px;color:#765024;box-shadow:0 2px 4px #9a6c2c16;}
+#shopPage #starShopSection .shopIntro strong{display:block;font-size:14px;line-height:1.3;font-weight:900;color:#794413;}
+#shopPage #starShopSection .shopIntro span{display:block;font-size:11px;line-height:1.35;color:#9a7b4b;margin-top:2px;}
+#shopPage #starShopSection .shopIntro .shopIntroIcon{font-size:25px;flex:0 0 auto;}
+#shopPage #starShopSection .shopList{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;margin:0 8px!important;padding:0 0 8px!important;align-content:start!important;}
+#shopPage #starShopSection .shopRow.star{position:relative;box-sizing:border-box;display:grid!important;grid-template-columns:56px minmax(0,1fr) 69px!important;align-items:center!important;column-gap:9px!important;min-height:86px!important;height:auto!important;margin:0!important;padding:10px 11px!important;border:1.5px solid #eed69b!important;border-radius:15px!important;background:linear-gradient(180deg,#fffbf0,#fff5dd)!important;box-shadow:inset 0 1px #fff,0 2px 4px #76572a12!important;opacity:1!important;}
+#shopPage #starShopSection .shopRow.star .shopIcon{display:flex!important;align-items:center!important;justify-content:center!important;width:53px!important;height:53px!important;min-width:53px!important;margin:0!important;padding:0!important;font-size:35px!important;line-height:1!important;background:transparent!important;border:0!important;box-shadow:none!important;}
+#shopPage #starShopSection .shopRow.star .shopBody{display:flex!important;flex-direction:column!important;justify-content:center!important;min-width:0!important;gap:5px!important;padding:0!important;margin:0!important;}
+#shopPage #starShopSection .shopRow.star .sTitle{font-size:17px!important;line-height:1.2!important;font-weight:900!important;color:#36578f!important;margin:0!important;}
+#shopPage #starShopSection .shopRow.star .sDesc{font-size:12px!important;line-height:1.4!important;color:#978a75!important;margin:0!important;white-space:normal!important;}
+#shopPage #starShopSection .shopRow.star .shopBuyBtn.star{display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;box-sizing:border-box!important;width:69px!important;min-width:69px!important;height:43px!important;margin:0!important;padding:0 5px!important;border-radius:13px!important;font-size:16px!important;font-weight:900!important;line-height:1!important;background:linear-gradient(180deg,#ffdc70,#f6b733)!important;border:1px solid #e4b044!important;box-shadow:0 4px 0 #bf8b22!important;color:white!important;white-space:nowrap!important;}
+#shopPage #starShopSection .shopRow.star.disabled{opacity:.72!important;}
+#shopPage #starShopSection .shopRow.star.disabled .shopBuyBtn.star{background:linear-gradient(#fbe6a8,#e4ca8e)!important;box-shadow:0 3px 0 #bea775!important;}
+#shopPage #starShopSection .shopRow.star .shopBuyBtn.star:active{transform:translateY(2px)!important;box-shadow:0 2px 0 #bf8b22!important;}
+#shopPage .shopNote{margin:13px 8px 0!important;font-size:11px!important;line-height:1.5!important;color:#9c8a63!important;text-align:center!important;}
+#shopPage .starShopHelp{margin:14px 8px 18px!important;padding:10px 12px!important;border-radius:12px!important;border:1px solid #efdbac!important;background:#fff8e8!important;text-align:center!important;color:#997349!important;font-size:11px!important;line-height:1.5!important;}
+@media(max-width:360px){#shopPage #starShopSection .shopRow.star{grid-template-columns:45px minmax(0,1fr) 62px!important;column-gap:6px!important;padding:9px 7px!important;min-height:80px!important;}#shopPage #starShopSection .shopRow.star .shopIcon{width:43px!important;height:43px!important;min-width:43px!important;font-size:30px!important}#shopPage #starShopSection .shopRow.star .sTitle{font-size:15px!important}#shopPage #starShopSection .shopRow.star .sDesc{font-size:11px!important}#shopPage #starShopSection .shopRow.star .shopBuyBtn.star{width:62px!important;min-width:62px!important;font-size:14px!important}}
+</style>
+
 </head>
 <body>
 <div id="splashScreen">
@@ -184,7 +207,9 @@
     <div class="achieveFrame">
       <div class="achieveTabs" id="shopTabs"></div>
       <div class="shopSection" id="starShopSection">
+        <div class="shopIntro"><div><strong>⭐ 별 아이템 상점</strong><span>필요한 아이템을 별로 교환해보세요!</span></div><div class="shopIntroIcon">🎁</div></div>
         <div class="shopList" id="starShopList"></div>
+        <div class="starShopHelp">✨ 구매한 아이템은 즉시 보관함에 추가돼요.</div>
       </div>
       <div class="shopSection" id="generalShopSection">
         <div class="shopList" id="shopList"></div>
