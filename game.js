@@ -3059,6 +3059,8 @@
     { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
   ];
 
+  document.getElementById('shopPlayBtn')?.addEventListener('click',()=>document.getElementById('navHome').click());
+
   function renderShop(){
     const starList = document.getElementById('starShopList');
     const balance = document.getElementById('shopStarBalance');
@@ -3069,7 +3071,7 @@
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
         + '<div class="shopIcon"><img src="'+iconFile+'" alt="'+it.name+'" loading="lazy"></div>'
         + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
-        + '<button class="shopBuyBtn star" data-key="'+it.key+'" data-star="'+it.star+'"'+(affordable?'':' disabled aria-label="별이 부족합니다"')+'>⭐ '+it.star+'</button>'
+        + '<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-star="'+it.star+'"'+(affordable?'':' disabled aria-label="별 '+(it.star-totalStars)+'개 부족"')+'><span class="priceLine"><img src="assets/images/icon_star.png" alt="">'+it.star+'</span><small class="purchaseHint">'+(affordable?'교환하기':(it.star-totalStars)+'개 부족')+'</small></button>'
         + '</div>';
     }).join('');
     starList.querySelectorAll('.shopBuyBtn.star').forEach(function(btn){
