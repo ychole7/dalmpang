@@ -1639,7 +1639,31 @@
         ensureStoneBombMissionPair();
         return;
       }
-      for(const type of specials.values())if(type===kind)return;
+      // Existing mission tiles are useful only if the player can activate
+      // them. Ice is released by adjacent matches; other specials must join
+      // a legal chain (same symbol or rainbow in the 8-neighborhood).
+      function isReachableMissionTile(r,c,type){
+        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+          if(!dr&&!dc)continue;
+          const nr=r+dr,nc=c+dc;
+          if(nr<0||nr>=ROWS||nc<0||nc>=COLS||isBlocked(nr,nc))continue;
+          if(type==='ice'){
+            // Neighbor must itself be linkable to something besides this ice.
+            for(let dr2=-1;dr2<=1;dr2++)for(let dc2=-1;dc2<=1;dc2++){
+              if(!dr2&&!dc2)continue;
+              const rr=nr+dr2,cc=nc+dc2;
+              if(rr<0||rr>=ROWS||cc<0||cc>=COLS||(rr===r&&cc===c)||isBlocked(rr,cc))continue;
+              if(board[nr][nc]===board[rr][cc]||specialAt(nr,nc)==='rainbow'||specialAt(rr,cc)==='rainbow')return true;
+            }
+          }else if(board[nr][nc]===board[r][c]||specialAt(nr,nc)==='rainbow'||type==='rainbow')return true;
+        }
+        return false;
+      }
+      for(const [key,type] of specials){
+        if(type!==kind)continue;
+        const [r,c]=key.split(',').map(Number);
+        if(isReachableMissionTile(r,c,type))return;
+      }
       const positions=[];
       for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++){
         if(board[r][c]===null || specialAt(r,c))continue;
@@ -1653,6 +1677,11 @@
       if(kind==='star'||kind==='bomb'||kind==='gift'||kind==='rainbow'){
         const nc=!specialAt(p.r,p.c+1)?p.c+1:p.c-1;
         board[p.r][nc]=board[p.r][p.c];
+      }else if(kind==='ice'){
+        // Make two horizontally adjacent ordinary tiles connectable beside ice.
+        const near=p.c+1< COLS-1?p.c+1:p.c-1;
+        const far=near+ (near>p.c?1:-1);
+        if(far>=0 && far<COLS && !specialAt(p.r,near) && !specialAt(p.r,far))board[p.r][far]=board[p.r][near];
       }
       if(!hasOpenPair())specials.delete(skey(p.r,p.c));
       render();
@@ -1675,6 +1704,18 @@
       const groups=['rabbit','bear','flower','dog','cat','strawberry','pig','chick','flower','cat','rabbit','pig','bear','strawberry','dog','chick'];
       const cluster=Math.floor((i-30)/2);
       return v41Map[groups[(cluster+Math.floor(cluster/4))%groups.length]];
+    }
+    // V73: gradual late-game balance correction.
+    // Stages 1–500 are deliberately unchanged. Special-tile rewards and
+    // per-stage missions remain unchanged; only target and move allowance vary.
+    function v73Balance(i, originalTarget, originalMoves){
+      if(i < 500 || i >= 1000) return {target:originalTarget, moves:originalMoves};
+      const progress = (i - 500) / 499;
+      // Ease from 95% at stage 501 to 80% at stage 1000.
+      const targetScale = 0.95 - progress * 0.15;
+      const target = Math.round(originalTarget * targetScale / 10) * 10;
+      const moves = originalMoves + (progress < 0.33 ? 1 : 2);
+      return {target, moves};
     }
     function v41StageTarget(i){
       if(i<3)return [450,520,620][i];
@@ -1703,11 +1744,11 @@
       if(i<300)return V61_STAGES[i-200][2];
       if(i<400)return V62_STAGES[i-300][2];
       if(i<500)return V63_STAGES[i-400][2];
-      if(i<600)return V64_STAGES[i-500][2];
-      if(i<700)return V65_STAGES[i-600][2];
-      if(i<800)return V66_STAGES[i-700][2];
-      if(i<900)return V67_STAGES[i-800][2];
-      if(i<1000)return V68_STAGES[i-900][2];
+      if(i<600)return v73Balance(i,V64_STAGES[i-500][1],V64_STAGES[i-500][2]).moves;
+      if(i<700)return v73Balance(i,V65_STAGES[i-600][1],V65_STAGES[i-600][2]).moves;
+      if(i<800)return v73Balance(i,V66_STAGES[i-700][1],V66_STAGES[i-700][2]).moves;
+      if(i<900)return v73Balance(i,V67_STAGES[i-800][1],V67_STAGES[i-800][2]).moves;
+      if(i<1000)return v73Balance(i,V68_STAGES[i-900][1],V68_STAGES[i-900][2]).moves;
       return 18+Math.min(6,Math.floor((i-30)/50));
     }
     function v41AllowedSpecials(i){
@@ -1743,7 +1784,8 @@
       // Test mode: one theme per stage (1 chick, 2 strawberry, 3 dog, 4 flower, 5 rabbit, 6 cat, 7 bear).
       // Stage 1–50 cycles all seven themes; existing stage progression is unchanged.
       base=v41Stage(i);
-      const target = v41StageTarget(i);
+      const tuned = v73Balance(i,v41StageTarget(i),v41Moves(i));
+      const target = tuned.target;
       arr.push(Object.assign({}, base, { target: target, timeLimit: i<1000 ? null : band.timeLimit }));
     }
     return arr;
@@ -2137,7 +2179,23 @@
         if(specialAt(r+dr,c+dc)==='bomb')existing=true;
       }
     }
-    if(existing)return;
+    // A neighboring stone is not enough: the bomb must itself be connectable.
+    // Otherwise the stage can appear solvable while the mission cannot advance.
+    if(existing){
+      for(const [key,type] of specials){
+        if(type!=='bomb')continue;
+        const [r,c]=key.split(',').map(Number);
+        let nextToStone=false,canLink=false;
+        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+          if(!dr&&!dc)continue;
+          const nr=r+dr,nc=c+dc;
+          if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;
+          if(specialAt(nr,nc)==='stone')nextToStone=true;
+          if(!isBlocked(nr,nc) && (board[nr][nc]===board[r][c] || specialAt(nr,nc)==='rainbow'))canLink=true;
+        }
+        if(nextToStone && canLink)return;
+      }
+    }
     // Reserve a clean, reachable row only when a valid pair is missing.
     for(const p of [stone,bomb,helper])specials.delete(skey(p.r,p.c));
     const symbol=board[bomb.r][bomb.c]===null?0:board[bomb.r][bomb.c];
@@ -2195,6 +2253,9 @@
       }
     });
     const stonesRemoved=[...removed.keys()].filter(key=>specials.get(key)==='stone').length;
+    // A bomb directly removes ice as well as thawing adjacent ice. Both count
+    // towards the ice-release objective; never count the same tile twice.
+    const directlyRemovedIce=new Set([...removed.keys()].filter(key=>specials.get(key)==='ice'));
     const giftTriggered=new Set();
     const thawed=new Set();
     // Adjacent successful connections break ice; gifts open for coin rewards.
@@ -2211,7 +2272,7 @@
     return {
       cells:[...removed.values()],bonus:removed.size-chainCells.length,exploded:bombs.length,
       star:chainCells.some(p=>specialAt(p.r,p.c)==='star'),giftCount:giftTriggered.size+chainCells.filter(p=>specialAt(p.r,p.c)==='gift').length,
-      thawed:thawed.size,stonesRemoved
+      thawed:new Set([...thawed,...directlyRemovedIce]).size,stonesRemoved
     };
   }
   function newStageBoard(){
