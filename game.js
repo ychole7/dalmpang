@@ -3052,29 +3052,6 @@
     popCells(cells, true);
   });
 
-  const SHOP_ITEMS = [
-    { key:'starter',   cls:'starter',   icon:'🌟', tag:'첫 구매 한정', name:'스타터팩',
-      desc:'모이 1,000 + 사탕2·폭탄2·셔플2·무지개2\n+ 하트 즉시 충전', price:'₩1,200',
-      grant:{ coin:1000, candy:2, bomb:2, shuffle:2, rainbow:2, fillHearts:true } },
-    { key:'heartpass', cls:'heartpass', icon:'❤️', name:'하트 무제한 패스',
-      desc:'7일 동안 하트가 무제한이에요!\n(구매 즉시 적용, 남은 기간 연장)', price:'₩5,500',
-      grant:{ heartPassDays:7 } },
-    { key:'noads',     cls:'',          icon:'🚫', name:'광고 제거',
-      desc:'모든 광고를 영구히 제거하고\n쾌적하게 플레이하세요!', price:'₩5,500',
-      grant:{ noAds:true } },
-    { key:'power',     cls:'power',     icon:'🎁', name:'파워팩',
-      desc:'사탕5 · 폭탄3 · 셔플3 · 무지개2\n한 번에 듬뿍!', price:'₩4,400',
-      grant:{ candy:5, bomb:3, shuffle:3, rainbow:2 } },
-    { key:'coin_s',    cls:'coin',      icon:'💰', name:'모이 소',
-      desc:'모이 1,200개', price:'₩1,200', grant:{ coin:1200 } },
-    { key:'coin_m',    cls:'coin',      icon:'💰', name:'모이 중',
-      desc:'모이 2,750개 (+10% 보너스)', price:'₩2,500', grant:{ coin:2750 } },
-    { key:'coin_l',    cls:'coin',      icon:'💰', name:'모이 대',
-      desc:'모이 6,600개 (+20% 보너스)', price:'₩5,500', grant:{ coin:6600 } },
-    { key:'coin_xl',   cls:'coin',      icon:'💰', name:'모이 메가',
-      desc:'모이 15,400개 (+40% 보너스)', price:'₩11,000', grant:{ coin:15400 } }
-  ];
-
   const STAR_SHOP_ITEMS = [
     { key:'candy',   icon:'🍬', name:'사탕 +1',   desc:'이동 횟수 3회 추가', star:5 },
     { key:'shuffle', icon:'🔀', name:'셔플 +1',   desc:'보드를 다시 섞어요', star:6 },
@@ -3082,29 +3059,7 @@
     { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
   ];
 
-  const SHOP_TABS = [
-    { id:'star',    label:'⭐ 별' },
-    { id:'general', label:'🛍️ 모이 상점' }
-  ];
-  let currentShopTab = 'star';
-
-  function renderShopTabs(){
-    const tabsEl = document.getElementById('shopTabs');
-    tabsEl.innerHTML = SHOP_TABS.map(function(t){
-      return '<button class="achieveTabBtn'+(t.id===currentShopTab?' active':'')+'" data-tab="'+t.id+'">'+t.label+'</button>';
-    }).join('');
-    tabsEl.querySelectorAll('.achieveTabBtn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        currentShopTab = btn.dataset.tab;
-        renderShop();
-      });
-    });
-    document.getElementById('starShopSection').classList.toggle('show', currentShopTab==='star');
-    document.getElementById('generalShopSection').classList.toggle('show', currentShopTab==='general');
-  }
-
   function renderShop(){
-    renderShopTabs();
     const starList = document.getElementById('starShopList');
     starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
       const iconFile = 'assets/images/powerup_' + it.key + '.png';
@@ -3131,56 +3086,6 @@
       });
     });
 
-    const list = document.getElementById('shopList');
-    const starterBought = localStorage.getItem('sp_starter_bought') === '1';
-    const visibleItems = SHOP_ITEMS.filter(function(it){
-      if(it.key==='starter' && starterBought) return false;
-      if(it.key==='noads' && noAdsOwned) return false;
-      return true;
-    });
-    list.innerHTML = visibleItems.map(function(it){
-      const tagHtml = it.tag ? '<span class="shopTag">'+it.tag+'</span>' : '';
-      return '<div class="shopRow'+(it.cls?' '+it.cls:'')+'">'
-        + '<div class="shopIcon">'+it.icon+'</div>'
-        + '<div class="shopBody"><div class="sTitle">'+it.name+tagHtml+'</div><div class="sDesc">'+it.desc.replace(/\n/g,'<br>')+'</div></div>'
-        + '<button class="shopBuyBtn" data-key="'+it.key+'">'+it.price+'</button>'
-        + '</div>';
-    }).join('');
-    list.querySelectorAll('.shopBuyBtn:not(.star)').forEach(function(btn){
-      btn.addEventListener('click', function(){ purchaseItem(btn.dataset.key); });
-    });
-  }
-
-  // 실제 Google Play 결제(Digital Goods API) 연동 전까지의 임시 처리.
-  // Play Console에 상품을 등록한 뒤, 이 함수 내부를 실제 결제 요청으로 교체하면 됨.
-  function purchaseItem(key){
-    const it = SHOP_ITEMS.find(function(i){ return i.key===key; });
-    if(!it) return;
-    if(!confirm(it.name+' ('+it.price+')을(를) 구매하시겠어요?\n[테스트 모드: 실제 결제는 아직 연동되지 않았어요]')) return;
-    if(it.key === 'starter') localStorage.setItem('sp_starter_bought', '1');
-    grantShopItem(it.grant);
-    updateHud();
-    showToast(it.name+' 구매 완료! (테스트)');
-    renderShop();
-  }
-
-  function grantShopItem(grant){
-    if(!grant) return;
-    if(grant.coin) awardCoins(grant.coin);
-    ['candy','bomb','shuffle','rainbow'].forEach(function(k){
-      if(grant[k]){ powerCounts[k] = (powerCounts[k]||0) + grant[k]; }
-    });
-    if(grant.candy||grant.bomb||grant.shuffle||grant.rainbow) savePowerCounts();
-    if(grant.fillHearts){ hearts = HEART_MAX; heartRegenAt = 0; saveHearts(); }
-    if(grant.heartPassDays){
-      const base = Math.max(Date.now(), heartPassUntil);
-      heartPassUntil = base + grant.heartPassDays*24*60*60*1000;
-      localStorage.setItem('sp_heart_pass_until', heartPassUntil);
-    }
-    if(grant.noAds){
-      noAdsOwned = true;
-      localStorage.setItem('sp_no_ads', '1');
-    }
   }
 
   function hideAllPages(){

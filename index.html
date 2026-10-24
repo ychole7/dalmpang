@@ -133,6 +133,33 @@
 @media(max-width:360px){#shopPage #starShopSection .shopRow.star{grid-template-columns:45px minmax(0,1fr) 62px!important;column-gap:6px!important;padding:9px 7px!important;min-height:80px!important;}#shopPage #starShopSection .shopRow.star .shopIcon{width:43px!important;height:43px!important;min-width:43px!important;font-size:30px!important}#shopPage #starShopSection .shopRow.star .sTitle{font-size:15px!important}#shopPage #starShopSection .shopRow.star .sDesc{font-size:11px!important}#shopPage #starShopSection .shopRow.star .shopBuyBtn.star{width:62px!important;min-width:62px!important;font-size:14px!important}}
 </style>
 
+
+<style id="dpStarShopV82">
+/* V82: stars-only shop; keep game and navigation untouched. */
+#shopPage .achieveFrame{padding-top:12px!important;overflow-y:auto!important;}
+#shopPage #starShopSection{display:block!important;}
+#shopPage .shopIntro{margin:4px 11px 18px!important;padding:14px 16px!important;border-radius:17px!important;background:linear-gradient(130deg,#fff8df,#fff0c2)!important;border:2px solid #e7c583!important;box-shadow:inset 0 1px 0 #fff,0 3px 7px #88632616!important;}
+#shopPage .shopIntro strong{font-size:18px!important;color:#76491c!important;}
+#shopPage .shopIntro span{font-size:12px!important;color:#94754a!important;margin-top:6px!important;}
+#shopPage .shopHeaderStar{width:38px;height:38px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 3px 3px #b7833455)}
+#shopPage #starShopSection .shopList{gap:13px!important;margin:0 11px!important;}
+#shopPage #starShopSection .shopRow.star{grid-template-columns:73px minmax(0,1fr) 75px!important;gap:9px!important;min-height:104px!important;border-radius:20px!important;padding:13px 12px!important;border:2px solid #ead29b!important;background:linear-gradient(#fffdf5,#fff3da)!important;box-shadow:inset 0 2px 0 #ffffffcc,0 3px 8px #715b2a1a!important;}
+#shopPage #starShopSection .shopRow.star .shopIcon{width:66px!important;height:66px!important;min-width:66px!important;border-radius:15px!important;background:linear-gradient(#e8f8ff,#bde4fa)!important;border:2px solid #ffffff!important;box-shadow:0 2px 5px #45628829!important;}
+#shopPage #starShopSection .shopRow.star .shopIcon img{width:59px!important;height:59px!important;max-width:59px!important;max-height:59px!important;}
+#shopPage #starShopSection .shopRow.star .sTitle{font-size:18px!important;color:#244d85!important;}
+#shopPage #starShopSection .shopRow.star .sDesc{font-size:12px!important;color:#897c6a!important;line-height:1.4!important;}
+#shopPage #starShopSection .shopRow.star .shopBuyBtn.star{width:75px!important;min-width:75px!important;height:47px!important;font-size:18px!important;border-radius:15px!important;}
+#shopPage #starShopSection .shopRow.star.disabled{opacity:1!important;}
+#shopPage #starShopSection .shopRow.star.disabled .shopBuyBtn.star{opacity:.65!important;}
+#shopPage .starShopHelp{margin:20px 11px!important;border:0!important;background:transparent!important;color:#8c795b!important;font-size:12px!important;}
+@media(max-width:380px){
+ #shopPage #starShopSection .shopRow.star{grid-template-columns:53px minmax(0,1fr) 66px!important;min-height:92px!important;padding:9px 8px!important;gap:7px!important;}
+ #shopPage #starShopSection .shopRow.star .shopIcon{width:50px!important;height:50px!important;min-width:50px!important;}
+ #shopPage #starShopSection .shopRow.star .shopIcon img{width:47px!important;height:47px!important;}
+ #shopPage #starShopSection .shopRow.star .shopBuyBtn.star{width:66px!important;min-width:66px!important;font-size:16px!important;}
+ #shopPage #starShopSection .shopRow.star .sTitle{font-size:16px!important;}
+}
+</style>
 </head>
 <body>
 <div id="splashScreen">
@@ -206,16 +233,11 @@
   <div class="pageScreen" id="shopPage">
     <img class="achieveRibbon" src="assets/images/shop_ribbon.png" alt="상점">
     <div class="achieveFrame">
-      <div class="achieveTabs" id="shopTabs"></div>
       <div class="shopSection" id="starShopSection">
-        <div class="shopIntro"><div><strong>⭐ 별 아이템 상점</strong><span>필요한 아이템을 별로 교환해보세요!</span></div><div class="shopIntroIcon">🎁</div></div>
+        <div class="shopIntro"><div><strong>별 아이템 상점</strong><span>게임에서 모은 별로 필요한 아이템을 교환하세요</span></div><img src="assets/images/icon_star.png" alt="별" class="shopHeaderStar"></div>
         <div class="shopList" id="starShopList"></div>
-        <div class="starShopHelp">✨ 구매한 아이템은 즉시 보관함에 추가돼요.</div>
+        <div class="starShopHelp">구매한 아이템은 게임에서 바로 사용할 수 있어요.</div>
       </div>
-      <div class="shopSection" id="generalShopSection">
-        <div class="shopList" id="shopList"></div>
-      </div>
-      <div class="shopNote">✨ 구매한 상품은 즉시 적용됩니다. ✨</div>
     </div>
   </div>
 
