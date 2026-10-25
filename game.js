@@ -3210,9 +3210,9 @@
   });
 
   const STAR_SHOP_ITEMS = [
-    { key:'candy',   icon:'🍬', name:'사탕 +1',   desc:'이동 횟수 3회 추가', star:5 },
-    { key:'shuffle', icon:'🔀', name:'셔플 +1',   desc:'보드를 다시 섞어요', star:6 },
-    { key:'bomb',    icon:'💣', name:'폭탄 +1',   desc:'주변 타일을 한번에 제거', star:8 },
+    { key:'candy',   icon:'🍬', name:'사탕 +1',   desc:'이동 횟수 3회 추가', star:12 },
+    { key:'shuffle', icon:'🔀', name:'셔플 +1',   desc:'보드를 다시 섞어요', star:4 },
+    { key:'bomb',    icon:'💣', name:'폭탄 +1',   desc:'주변 타일을 한번에 제거', star:7 },
     { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
   ];
 
