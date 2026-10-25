@@ -1826,6 +1826,99 @@
   const HEART_MAX = 5;
   const HEART_REGEN_MS = 2*60*1000; // 2분당 1개
 
+  // V89: crash-recoverable first-clear reward commit.
+  // localStorage is not a multi-key transaction: replay unfinished commits on startup.
+  const CLEAR_REWARD_TX_KEY = 'sp_clear_reward_tx_v1';
+  function applyClearRewardWrites(writes){
+    for(const [key,value] of Object.entries(writes)) localStorage.setItem(key,value);
+  }
+  function recoverClearReward(){
+    try{
+      const raw=localStorage.getItem(CLEAR_REWARD_TX_KEY);
+      if(!raw) return true;
+      const tx=JSON.parse(raw);
+      const allowed=['sp_stage_bests','sp_rewarded_stage_slots','sp_stars','sp_coins',
+        'sp_total_coins_earned','sp_total_cleared','sp_perfect_clears'];
+      if(!tx || tx.version!==1 || !tx.writes ||
+         Object.keys(tx.writes).length!==allowed.length ||
+         !allowed.every(k=>typeof tx.writes[k]==='string')) throw Error('invalid reward transaction');
+      applyClearRewardWrites(tx.writes);
+      localStorage.removeItem(CLEAR_REWARD_TX_KEY);
+      return true;
+    }catch(err){
+      console.error('[Dalmpang] Pending clear reward could not be recovered',err);
+      // Preserve the journal and stop all game initialization rather than
+      // allowing purchases/rewards against partially written balances.
+      return false;
+    }
+  }
+  function showRecoveryLock(){
+    const veil=document.createElement('div');
+    veil.id='dp-reward-recovery-lock';
+    veil.setAttribute('role','alertdialog');
+    veil.setAttribute('aria-modal','true');
+    veil.setAttribute('aria-label','저장 데이터 복구 필요');
+    veil.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(24,35,58,.88);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box';
+    const panel=document.createElement('div');
+    panel.style.cssText='width:min(340px,100%);padding:24px 20px;border-radius:20px;background:#fff9ee;text-align:center;color:#4b3c31;box-shadow:0 10px 40px #0005;font:600 15px/1.6 system-ui,sans-serif';
+    const title=document.createElement('div');
+    title.textContent='저장 데이터 복구가 필요해요';
+    title.style.cssText='font-size:20px;font-weight:900;margin-bottom:10px';
+    const message=document.createElement('p');
+    message.textContent='보상 기록을 안전하게 복구하지 못했어요. 중복 지급이나 재화 손실을 막기 위해 플레이를 중단했어요. 앱을 다시 열어 재시도해 주세요.';
+    message.style.cssText='margin:0 0 18px';
+    const retry=document.createElement('button');
+    retry.type='button';retry.textContent='복구 다시 시도';
+    retry.style.cssText='width:100%;border:0;border-radius:12px;padding:13px;background:#2f88d9;color:white;font-size:16px;font-weight:800';
+    retry.addEventListener('click',()=>location.reload());
+    panel.append(title,message,retry);veil.append(panel);
+    document.body.appendChild(veil);
+    retry.focus();
+  }
+  // V92: absolute-value transaction journal for spending currencies.
+  // Replaying exact target values prevents both double spend and free grants.
+  const SPEND_TX_KEY='sp_spend_tx_v1';
+  const SPEND_ALLOWED=new Set(['sp_stars','sp_coins','sp_hearts','sp_heart_regen_at','sp_power_counts','sp_active_round_v1']);
+  function applySpendWrites(writes){
+    for(const [key,value] of Object.entries(writes)) localStorage.setItem(key,value);
+  }
+  function validateSpendTx(tx){
+    if(!tx||tx.version!==1||!tx.writes||Array.isArray(tx.writes)) return false;
+    const keys=Object.keys(tx.writes);
+    return keys.length>0&&keys.every(k=>SPEND_ALLOWED.has(k)&&typeof tx.writes[k]==='string');
+  }
+  function recoverSpendTx(){
+    try{
+      const raw=localStorage.getItem(SPEND_TX_KEY);
+      if(!raw)return true;
+      const tx=JSON.parse(raw);
+      if(!validateSpendTx(tx))throw Error('invalid spend transaction');
+      applySpendWrites(tx.writes);
+      localStorage.removeItem(SPEND_TX_KEY);
+      return true;
+    }catch(err){console.error('[Dalmpang] Spend recovery failed',err);return false;}
+  }
+  function commitSpend(writes){
+    try{
+      // A previous failed transaction cannot be overwritten or skipped.
+      if(localStorage.getItem(SPEND_TX_KEY))throw Error('previous spend pending');
+      const tx={version:1,writes};
+      if(!validateSpendTx(tx))throw Error('invalid spend writes');
+      localStorage.setItem(SPEND_TX_KEY,JSON.stringify(tx));
+      applySpendWrites(writes);
+      localStorage.removeItem(SPEND_TX_KEY);
+      return true;
+    }catch(err){
+      console.error('[Dalmpang] Cannot finish purchase safely',err);
+      showRecoveryLock();
+      return false;
+    }
+  }
+  // Critical: no other game code may run while a reward journal is unresolved.
+  if(!recoverClearReward() || !recoverSpendTx()){
+    showRecoveryLock();
+    return;
+  }
   let board = [];
   let cellEls = [];
   let stageIndex = parseInt(localStorage.getItem('sp_stage_index'), 10);
@@ -2892,40 +2985,56 @@
     const prevBest = stageBests[slot]||0;
     const firstReward = !rewardedStageSlots.has(slot);
     const newBest = Math.max(prevBest, stageScore);
-    if(stageScore > prevBest){
-      stageBests[slot] = stageScore;
-      localStorage.setItem('sp_stage_bests', JSON.stringify(stageBests));
-    }
+    const coinGain = 30*stars + Math.floor(stageIndex/20);
     clearBestValEl.textContent = fmt(newBest);
     clearScoreValEl.textContent = fmt(stageScore);
     clearTargetValEl.textContent = fmt(st.target);
 
     if(firstReward){
-      // Commit eligibility before writing currencies, so reload cannot claim again.
+      // Calculate the complete final state BEFORE any persisted mutation.
+      const newBests=stageBests.slice();
+      newBests[slot]=newBest;
+      const newRewarded=[...rewardedStageSlots,slot];
+      const writes={
+        sp_stage_bests:JSON.stringify(newBests),
+        sp_rewarded_stage_slots:JSON.stringify(newRewarded),
+        sp_stars:String(totalStars+stars),
+        sp_coins:String(coins+coinGain),
+        sp_total_coins_earned:String(totalCoinsEarned+coinGain),
+        sp_total_cleared:String(totalStagesCleared+1),
+        sp_perfect_clears:String(perfectClears+(stars>=3?1:0))
+      };
+      try{
+        // Write-ahead journal: a crash before the final remove is replayed next launch.
+        localStorage.setItem(CLEAR_REWARD_TX_KEY,JSON.stringify({version:1,writes}));
+        applyClearRewardWrites(writes);
+        localStorage.removeItem(CLEAR_REWARD_TX_KEY);
+      }catch(err){
+        console.error('[Dalmpang] Clear reward save failed',err);
+        // State may have been partly persisted. Retry from journal on restart;
+        // never continue with in-memory balances that may be out of sync.
+        showToast('보상 저장 오류예요. 저장 공간을 확인하고 게임을 다시 열어 주세요.');
+        return;
+      }
+      stageBests[slot]=newBest;
       rewardedStageSlots.add(slot);
-      localStorage.setItem('sp_rewarded_stage_slots', JSON.stringify([...rewardedStageSlots]));
-      totalStars += stars;
-      localStorage.setItem('sp_stars', totalStars);
-      starsValEl.textContent = totalStars;
-    }
-
-    const coinGain = 30*stars + Math.floor(stageIndex/20);
-    if(firstReward) awardCoins(coinGain);
-    clearCoinGainEl.textContent = fmt(firstReward ? coinGain : 0);
-    clearStarGainEl.textContent = firstReward ? stars : 0;
-
-    if(firstReward){
+      totalStars+=stars;
+      coins+=coinGain;
+      totalCoinsEarned+=coinGain;
       totalStagesCleared++;
-      localStorage.setItem('sp_total_cleared', totalStagesCleared);
+      if(stars>=3)perfectClears++;
+      starsValEl.textContent=totalStars;
+      coinsValEl.textContent=fmt(coins);
+    }else if(stageScore>prevBest){
+      stageBests[slot]=newBest;
+      localStorage.setItem('sp_stage_bests',JSON.stringify(stageBests));
     }
-    if(firstReward && stars>=3){
-      perfectClears++;
-      localStorage.setItem('sp_perfect_clears', perfectClears);
-    }
-    const pSlot = poolSlot();
+    clearCoinGainEl.textContent=fmt(firstReward?coinGain:0);
+    clearStarGainEl.textContent=firstReward?stars:0;
+    const pSlot=poolSlot();
     if(!patternsCleared.includes(pSlot)){
       patternsCleared.push(pSlot);
-      localStorage.setItem('sp_patterns_cleared', JSON.stringify(patternsCleared));
+      localStorage.setItem('sp_patterns_cleared',JSON.stringify(patternsCleared));
     }
 
     if(stageIndex>=TOTAL_STAGES-1){
@@ -2985,12 +3094,18 @@
     if(stageOutcome!=='fail') return;
     if(coins < CONTINUE_COST){ showToast('모이가 부족해요'); return; }
     stageOutcome='continuing';
-    coins -= CONTINUE_COST;
-    localStorage.setItem('sp_coins', coins);
-    coinsValEl.textContent = fmt(coins);
-    movesLeft += 5;
-    const st = currentStage();
-    if(st.timeLimit){ stageTimeLeft += Math.round(st.timeLimit/2); resumeStageTimer(); }
+    const st=currentStage();
+    const nextMoves=movesLeft+5;
+    const nextTime=stageTimeLeft+(st.timeLimit?Math.round(st.timeLimit/2):0);
+    const savedRound=JSON.stringify({version:1,stageIndex,stageScore,movesLeft:nextMoves,
+      stageTimeLeft:nextTime,missionCount:v42MissionCount,
+      board:board.map(row=>row.slice()),specials:[...specials.entries()]});
+    if(!commitSpend({'sp_coins':String(coins-CONTINUE_COST),'sp_active_round_v1':savedRound}))return;
+    coins-=CONTINUE_COST;
+    coinsValEl.textContent=fmt(coins);
+    movesLeft=nextMoves;
+    stageTimeLeft=nextTime;
+    if(st.timeLimit)resumeStageTimer();
     failOverlay.classList.remove('show');
     stageOutcome=null;
     updateHud();
@@ -3121,11 +3236,13 @@
         const cost = parseInt(btn.dataset.star, 10);
         const key = btn.dataset.key;
         if(totalStars < cost){ showToast('별이 부족해요'); return; }
-        totalStars -= cost;
-        localStorage.setItem('sp_stars', totalStars);
-        starsValEl.textContent = totalStars;
-        powerCounts[key] = (powerCounts[key]||0) + 1;
-        savePowerCounts();
+        if(!STAR_SHOP_ITEMS.some(it=>it.key===key&&it.star===cost))return;
+        const nextPower={...powerCounts,[key]:(powerCounts[key]||0)+1};
+        if(!commitSpend({'sp_stars':String(totalStars-cost),
+                         'sp_power_counts':JSON.stringify(nextPower)}))return;
+        totalStars-=cost;
+        starsValEl.textContent=totalStars;
+        powerCounts=nextPower;
         updateHud();
         showToast(STAR_SHOP_ITEMS.find(i=>i.key===key).name+' 구매 완료!');
         renderShop();
@@ -3182,12 +3299,12 @@
   document.getElementById('heartPlus').addEventListener('click', ()=>{
     if(hearts >= HEART_MAX){ showToast('하트가 이미 가득 찼어요'); return; }
     if(coins < HEART_REFILL_COST){ showToast('모이가 부족해요'); return; }
-    coins -= HEART_REFILL_COST;
-    localStorage.setItem('sp_coins', coins);
-    coinsValEl.textContent = fmt(coins);
-    hearts = HEART_MAX;
-    heartRegenAt = 0;
-    saveHearts();
+    if(!commitSpend({'sp_coins':String(coins-HEART_REFILL_COST),
+                     'sp_hearts':String(HEART_MAX),'sp_heart_regen_at':'0'}))return;
+    coins-=HEART_REFILL_COST;
+    coinsValEl.textContent=fmt(coins);
+    hearts=HEART_MAX;
+    heartRegenAt=0;
     updateHud();
     showToast('🪙 '+HEART_REFILL_COST+'으로 하트를 채웠습니다');
   });
