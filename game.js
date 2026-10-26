@@ -2364,7 +2364,8 @@
     // A bomb directly removes ice as well as thawing adjacent ice. Both count
     // towards the ice-release objective; never count the same tile twice.
     const directlyRemovedIce=new Set([...removed.keys()].filter(key=>specials.get(key)==='ice'));
-    const giftTriggered=new Set();
+    // Count every removed gift exactly once (chain, explosion or adjacency).
+    const giftTriggered=new Set([...removed.keys()].filter(key=>specials.get(key)==='gift'));
     const thawed=new Set();
     // Adjacent successful connections break ice; gifts open for coin rewards.
     for(const p of [...removed.values()]){
@@ -2373,13 +2374,13 @@
         if(r<0||r>=ROWS||c<0||c>=COLS||(!dr&&!dc))continue;
         const type=specialAt(r,c),key=skey(r,c);
         if(type==='ice'&&!removed.has(key))thawed.add(key);
-        if(type==='gift'&&!removed.has(key)){giftTriggered.add(key);removed.set(key,{r,c});}
+        if(type==='gift'){giftTriggered.add(key);if(!removed.has(key))removed.set(key,{r,c});}
       }
     }
     for(const key of thawed)specials.delete(key); // Ice melts into an ordinary playable tile.
     return {
       cells:[...removed.values()],bonus:removed.size-chainCells.length,exploded:bombs.length,
-      star:chainCells.some(p=>specialAt(p.r,p.c)==='star'),giftCount:giftTriggered.size+chainCells.filter(p=>specialAt(p.r,p.c)==='gift').length,
+      star:chainCells.some(p=>specialAt(p.r,p.c)==='star'),giftCount:giftTriggered.size,
       thawed:new Set([...thawed,...directlyRemovedIce]).size,stonesRemoved
     };
   }
@@ -2851,10 +2852,13 @@
   function popCells(cells, isBonus){
     if(poppingInProgress || stageOutcome) return;
     poppingInProgress=true;
-    const originalCount=cells.length;
+    const originalChain=cells.slice();
+    const originalCount=originalChain.length;
     const splash=(!isBonus && specialRulesActive()) ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
     cells=splash.cells;
-    if(!isBonus)v42MissionProgress(splash,cells.slice());
+    // Rainbow mission requires the rainbow to be intentionally linked,
+    // not merely removed by a nearby explosion.
+    if(!isBonus)v42MissionProgress(splash,originalChain);
     const chickPop=specialRulesActive();
     const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
     // Score comes from the original chain; bomb splash awards 35 points per extra tile.
