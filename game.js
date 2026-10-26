@@ -1603,6 +1603,8 @@
     };
     let v42MissionCount=0;
     function v42Mission(){return v42Missions[stageSlot()]||null;}
+    // Every stage with configured special tiles must run special effects, regardless of theme.
+    function specialRulesActive(){return stageSlot()>=30 || currentStage().type==='chick' || !!v41AllowedSpecials(stageSlot())?.length;}
     function v42MissionDone(){const m=v42Mission();return !m||v42MissionCount>=m.need;}
     function v42MissionUpdate(){
       // Mission belongs to the fixed-height score card; never insert above the board.
@@ -1633,7 +1635,7 @@
     // This operates on the actual board/specials model, never on overlay images.
     function v43RestoreMissionTile(){
       const m=v42Mission();
-      if(!m || v42MissionDone() || (stageSlot()<30 && currentStage().type!=='chick'))return;
+      if(!m || v42MissionDone())return;
       const kind=m.kind==='bombStone'?'stone':m.kind;
       if(m.kind==='bombStone'){
         ensureStoneBombMissionPair();
@@ -2314,7 +2316,7 @@
   function createSpecials(){
     specials.clear();
     const stage=currentStage();
-    if(stage.type!=='chick' && stageSlot()<30)return;
+    if(!specialRulesActive())return;
     const requested=v41AllowedSpecials(stageSlot());
     if(!requested || !requested.length)return;
     const cells=[];
@@ -2813,7 +2815,7 @@
   // 기존 DOM 셀을 유지하되, 떨어질 원래 행을 기억해 자연스럽게 낙하시킨다.
   function gravityAndAnimateChicks(){
     const stage=currentStage();
-    if(stage.type!=='chick' && stageSlot()<30){
+    if(!specialRulesActive()){
       applyGravity(); render(); return Promise.resolve();
     }
     const sourceRows=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
@@ -2850,10 +2852,10 @@
     if(poppingInProgress || stageOutcome) return;
     poppingInProgress=true;
     const originalCount=cells.length;
-    const splash=(!isBonus && (currentStage().type==='chick' || stageSlot()>=30)) ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
+    const splash=(!isBonus && specialRulesActive()) ? specialEffects(cells) : {cells,bonus:0,exploded:0,star:false,giftCount:0,thawed:0};
     cells=splash.cells;
     if(!isBonus)v42MissionProgress(splash,cells.slice());
-    const chickPop=currentStage().type==='chick' || stageSlot()>=30;
+    const chickPop=specialRulesActive();
     const reward=(!isBonus && chickPop) ? chainReward(originalCount) : null;
     // Score comes from the original chain; bomb splash awards 35 points per extra tile.
     const baseGained=isBonus ? cells.length*15 : (reward ? reward.score+splash.bonus*35 : cells.length*cells.length*10);
@@ -2931,7 +2933,7 @@
   }
 
   function hasAnyMove(){
-    if(currentStage().type==='chick' || stageSlot()>=30)return hasOpenPair();
+    if(specialRulesActive())return hasOpenPair();
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const v = board[r][c];
