@@ -1950,6 +1950,7 @@
   let chainPreviewBonus = 0;
   let dragging = false;
   let poppingInProgress = false;
+  let reshufflePending = false;
   let stageOutcome = null; // lock clear/fail rewards and overlays
   let activePointerId = null;
   let powerCounts = Object.assign({ candy:3, bomb:2, shuffle:2, rainbow:2 }, JSON.parse(localStorage.getItem('sp_power_counts')||'{}'));
@@ -2422,7 +2423,7 @@
   }
   function forgetRound(){localStorage.removeItem(ROUND_SAVE_KEY);}
   function saveRound(){
-    if(stageOutcome || poppingInProgress || dragging || board.length!==ROWS)return;
+    if(stageOutcome || poppingInProgress || reshufflePending || dragging || board.length!==ROWS)return;
     try{
       localStorage.setItem(ROUND_SAVE_KEY,JSON.stringify({
         version:1,stageIndex,stageScore,movesLeft,stageTimeLeft,
@@ -2478,6 +2479,7 @@
     activePointerId=null;
     dragging=false;
     poppingInProgress=false;
+    reshufflePending=false;
     chain=[];
     v42MissionCount=0;
     stageScore = 0;
@@ -2904,21 +2906,30 @@
       board[r][c]=null;
     });
     setTimeout(()=>{
-      gravityAndAnimateChicks().then(()=>{
+      // Resolve exactly once, including when Web Animations / layout APIs fail.
+      // The logical board is already updated before the animation promise settles.
+      let settled=false;
+      const finishTurn=()=>{
+        if(settled)return;
+        settled=true;
         poppingInProgress=false;
         v43RestoreMissionTile();
+        render();
         updateHud();
         if(stageScore>=currentStage().target && v42MissionDone()) showStageClear();
         else if(movesLeft<=0) showStageFail();
         else checkNoMoves();
         if(!stageOutcome)saveRound();
         settlePendingPower();
-      }).catch(()=>{poppingInProgress=false;render();updateHud();saveRound();settlePendingPower();});
+      };
+      try{
+        Promise.resolve(gravityAndAnimateChicks()).then(finishTurn,finishTurn);
+      }catch(err){console.warn('[Dalmpang] Falling animation failed',err);finishTurn();}
     },chickPop?530:260);
   }
 
   function popChain(cells){
-    if(poppingInProgress || stageOutcome || movesLeft<=0) return;
+    if(poppingInProgress || reshufflePending || stageOutcome || movesLeft<=0) return;
     chainPreviewBonus = 0;
     movesLeft = Math.max(0, movesLeft-1);
     popCells(cells, false);
@@ -2954,10 +2965,17 @@
   }
 
   function checkNoMoves(){
-    if(!hasAnyMove()){
-      showToast('연결 가능한 조합이 없어 다시 섞습니다');
-      setTimeout(()=>{ if(stageOutcome)return; reshuffleInPlace(); render(); checkNoMoves(); saveRound(); }, 500);
-    }
+    if(stageOutcome || reshufflePending || hasAnyMove())return;
+    reshufflePending=true;
+    showToast('연결 가능한 조합이 없어 다시 섞습니다');
+    setTimeout(()=>{
+      if(stageOutcome){reshufflePending=false;return;}
+      reshuffleInPlace();
+      render();
+      reshufflePending=false;
+      checkNoMoves();
+      saveRound();
+    },500);
   }
 
   function reshuffleInPlace(){
@@ -3122,7 +3140,7 @@
   });
 
   gridEl.addEventListener('pointerdown', (e)=>{
-    if(dragging || stageOutcome || poppingInProgress) return;
+    if(dragging || stageOutcome || poppingInProgress || reshufflePending) return;
     const cell = cellFromPoint(e.clientX,e.clientY);
     if(!cell || poppingInProgress || movesLeft<=0 || isBlocked(cell.r,cell.c)) return;
     dragging = true;
@@ -3155,7 +3173,7 @@
 
   // ---- power-ups ----
   document.getElementById('btnCandy').addEventListener('click', ()=>{
-    if(poppingInProgress || dragging || stageOutcome) return;
+    if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.candy<=0){ showToast('사탕 개수가 없어요'); return; }
     powerCounts.candy--;
     savePowerCounts();
@@ -3165,7 +3183,7 @@
     showToast('사탕 사용! 이동 횟수 +3');
   });
   document.getElementById('btnBomb').addEventListener('click', ()=>{
-    if(poppingInProgress || dragging || stageOutcome) return;
+    if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.bomb<=0){ showToast('폭탄 개수가 없어요'); return; }
     if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
@@ -3185,7 +3203,7 @@
     popCells(cells, true);
   });
   document.getElementById('btnShuffle').addEventListener('click', ()=>{
-    if(poppingInProgress || dragging || stageOutcome) return;
+    if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.shuffle<=0){ showToast('셔플 개수가 없어요'); return; }
     powerCounts.shuffle--;
     savePowerCounts();
@@ -3197,7 +3215,7 @@
     showToast('보드를 섞었습니다');
   });
   document.getElementById('btnRainbow').addEventListener('click', ()=>{
-    if(poppingInProgress || dragging || stageOutcome) return;
+    if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.rainbow<=0){ showToast('무지개 개수가 없어요'); return; }
     if(movesLeft<=0){ showToast('이동 횟수가 없어요'); return; }
     const candidates=[];
