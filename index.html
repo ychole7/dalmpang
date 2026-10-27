@@ -163,15 +163,6 @@
  #shopPage .shopEarnPlay{font-size:11px;padding:8px 6px}
 }
 </style>
-<style id="dpV104EconomyStyle">
-#mainScreen .powerRow{display:flex;justify-content:space-evenly;gap:4px;padding-left:5px;padding-right:5px}
-#mainScreen .powerRow .powerBtn{flex:0 1 58px;min-width:0;width:clamp(43px,13vw,58px);height:clamp(43px,13vw,58px)}
-#mainScreen .powerRow .powerBtn>img{max-width:100%;max-height:100%;object-fit:contain}
-#mainScreen #btnHint{display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;background:linear-gradient(160deg,#fff7c8,#f7d776);border:2px solid #d7a43b;border-radius:17px}
-#mainScreen #btnHint .dpHintIcon{font-size:clamp(23px,7vw,31px);line-height:1}
-#mainScreen #btnHint .dpHintPrice{font-size:10px;white-space:nowrap;min-width:40px;text-align:center;letter-spacing:-.7px}
-@media(max-width:360px){#mainScreen .powerRow{gap:2px}#mainScreen #btnHint .dpHintPrice{font-size:9px}}
-</style>
 </head>
 <body>
 <div id="splashScreen">
@@ -230,7 +221,6 @@
       <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
       <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
       <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
-      <div class="powerBtn" id="btnHint" role="button" tabindex="0" aria-label="연결 힌트 모이 100"><span class="dpHintIcon" aria-hidden="true">💡</span><span class="cnt dpHintPrice">🪙100</span></div>
     </div>
   </div>
 
@@ -247,14 +237,14 @@
     <img class="achieveRibbon" src="assets/images/shop_ribbon.png" alt="상점">
     <div class="achieveFrame">
       <div class="shopSection" id="starShopSection">
-        <div class="shopIntro"><div><strong>모이 아이템 상점</strong><span>모이로 플레이 아이템을 구매하세요</span></div><div class="starBalance" aria-live="polite"><span class="balanceLabel">보유 모이</span><div class="balanceValue"><img src="assets/images/icon_coin.png" alt=""><b id="shopStarBalance">0</b></div></div></div>
+        <div class="shopIntro"><div><strong>별 아이템 상점</strong><span>모은 별로 아이템을 교환하세요</span></div><div class="starBalance" aria-live="polite"><span class="balanceLabel">보유 별</span><div class="balanceValue"><img src="assets/images/icon_star.png" alt=""><b id="shopStarBalance">0</b></div></div></div>
         <div class="shopList" id="starShopList"></div>
         <div class="shopEarnPanel" aria-label="별 획득 안내">
-          <div class="shopEarnIcon"><img src="assets/images/icon_coin.png" alt=""></div>
-          <div class="shopEarnCopy"><strong>모이가 부족한가요?</strong><span>스테이지를 플레이하고 모이를 모아 보세요.</span></div>
+          <div class="shopEarnIcon"><img src="assets/images/icon_star.png" alt=""></div>
+          <div class="shopEarnCopy"><strong>별이 부족한가요?</strong><span>새 스테이지 첫 클리어 시 별 1~3개를 받을 수 있어요.</span></div>
           <button type="button" id="shopPlayBtn" class="shopEarnPlay">플레이 <span aria-hidden="true">›</span></button>
         </div>
-        <div class="starShopHelp">별은 앞으로 스킨과 꾸미기에 사용할 수 있도록 보관돼요.</div>
+        <div class="starShopHelp">구매한 아이템은 바로 보관함에 추가돼요.</div>
       </div>
     </div>
   </div>
