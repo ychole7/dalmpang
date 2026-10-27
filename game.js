@@ -3037,7 +3037,7 @@
         console.error('[Dalmpang] Clear reward save failed',err);
         // State may have been partly persisted. Retry from journal on restart;
         // never continue with in-memory balances that may be out of sync.
-        showToast('보상 저장 오류예요. 저장 공간을 확인하고 게임을 다시 열어 주세요.');
+        showRecoveryLock();
         return;
       }
       stageBests[slot]=newBest;
@@ -3124,7 +3124,10 @@
     const savedRound=JSON.stringify({version:1,stageIndex,stageScore,movesLeft:nextMoves,
       stageTimeLeft:nextTime,missionCount:v42MissionCount,
       board:board.map(row=>row.slice()),specials:[...specials.entries()]});
-    if(!commitSpend({'sp_coins':String(coins-CONTINUE_COST),'sp_active_round_v1':savedRound}))return;
+    if(!commitSpend({'sp_coins':String(coins-CONTINUE_COST),'sp_active_round_v1':savedRound})) {
+      stageOutcome='fail';
+      return;
+    }
     coins-=CONTINUE_COST;
     coinsValEl.textContent=fmt(coins);
     movesLeft=nextMoves;
