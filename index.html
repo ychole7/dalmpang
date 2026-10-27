@@ -41,7 +41,7 @@
 #mainScreen .powerRow .powerBtn{box-sizing:border-box!important;flex:0 0 min(18vw,76px)!important;width:min(18vw,76px)!important;min-width:0!important;max-width:76px!important;height:min(18vw,76px)!important;min-height:0!important;aspect-ratio:1!important}
 #mainScreen .powerRow .powerBtn>img{width:100%!important;height:100%!important;object-fit:contain!important}
 #mainScreen #btnHint{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;border:2px solid #d7a43b!important;border-radius:16px!important;background:linear-gradient(160deg,#fff7c8,#f7d776)!important;box-shadow:inset 0 2px 0 #fff9,0 2px 5px #ac772652!important}
-#mainScreen #btnHint .dpHintIcon{font-size:clamp(34px,9vw,44px)!important;line-height:1!important}
+#mainScreen #btnHint .dpHintIcon{width:88%!important;height:88%!important;object-fit:contain!important;display:block!important;margin:auto!important;border-radius:12px!important}
 #mainScreen #btnHint .dpHintPrice{font-size:10px!important;letter-spacing:-.5px!important;white-space:nowrap!important}
 @media(max-width:340px){#mainScreen .powerRow .powerBtn{flex-basis:18vw!important;width:18vw!important;height:18vw!important}}
 </style>
@@ -157,7 +157,7 @@
       <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
       <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
       <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
-      <div class="powerBtn" id="btnHint" role="button" tabindex="0" aria-label="연결 힌트, 모이 100"><span class="dpHintIcon" aria-hidden="true">💡</span><span class="cnt dpHintPrice">🪙100</span></div>
+      <div class="powerBtn" id="btnHint" role="button" tabindex="0" aria-label="연결 힌트"><img class="dpHintIcon" src="assets/images/powerup_hint.png" alt="힌트"><span class="cnt" id="cntHint">2</span></div>
     </div>
   </div>
 

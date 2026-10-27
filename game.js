@@ -3345,6 +3345,13 @@
   });
   // V105: direct fifth-item hint, retains V103 star shop and other currencies.
   const COIN_HINT_COST=100;
+  const HINT_STOCK_KEY='sp_hint_stock';
+  let hintStock=Math.max(0,Math.min(999,parseInt(localStorage.getItem(HINT_STOCK_KEY)??'2',10)||0));
+  function renderHintStock(){
+    const el=document.getElementById('cntHint');
+    if(el)el.textContent=String(hintStock);
+  }
+  renderHintStock();
   const coinHintStyle=document.createElement('style');
   coinHintStyle.textContent='#boardWrap .dpCoinHint{outline:3px solid #ffcf50!important;outline-offset:-3px;box-shadow:inset 0 0 0 3px #fff7aa,0 0 13px #f8b43c!important;position:relative;z-index:3}';
   document.head.appendChild(coinHintStyle);
@@ -3372,12 +3379,22 @@
   });
   document.getElementById('btnHint').addEventListener('click',()=>{
     if(stageOutcome||dragging||poppingInProgress||reshufflePending)return;
-    if(coins<COIN_HINT_COST){showToast('힌트에 필요한 모이가 부족해요');return;}
     const pair=coinHintPair();
     if(!pair){showToast('연결 가능한 타일이 없어요');return;}
-    if(!commitSpend({'sp_coins':String(coins-COIN_HINT_COST)}))return;
-    coins-=COIN_HINT_COST;
-    coinsValEl.textContent=fmt(coins);
+    if(hintStock<=0){
+      if(coins<COIN_HINT_COST){showToast('힌트가 0개예요. 구매에는 모이 100개가 필요해요.');return;}
+      if(!window.confirm('힌트 1개를 모이 100개로 구매할까요?'))return;
+      if(!commitSpend({'sp_coins':String(coins-COIN_HINT_COST),[HINT_STOCK_KEY]:'1'}))return;
+      coins-=COIN_HINT_COST;
+      hintStock=1;
+      coinsValEl.textContent=fmt(coins);
+      renderHintStock();
+      showToast('힌트 1개 구매 완료! 다시 눌러 사용하세요.');
+      return;
+    }
+    if(!commitSpend({[HINT_STOCK_KEY]:String(hintStock-1)}))return;
+    hintStock--;
+    renderHintStock();
     clearCoinHint();
     pair.forEach(({r,c})=>cellEls[r]?.[c]?.classList.add('dpCoinHint'));
     coinHintTimer=setTimeout(clearCoinHint,2800);
