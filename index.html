@@ -14,100 +14,36 @@
 
 
 <style id="dpMissionCardStyle">
-/* V57 -- one coherent, phone-realistic premium HUD layout */
-.statsRow {
-  display:flex!important;align-items:stretch!important;gap:6px!important;
-  height:105px!important;min-height:105px!important;margin:2px 7px 8px!important;flex:0 0 auto!important;
-}
-.statsRow .stageBadgeMini,.statsRow .targetCard,.statsRow .movesBadge{box-sizing:border-box!important;height:100%!important;min-height:0!important;}
-.statsRow .stageBadgeMini{
-  order:0!important;flex:0 0 70px!important;min-width:70px!important;
-  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;
-  padding:8px 3px!important;border-radius:18px!important;border:2px solid #dcb273!important;
-  background:linear-gradient(#ca924a,#95541f)!important;color:white!important;
-  box-shadow:inset 0 2px 0 #ffffff42,0 3px 6px #67451a30!important;
-}
-.statsRow .stageBadgeMini br{display:none!important;}
-.statsRow .stageBadgeMini #stageBadgeLbl{font-size:12px!important;font-weight:900!important;letter-spacing:0!important;line-height:13px!important;}
-.statsRow .stageBadgeMini #stageNum{font-size:29px!important;font-weight:900!important;line-height:32px!important;}
-.statsRow .targetCard{
-  order:1!important;flex:1 1 0!important;min-width:0!important;
-  display:grid!important;grid-template-rows:15px 30px 13px 24px!important;row-gap:3px!important;
-  align-content:center!important;justify-items:stretch!important;
-  padding:6px 6px!important;position:relative!important;overflow:hidden!important;
-  border:2px solid #d7c29d!important;border-radius:18px!important;
-  background:linear-gradient(#faf5ea,#f3e9d8)!important;box-shadow:inset 0 2px 0 #ffffffc5,0 2px 5px #654b2c20!important;
-}
-.statsRow .targetCard #targetBadgeLbl{
-  position:static!important;inset:auto!important;transform:none!important;
-  display:block!important;grid-row:1!important;justify-self:center!important;align-self:center!important;
-  margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;
-  color:#79532e!important;font-size:12px!important;font-weight:900!important;line-height:15px!important;white-space:nowrap!important;
-}
-.statsRow .targetCard #targetVal{
-  grid-row:2!important;align-self:center!important;justify-self:center!important;
-  margin:0!important;padding:0!important;color:#20436d!important;
-  font-size:clamp(26px,7.15vw,32px)!important;line-height:30px!important;font-weight:900!important;white-space:nowrap!important;
-}
-.statsRow .targetCard .barTrack{
-  grid-row:3!important;position:relative!important;inset:auto!important;align-self:center!important;
-  width:calc(100% - 16px)!important;height:13px!important;margin:0 8px!important;box-sizing:border-box!important;
-  background:linear-gradient(#e9ddc7,#e0d1b7)!important;border-radius:999px!important;box-shadow:inset 0 1px 2px #775c4433!important;
-}
-.statsRow .targetCard .barFill{
-  height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#ffb52d,#ffda65)!important;
-  transition:width .3s ease!important;
-}
-.statsRow .targetCard .barStar{
-  /* IMPORTANT: left is controlled by game.js, not CSS */
-  position:absolute!important;top:50%!important;transform:translate(-50%,-50%)!important;
-  font-size:17px!important;line-height:1!important;z-index:2!important;transition:left .3s ease!important;
-}
-.statsRow .targetCard #dpV42Mission.dpMissionInCard{
-  grid-row:4!important;position:static!important;inset:auto!important;transform:none!important;
-  justify-self:center!important;display:flex!important;align-items:center!important;justify-content:center!important;
-  width:calc(100% - 4px)!important;min-width:0!important;height:24px!important;min-height:24px!important;max-height:24px!important;
-  margin:0!important;padding:0 5px!important;gap:3px!important;box-sizing:border-box!important;
-  border-radius:10px!important;border:1px solid #d6b477!important;
-  background:linear-gradient(#fffaf0,#ffedcf)!important;box-shadow:inset 0 1px 0 #fff!important;
-  font-size:clamp(10px,2.55vw,12px)!important;line-height:22px!important;font-weight:800!important;color:#734a25!important;
-  pointer-events:none!important;
-}
-.statsRow .targetCard #dpV42Mission[hidden]{display:flex!important;visibility:hidden!important;}
-.statsRow .targetCard #dpV42Mission .dpMissionLabel{
-  flex:0 1 auto!important;min-width:0!important;text-overflow:ellipsis!important;overflow:hidden!important;white-space:nowrap!important;
-}
-.statsRow .targetCard #dpV42Mission .dpMissionCount{
-  flex:0 0 auto!important;font-variant-numeric:tabular-nums!important;font-size:11px!important;
-  padding:0 4px!important;border-radius:5px!important;background:#ffffffb5!important;color:#855025!important;
-}
-.statsRow .targetCard #dpV42Mission.complete{background:linear-gradient(#f4ffe9,#dcefce)!important;border-color:#91be7e!important;color:#31733d!important;}
-.statsRow .targetCard #dpV42Mission.complete .dpMissionCount{color:#31733d!important;}
-.statsRow .movesBadge{
-  order:2!important;flex:0 0 79px!important;min-width:79px!important;
-  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;
-  padding:8px 4px!important;border-radius:18px!important;border:2px solid #d7c29d!important;
-  background:linear-gradient(#faf5ea,#f3e9d8)!important;box-shadow:inset 0 2px 0 #ffffffc5,0 2px 5px #654b2c20!important;
-}
-.statsRow .movesBadge .lbl{order:-1!important;margin:0!important;color:#775332!important;font-size:12px!important;line-height:14px!important;font-weight:900!important;white-space:nowrap!important;}
-.statsRow .movesBadge .circle{
-  flex:0 0 50px!important;width:50px!important;height:50px!important;min-height:50px!important;
-  border-radius:50%!important;color:white!important;font-size:24px!important;font-weight:900!important;
-  background:linear-gradient(#5db4fe,#267ad6)!important;border:2px solid #ffffffa8!important;
-  box-shadow:inset 0 2px 2px #ffffff42,0 2px 5px #204a852d!important;
-}
-.statsRow #movesStars,.statsRow #movesScoreEcho{display:none!important;}
-@media(max-width:380px){
-  .statsRow{height:101px!important;min-height:101px!important;gap:4px!important;margin-left:5px!important;margin-right:5px!important;}
-  .statsRow .stageBadgeMini{flex-basis:62px!important;min-width:62px!important;}
-  .statsRow .movesBadge{flex-basis:72px!important;min-width:72px!important;}
-  .statsRow .targetCard{padding:5px 4px!important;grid-template-rows:14px 29px 12px 23px!important;row-gap:3px!important;}
-  .statsRow .targetCard #targetBadgeLbl{font-size:11px!important;}
-  .statsRow .targetCard #dpV42Mission.dpMissionInCard{height:23px!important;min-height:23px!important;max-height:23px!important;padding:0 3px!important;}
-  .statsRow .targetCard #dpV42Mission .dpMissionCount{font-size:10px!important;padding:0 2px!important;}
-  .statsRow .movesBadge .lbl{font-size:11px!important;}
-  .statsRow .movesBadge .circle{width:46px!important;height:46px!important;min-height:46px!important;flex-basis:46px!important;}
-}
+/* V105 compact HUD: a single score line, functioning bar + optional mission below */
+.statsRow{display:flex!important;gap:6px!important;align-items:stretch!important;height:82px!important;min-height:82px!important;margin:2px 7px 8px!important;flex:0 0 auto!important}
+.statsRow .stageBadgeMini,.statsRow .targetCard,.statsRow .movesBadge{box-sizing:border-box!important;height:100%!important;min-height:0!important}
+.statsRow .stageBadgeMini{order:0!important;display:flex!important;flex:0 0 69px!important;min-width:69px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;padding:5px 3px!important;border-radius:16px!important;border:2px solid #dcb273!important;background:linear-gradient(#ca924a,#95541f)!important;color:#fff!important}
+.statsRow .stageBadgeMini br{display:none!important}
+.statsRow .stageBadgeMini #stageBadgeLbl{font-size:11px!important;line-height:13px!important;font-weight:900!important}
+.statsRow .stageBadgeMini #stageNum{font-size:25px!important;line-height:27px!important;font-weight:900!important}
+.statsRow .targetCard{order:1!important;flex:1 1 0!important;min-width:0!important;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;grid-template-rows:28px 11px 22px!important;gap:2px 5px!important;align-content:center!important;align-items:center!important;justify-items:stretch!important;padding:5px 7px!important;overflow:hidden!important;border:2px solid #d7c29d!important;border-radius:17px!important;position:relative!important;text-align:center!important;background:linear-gradient(#faf5ea,#f3e9d8)!important}
+.statsRow .targetCard #targetBadgeLbl{grid-column:1!important;grid-row:1!important;position:static!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;color:#79532e!important;font-size:clamp(11px,3vw,13px)!important;line-height:1.2!important;font-weight:900!important;white-space:nowrap!important;justify-self:end!important}
+.statsRow .targetCard #targetVal{grid-column:2!important;grid-row:1!important;margin:0!important;padding:0!important;color:#20436d!important;font-size:clamp(21px,6vw,27px)!important;line-height:28px!important;font-weight:900!important;white-space:nowrap!important;justify-self:start!important}
+.statsRow .targetCard .barTrack{grid-column:1 / -1!important;grid-row:2!important;position:relative!important;inset:auto!important;margin:0 7px!important;width:calc(100% - 14px)!important;height:11px!important;background:#e5d8c0!important;border-radius:999px!important;box-shadow:inset 0 1px 2px #775c4433!important}
+.statsRow .targetCard .barFill{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#ffb52d,#ffda65)!important;transition:width .3s ease!important}
+.statsRow .targetCard .barStar{position:absolute!important;top:50%!important;transform:translate(-50%,-50%)!important;font-size:16px!important;line-height:1!important;z-index:2!important;transition:left .3s ease!important}
+.statsRow .targetCard #dpV42Mission.dpMissionInCard{grid-column:1 / -1!important;grid-row:3!important;position:static!important;inset:auto!important;transform:none!important;width:100%!important;height:22px!important;min-height:22px!important;max-height:22px!important;min-width:0!important;margin:0!important;padding:0 4px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border:1px solid #d6b477!important;border-radius:9px!important;background:linear-gradient(#fffaf0,#ffedcf)!important;font-size:clamp(9px,2.5vw,11px)!important;color:#734a25!important;font-weight:800!important;line-height:19px!important;pointer-events:none!important}
+.statsRow .targetCard #dpV42Mission[hidden]{display:flex!important;visibility:hidden!important}
+.statsRow .targetCard #dpV42Mission .dpMissionLabel{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.statsRow .targetCard #dpV42Mission .dpMissionCount{flex:0 0 auto!important;white-space:nowrap!important;font-size:10px!important;padding:0 3px!important;border-radius:5px!important;background:#ffffffb5!important;color:#855025!important}
+.statsRow .movesBadge{order:2!important;flex:0 0 78px!important;min-width:78px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:5px 3px!important;border-radius:16px!important;border:2px solid #d7c29d!important;background:linear-gradient(#faf5ea,#f3e9d8)!important}
+.statsRow .movesBadge .lbl{order:-1!important;margin:0!important;font-size:11px!important;line-height:13px!important;font-weight:900!important;color:#775332!important;white-space:nowrap!important}
+.statsRow .movesBadge .circle{flex:0 0 39px!important;min-height:39px!important;width:39px!important;height:39px!important;border:2px solid #ffffffa8!important;border-radius:50%!important;color:#fff!important;font-size:21px!important;font-weight:900!important;background:linear-gradient(#5db4fe,#267ad6)!important}
+.statsRow #movesStars,.statsRow #movesScoreEcho{display:none!important}
+@media(max-width:380px){.statsRow{gap:4px!important;margin-left:5px!important;margin-right:5px!important}.statsRow .stageBadgeMini{flex-basis:58px!important;min-width:58px!important}.statsRow .movesBadge{flex-basis:67px!important;min-width:67px!important}.statsRow .targetCard{padding:4px 4px!important;column-gap:3px!important}.statsRow .targetCard #targetVal{font-size:23px!important}}
+/* Five full-size controls: distribute available horizontal space instead of shrinking assets */
+#mainScreen .powerRow{display:flex!important;justify-content:center!important;align-items:center!important;gap:clamp(3px,1vw,7px)!important;padding:0 3px!important;box-sizing:border-box!important;min-width:0!important}
+#mainScreen .powerRow .powerBtn{box-sizing:border-box!important;flex:0 0 58px!important;width:58px!important;min-width:58px!important;max-width:58px!important;height:58px!important;min-height:58px!important}
+#mainScreen .powerRow .powerBtn>img{width:100%!important;height:100%!important;object-fit:contain!important}
+#mainScreen #btnHint{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;border:2px solid #d7a43b!important;border-radius:16px!important;background:linear-gradient(160deg,#fff7c8,#f7d776)!important;box-shadow:inset 0 2px 0 #fff9,0 2px 5px #ac772652!important}
+#mainScreen #btnHint .dpHintIcon{font-size:34px!important;line-height:1!important}
+#mainScreen #btnHint .dpHintPrice{font-size:10px!important;letter-spacing:-.5px!important;white-space:nowrap!important}
+@media(max-width:340px){#mainScreen .powerRow .powerBtn{flex-basis:54px!important;width:54px!important;min-width:54px!important;max-width:54px!important;height:54px!important;min-height:54px!important}}
 </style>
 <style id="dpStarShopRefinement">
 /* V84 — Star-only shop: one cohesive layout, no version-stacked rules */
@@ -221,6 +157,7 @@
       <div class="powerBtn" id="btnBomb"><img src="assets/images/powerup_bomb.png" alt="폭탄"><span class="cnt" id="cntBomb">2</span></div>
       <div class="powerBtn" id="btnShuffle"><img src="assets/images/powerup_shuffle.png" alt="셔플"><span class="cnt" id="cntShuffle">2</span></div>
       <div class="powerBtn" id="btnRainbow"><img src="assets/images/powerup_rainbow.png" alt="무지개"><span class="cnt" id="cntRainbow">2</span></div>
+      <div class="powerBtn" id="btnHint" role="button" tabindex="0" aria-label="연결 힌트, 모이 100"><span class="dpHintIcon" aria-hidden="true">💡</span><span class="cnt dpHintPrice">🪙100</span></div>
     </div>
   </div>
 

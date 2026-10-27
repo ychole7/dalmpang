@@ -3343,43 +3343,17 @@
     updateHud();
     showToast('🪙 '+HEART_REFILL_COST+'으로 하트를 채웠습니다');
   });
-  // V103: optional coin utility, separate from the locked star shop.
-  const COIN_HINT_COST=100, COIN_START_COST=200;
-  const coinUtilityStyles=document.createElement('style');
-  coinUtilityStyles.textContent=`
-    #dpCoinUtility{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(39,52,63,.54)}
-    #dpCoinUtility.open{display:flex}
-    #dpCoinUtility .cuPanel{width:min(100%,350px);padding:18px;background:#fff7e8;border:3px solid #dfb778;border-radius:22px;box-shadow:0 12px 40px #253d584d;color:#684926;font-family:inherit}
-    #dpCoinUtility h3{font-size:21px;font-weight:900;margin:0 0 4px;text-align:center}
-    #dpCoinUtility .cuBalance{text-align:center;margin:0 0 16px;font-weight:900;color:#ab762a}
-    #dpCoinUtility .cuItem{background:#fff;border:1.5px solid #e9d7ba;border-radius:15px;margin:9px 0;padding:11px;display:flex;align-items:center;gap:8px}
-    #dpCoinUtility .cuInfo{flex:1;min-width:0}
-    #dpCoinUtility .cuName{font-weight:900;font-size:15px}
-    #dpCoinUtility .cuDesc{font-size:12px;line-height:1.35;color:#846f5a;margin-top:3px}
-    #dpCoinUtility .cuBuy{flex:0 0 auto;border:0;border-radius:11px;background:#f3b849;color:#573711;font-weight:900;font-size:13px;padding:10px 9px;cursor:pointer}
-    #dpCoinUtility .cuBuy:disabled{background:#e3ded4;color:#91887e;cursor:default}
-    #dpCoinUtility .cuClose{display:block;margin:13px auto 0;background:#eee1cc;border:0;border-radius:12px;padding:10px 28px;font-weight:900;color:#76512c}
-    #boardWrap .dpCoinHint{outline:3px solid #ffcf50!important;outline-offset:-3px;box-shadow:inset 0 0 0 3px #fff7aa,0 0 13px #f8b43c!important;position:relative;z-index:3}
-  `;
-  document.head.appendChild(coinUtilityStyles);
-  const coinUtility=document.createElement('div');
-  coinUtility.id='dpCoinUtility';
-  coinUtility.setAttribute('role','dialog');
-  coinUtility.setAttribute('aria-modal','true');
-  coinUtility.setAttribute('aria-label','모이 사용');
-  coinUtility.innerHTML=`<div class="cuPanel"><h3>🪙 모이 사용</h3><p class="cuBalance" id="cuBalance"></p>
-    <div class="cuItem"><div class="cuInfo"><div class="cuName">🔎 연결 힌트</div><div class="cuDesc">연결할 수 있는 타일 두 개를 잠깐 표시해요.</div></div><button class="cuBuy" id="cuHint" type="button">🪙 100</button></div>
-    <div class="cuItem"><div class="cuInfo"><div class="cuName">🎁 시작 보너스</div><div class="cuDesc">첫 이동 전에만 구매 · 이번 판 +2무브</div></div><button class="cuBuy" id="cuStart" type="button">🪙 200</button></div>
-    <button class="cuClose" id="cuClose" type="button">닫기</button></div>`;
-  document.body.appendChild(coinUtility);
+  // V105: direct fifth-item hint, retains V103 star shop and other currencies.
+  const COIN_HINT_COST=100;
+  const coinHintStyle=document.createElement('style');
+  coinHintStyle.textContent='#boardWrap .dpCoinHint{outline:3px solid #ffcf50!important;outline-offset:-3px;box-shadow:inset 0 0 0 3px #fff7aa,0 0 13px #f8b43c!important;position:relative;z-index:3}';
+  document.head.appendChild(coinHintStyle);
   let coinHintTimer=null;
   function clearCoinHint(){
     if(coinHintTimer)clearTimeout(coinHintTimer);
     coinHintTimer=null;
     document.querySelectorAll('#boardWrap .dpCoinHint').forEach(el=>el.classList.remove('dpCoinHint'));
   }
-  function coinUtilityAvailable(){return !stageOutcome&&!dragging&&!poppingInProgress&&!reshufflePending;}
-  function coinUtilityStartAllowed(){return coinUtilityAvailable()&&stageScore===0&&movesLeft===movesBudget();}
   function coinHintPair(){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
       if(board[r][c]===null||isBlocked(r,c))continue;
@@ -3393,38 +3367,21 @@
     }
     return null;
   }
-  function refreshCoinUtility(){
-    document.getElementById('cuBalance').textContent='보유 모이 '+fmt(coins);
-    const hint=document.getElementById('cuHint'),start=document.getElementById('cuStart');
-    hint.disabled=coins<COIN_HINT_COST||!coinUtilityAvailable()||!coinHintPair();
-    start.disabled=coins<COIN_START_COST||!coinUtilityStartAllowed();
-  }
-  function closeCoinUtility(){coinUtility.classList.remove('open');}
   document.getElementById('coinPlus').addEventListener('click',()=>{
-    refreshCoinUtility();coinUtility.classList.add('open');
+    showToast('모이는 힌트, 하트 충전, 이어하기에 사용할 수 있어요!');
   });
-  coinUtility.addEventListener('click',ev=>{if(ev.target===coinUtility)closeCoinUtility();});
-  document.getElementById('cuClose').addEventListener('click',closeCoinUtility);
-  document.getElementById('cuHint').addEventListener('click',()=>{
-    if(!coinUtilityAvailable()||coins<COIN_HINT_COST)return;
+  document.getElementById('btnHint').addEventListener('click',()=>{
+    if(stageOutcome||dragging||poppingInProgress||reshufflePending)return;
+    if(coins<COIN_HINT_COST){showToast('힌트에 필요한 모이가 부족해요');return;}
     const pair=coinHintPair();
-    if(!pair){showToast('연결 가능한 타일을 찾지 못했어요');return;}
+    if(!pair){showToast('연결 가능한 타일이 없어요');return;}
     if(!commitSpend({'sp_coins':String(coins-COIN_HINT_COST)}))return;
-    coins-=COIN_HINT_COST;coinsValEl.textContent=fmt(coins);
-    closeCoinUtility();clearCoinHint();
+    coins-=COIN_HINT_COST;
+    coinsValEl.textContent=fmt(coins);
+    clearCoinHint();
     pair.forEach(({r,c})=>cellEls[r]?.[c]?.classList.add('dpCoinHint'));
     coinHintTimer=setTimeout(clearCoinHint,2800);
-    showToast('반짝이는 두 타일을 연결해 보세요!');
-  });
-  document.getElementById('cuStart').addEventListener('click',()=>{
-    if(!coinUtilityStartAllowed()||coins<COIN_START_COST)return;
-    const nextMoves=movesLeft+2;
-    const round=JSON.stringify({version:1,stageIndex,stageScore,movesLeft:nextMoves,
-      stageTimeLeft,missionCount:v42MissionCount,board:board.map(row=>row.slice()),specials:[...specials.entries()]});
-    if(!commitSpend({'sp_coins':String(coins-COIN_START_COST),'sp_active_round_v1':round}))return;
-    coins-=COIN_START_COST;coinsValEl.textContent=fmt(coins);
-    movesLeft=nextMoves;updateHud();saveRound();closeCoinUtility();
-    showToast('🎁 이번 판 +2무브!');
+    showToast('✨ 빛나는 두 타일을 이어 보세요!');
   });
   document.getElementById('gearBtn').addEventListener('click', ()=>{
     document.getElementById('settingsOverlay').classList.add('show');
