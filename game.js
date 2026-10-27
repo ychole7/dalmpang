@@ -2549,7 +2549,14 @@
         else {
           el.style.visibility='visible'; el.dataset.v=v;
           const special=specialAt(r,c);
-          el.innerHTML=special ? '<img class="chickSymbol specialTileArt" draggable="false" src="assets/images/special_'+special+'.png" alt="특수 타일">' : renderSymbolHTML(stage,v);
+          const nextMarkup=special ? '<img class="chickSymbol specialTileArt" draggable="false" src="assets/images/special_'+special+'.png" alt="특수 타일">' : renderSymbolHTML(stage,v);
+          // V100 mobile QA: preserve unchanged image/SVG nodes across renders.
+          // Replacing every tile's innerHTML forced up to 48 image nodes to be
+          // recreated after each move, causing avoidable decode/layout churn.
+          if(el._dpTileMarkup!==nextMarkup){
+            el.innerHTML=nextMarkup;
+            el._dpTileMarkup=nextMarkup;
+          }
         }
         el.classList.remove('selected','popping','chickPopping','chainBump');
         el.style.removeProperty('--pop-delay');
