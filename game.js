@@ -3244,46 +3244,46 @@
     popCells(cells, true);
   });
 
-  const STAR_SHOP_ITEMS = [
-    { key:'candy',   icon:'🍬', name:'사탕 +1',   desc:'이동 횟수 3회 추가', star:12 },
-    { key:'shuffle', icon:'🔀', name:'셔플 +1',   desc:'보드를 다시 섞어요', star:4 },
-    { key:'bomb',    icon:'💣', name:'폭탄 +1',   desc:'주변 타일을 한번에 제거', star:7 },
-    { key:'rainbow', icon:'🌈', name:'무지개 +1', desc:'같은 심볼 전부 제거', star:10 }
+  // V115: coins buy consumable boosters; stars remain saved for future cosmetics.
+  const COIN_SHOP_ITEMS = [
+    {key:'hint',name:'힌트 +1',desc:'연결 가능한 타일을 알려줘요',coin:150},
+    {key:'shuffle',name:'셔플 +1',desc:'보드를 다시 섞어요',coin:250},
+    {key:'bomb',name:'폭탄 +1',desc:'주변 타일을 한번에 제거',coin:400},
+    {key:'rainbow',name:'무지개 +1',desc:'같은 심볼 전부 제거',coin:550},
+    {key:'candy',name:'사탕 +1',desc:'남은 이동 횟수 3회 추가',coin:650}
   ];
-
   document.getElementById('shopPlayBtn')?.addEventListener('click',()=>document.getElementById('navHome').click());
 
   function renderShop(){
-    const starList = document.getElementById('starShopList');
-    const balance = document.getElementById('shopStarBalance');
-    if(balance) balance.textContent = totalStars.toLocaleString('ko-KR');
-    starList.innerHTML = STAR_SHOP_ITEMS.map(function(it){
-      const iconFile = 'assets/images/powerup_' + it.key + '.png';
-      const affordable = totalStars >= it.star;
+    const list=document.getElementById('starShopList');
+    const balance=document.getElementById('shopStarBalance');
+    if(!list)return;
+    if(balance)balance.textContent=fmt(coins);
+    list.innerHTML=COIN_SHOP_ITEMS.map(it=>{
+      const affordable=coins>=it.coin;
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
-        + '<div class="shopIcon"><img src="'+iconFile+'" alt="'+it.name+'" loading="lazy"></div>'
-        + '<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
-        + '<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-star="'+it.star+'"'+(affordable?'':' disabled aria-label="별 '+(it.star-totalStars)+'개 부족"')+'><span class="priceLine"><img src="assets/images/icon_star.png" alt="">'+it.star+'</span><small class="purchaseHint">'+(affordable?'교환하기':(it.star-totalStars)+'개 부족')+'</small></button>'
-        + '</div>';
+        +'<div class="shopIcon"><img src="assets/images/powerup_'+it.key+'.png" alt="'+it.name+'" loading="lazy"></div>'
+        +'<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
+        +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(affordable?'':' disabled aria-label="모이 '+(it.coin-coins)+'개 부족"')+'>'
+        +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span><small class="purchaseHint">'+(affordable?'교환하기':(it.coin-coins)+' 부족')+'</small></button></div>';
     }).join('');
-    starList.querySelectorAll('.shopBuyBtn.star').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const cost = parseInt(btn.dataset.star, 10);
-        const key = btn.dataset.key;
-        if(totalStars < cost){ showToast('별이 부족해요'); return; }
-        if(!STAR_SHOP_ITEMS.some(it=>it.key===key&&it.star===cost))return;
-        const nextPower={...powerCounts,[key]:(powerCounts[key]||0)+1};
-        if(!commitSpend({'sp_stars':String(totalStars-cost),
-                         'sp_power_counts':JSON.stringify(nextPower)}))return;
-        totalStars-=cost;
-        starsValEl.textContent=totalStars;
-        powerCounts=nextPower;
-        updateHud();
-        showToast(STAR_SHOP_ITEMS.find(i=>i.key===key).name+' 구매 완료!');
-        renderShop();
-      });
-    });
-
+    list.querySelectorAll('.shopBuyBtn.star').forEach(btn=>btn.addEventListener('click',()=>{
+      const cost=Number(btn.dataset.coin),key=btn.dataset.key;
+      if(!COIN_SHOP_ITEMS.some(it=>it.key===key&&it.coin===cost))return;
+      if(coins<cost){showToast('모이가 부족해요');renderShop();return;}
+      const writes={'sp_coins':String(coins-cost)};
+      let nextPower=null;
+      if(key==='hint')writes[HINT_STOCK_KEY]=String(hintStock+1);
+      else {nextPower={...powerCounts,[key]:(powerCounts[key]||0)+1};writes.sp_power_counts=JSON.stringify(nextPower);}
+      if(!commitSpend(writes))return;
+      coins-=cost;
+      if(key==='hint'){hintStock++;renderHintStock();}
+      else powerCounts=nextPower;
+      coinsValEl.textContent=fmt(coins);
+      updateHud();
+      showToast(COIN_SHOP_ITEMS.find(it=>it.key===key).name+' 구매 완료!');
+      renderShop();
+    }));
   }
 
   function hideAllPages(){
@@ -3344,7 +3344,7 @@
     showToast('🪙 '+HEART_REFILL_COST+'으로 하트를 채웠습니다');
   });
   // V105: direct fifth-item hint, retains V103 star shop and other currencies.
-  const COIN_HINT_COST=100;
+  const COIN_HINT_COST=150;
   const HINT_STOCK_KEY='sp_hint_stock';
   let hintStock=Math.max(0,Math.min(999,parseInt(localStorage.getItem(HINT_STOCK_KEY)??'2',10)||0));
   function renderHintStock(){
@@ -3382,8 +3382,8 @@
     const pair=coinHintPair();
     if(!pair){showToast('연결 가능한 타일이 없어요');return;}
     if(hintStock<=0){
-      if(coins<COIN_HINT_COST){showToast('힌트가 0개예요. 구매에는 모이 100개가 필요해요.');return;}
-      if(!window.confirm('힌트 1개를 모이 100개로 구매할까요?'))return;
+      if(coins<COIN_HINT_COST){showToast('힌트가 0개예요. 구매에는 모이 150개가 필요해요.');return;}
+      if(!window.confirm('힌트 1개를 모이 150개로 구매할까요?'))return;
       if(!commitSpend({'sp_coins':String(coins-COIN_HINT_COST),[HINT_STOCK_KEY]:'1'}))return;
       coins-=COIN_HINT_COST;
       hintStock=1;
