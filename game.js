@@ -1880,7 +1880,7 @@
   // V92: absolute-value transaction journal for spending currencies.
   // Replaying exact target values prevents both double spend and free grants.
   const SPEND_TX_KEY='sp_spend_tx_v1';
-  const SPEND_ALLOWED=new Set(['sp_stars','sp_coins','sp_hearts','sp_heart_regen_at','sp_power_counts','sp_active_round_v1']);
+  const SPEND_ALLOWED=new Set(['sp_stars','sp_coins','sp_hearts','sp_heart_regen_at','sp_power_counts','sp_active_round_v1','sp_hint_stock']);
   function applySpendWrites(writes){
     for(const [key,value] of Object.entries(writes)) localStorage.setItem(key,value);
   }
@@ -3392,7 +3392,16 @@
       showToast('힌트 1개 구매 완료! 다시 눌러 사용하세요.');
       return;
     }
-    if(!commitSpend({[HINT_STOCK_KEY]:String(hintStock-1)}))return;
+    // Hint usage is an inventory decrement, not a currency purchase.
+    // Do not invoke the multi-key spending journal for this single-key update:
+    // an unrelated pending transaction must not trigger a recovery lock on hints.
+    try{
+      localStorage.setItem(HINT_STOCK_KEY,String(hintStock-1));
+    }catch(err){
+      console.error('[Dalmpang] Hint inventory save failed',err);
+      showToast('힌트를 저장하지 못했어요. 다시 시도해 주세요.');
+      return;
+    }
     hintStock--;
     renderHintStock();
     clearCoinHint();
