@@ -3255,6 +3255,49 @@
   ];
   document.getElementById('shopPlayBtn')?.addEventListener('click',()=>document.getElementById('navHome').click());
 
+  // UI-only confirmation. Currency and inventory changes remain in the existing commitSpend path.
+  function confirmShopPurchase(item){
+    const backdrop=document.getElementById('dpPurchaseBackdrop');
+    if(!backdrop)return Promise.resolve(false);
+    const img=backdrop.querySelector('#dpPurchaseIcon');
+    img.src=item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png';
+    img.alt=item.name;
+    backdrop.querySelector('#dpPurchaseName').textContent=item.name;
+    backdrop.querySelector('#dpPurchasePrice').textContent=String(item.coin);
+    backdrop.querySelector('#dpPurchaseQuestion').textContent=item.name+'을(를) 모이 '+item.coin+'개로 구매할까요?';
+    backdrop.hidden=false;
+    const accept=backdrop.querySelector('#dpPurchaseAccept');
+    const cancel=backdrop.querySelector('#dpPurchaseCancel');
+    const close=backdrop.querySelector('#dpPurchaseClose');
+    return new Promise(resolve=>{
+      const prevFocus=document.activeElement;
+      function finish(result){
+        backdrop.hidden=true;
+        accept.removeEventListener('click',yes);
+        cancel.removeEventListener('click',no);
+        close.removeEventListener('click',no);
+        backdrop.removeEventListener('click',outside);
+        document.removeEventListener('keydown',keyDown);
+        if(prevFocus?.isConnected)prevFocus.focus();
+        resolve(result);
+      }
+      function yes(){finish(true)}
+      function no(){finish(false)}
+      function outside(e){if(e.target===backdrop)finish(false)}
+      function keyDown(e){if(e.key==='Escape'){e.preventDefault();finish(false)}else if(e.key==='Tab'){
+        const active=document.activeElement;
+        if(e.shiftKey&&active===close){e.preventDefault();accept.focus()}
+        else if(!e.shiftKey&&active===accept){e.preventDefault();close.focus()}
+      }}
+      accept.addEventListener('click',yes);
+      cancel.addEventListener('click',no);
+      close.addEventListener('click',no);
+      backdrop.addEventListener('click',outside);
+      document.addEventListener('keydown',keyDown);
+      close.focus();
+    });
+  }
+
   function renderShop(){
     const list=document.getElementById('starShopList');
     const balance=document.getElementById('shopStarBalance');
@@ -3269,12 +3312,13 @@
         +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(affordable?'':' disabled aria-label="모이 '+(it.coin-coins)+'개 부족"')+'>'
         +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span></button></div>';
     }).join('');
-    list.querySelectorAll('.shopBuyBtn.star').forEach(btn=>btn.addEventListener('click',()=>{
+    list.querySelectorAll('.shopBuyBtn.star').forEach(btn=>btn.addEventListener('click',async()=>{
       const cost=Number(btn.dataset.coin),key=btn.dataset.key;
       if(!COIN_SHOP_ITEMS.some(it=>it.key===key&&it.coin===cost))return;
       if(coins<cost){showToast('모이가 부족해요');renderShop();return;}
       if(key==='heart' && hearts>=HEART_MAX){showToast('하트가 이미 가득 찼어요');renderShop();return;}
-      if(!window.confirm(key==='heart'?'모이 15개로 하트 1개를 충전할까요?':COIN_SHOP_ITEMS.find(it=>it.key===key).name+'을(를) 모이 '+cost+'개로 구매할까요?'))return;
+      if(!await confirmShopPurchase(COIN_SHOP_ITEMS.find(it=>it.key===key)))return;
+      if(coins<cost || (key==='heart' && hearts>=HEART_MAX)){renderShop();return;}
       const writes={'sp_coins':String(coins-cost)};
       let nextPower=null;
       if(key==='heart'){writes.sp_hearts=String(Math.min(HEART_MAX,hearts+1));writes.sp_heart_regen_at=String(hearts+1>=HEART_MAX?0:heartRegenAt);}

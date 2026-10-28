@@ -107,6 +107,24 @@
 #shopPage #starShopSection .shopRow.star .shopIcon{width:57px!important;height:57px!important;min-width:57px!important}
 #shopPage #starShopSection .shopRow.star .shopIcon img{width:54px!important;height:54px!important}
 #shopPage .shopEarnPanel{margin-top:12px!important;padding:10px 12px!important}
+
+/* Shop purchase confirmation: self-contained, game-style modal */
+.dpPurchaseBackdrop{position:fixed;inset:0;z-index:99999;background:rgba(13,25,48,.68);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+.dpPurchaseBackdrop[hidden]{display:none!important}
+.dpPurchaseDialog{position:relative;width:min(100%,390px);box-sizing:border-box;border:5px solid #edae37;border-radius:36px;background:linear-gradient(#fffaf0,#fff1d5);box-shadow:0 7px 0 #bf7d22,inset 0 0 0 3px #ffe6aa,0 22px 40px #091b38aa;padding:51px 17px 20px;text-align:center;color:#654024;font-family:inherit}
+.dpPurchaseTitle{position:absolute;top:-31px;left:18%;right:18%;height:59px;border:3px solid #f1a82f;border-radius:25px;background:linear-gradient(#ffe893,#ffc447 55%,#f7aa24);box-shadow:inset 0 3px 2px #fff9d1,0 5px 0 #b9791f;display:flex;align-items:center;justify-content:center;color:#743407;font-size:clamp(22px,6vw,28px);font-weight:1000;text-shadow:0 1px #fff2b7;white-space:nowrap}
+.dpPurchaseClose{position:absolute;right:-10px;top:-17px;border:3px solid #eaa039;border-radius:50%;width:45px;height:45px;background:linear-gradient(#ffdc77,#ff9f26);color:#fff;font-weight:1000;font-size:28px;line-height:1;cursor:pointer;text-shadow:0 2px #ac5c13}
+.dpPurchaseProduct{display:flex;align-items:center;justify-content:center;gap:15px;padding:16px 10px;border-radius:25px;background:linear-gradient(#fff4dd,#fbe4bf);min-height:116px}
+.dpPurchaseProduct img{width:93px;height:93px;object-fit:contain;flex:0 0 93px;filter:drop-shadow(0 3px 3px #87602d44)}
+.dpPurchaseInfo{text-align:left;min-width:0}.dpPurchaseName{font-size:clamp(21px,6vw,28px);font-weight:1000;color:#12477c;white-space:nowrap}
+.dpPurchaseCost{display:flex;align-items:center;gap:7px;margin-top:10px;padding:5px 12px;border-radius:16px;background:linear-gradient(#fff8e7,#f7d79a);border:1px solid #e9bc76;color:#92500d;font-size:22px;font-weight:1000;white-space:nowrap}
+.dpPurchaseCost img{width:29px;height:29px;flex:0 0 29px;filter:none}
+.dpPurchaseQuestion{margin:19px 3px 25px;font-size:clamp(17px,4.7vw,21px);line-height:1.5;font-weight:900;color:#80502a;word-break:keep-all}
+.dpPurchaseActions{display:flex;gap:10px}.dpPurchaseActions button{flex:1;min-width:0;height:59px;border-radius:22px;font-family:inherit;font-size:23px;font-weight:1000;cursor:pointer}
+.dpPurchaseCancel{border:3px solid #ca9348;background:linear-gradient(#fffdf6,#fbe3b5);color:#8b501f;box-shadow:0 5px 0 #b47c32}
+.dpPurchaseAccept{border:3px solid #eaa12b;background:linear-gradient(#36c9ff,#0575ec 70%,#0959d7);color:white;text-shadow:0 2px #145ab4;box-shadow:0 5px 0 #a16a23,inset 0 2px #c0f6ff}
+.dpPurchaseActions button:active{transform:translateY(3px);box-shadow:none}
+@media(max-width:355px){.dpPurchaseDialog{padding-left:11px;padding-right:11px}.dpPurchaseProduct{gap:8px}.dpPurchaseProduct img{width:75px;height:75px;flex-basis:75px}.dpPurchaseCost{font-size:19px}}
 </style>
 </head>
 <body>
@@ -201,6 +219,16 @@
     <div class="navBtn" id="navShop"><div class="ico"><img src="assets/images/icon_shop.png" alt=""></div><span class="navLabel">상점</span></div>
   </div>
 
+</div>
+
+<div id="dpPurchaseBackdrop" class="dpPurchaseBackdrop" hidden>
+  <div class="dpPurchaseDialog" role="dialog" aria-modal="true" aria-labelledby="dpPurchaseHeading" aria-describedby="dpPurchaseQuestion">
+    <div class="dpPurchaseTitle" id="dpPurchaseHeading">아이템 구매</div>
+    <button class="dpPurchaseClose" id="dpPurchaseClose" type="button" aria-label="닫기">×</button>
+    <div class="dpPurchaseProduct"><img id="dpPurchaseIcon" alt=""><div class="dpPurchaseInfo"><div class="dpPurchaseName" id="dpPurchaseName"></div><div class="dpPurchaseCost"><img src="assets/images/icon_coin.png" alt=""><span>모이</span><b id="dpPurchasePrice"></b></div></div></div>
+    <p class="dpPurchaseQuestion" id="dpPurchaseQuestion"></p>
+    <div class="dpPurchaseActions"><button class="dpPurchaseCancel" id="dpPurchaseCancel" type="button">취소</button><button class="dpPurchaseAccept" id="dpPurchaseAccept" type="button">구매</button></div>
+  </div>
 </div>
 
 <div id="toast"></div>
