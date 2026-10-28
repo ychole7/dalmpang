@@ -3434,9 +3434,73 @@
       }
     });
   });
-  document.querySelectorAll('.sActionBtn, .sFooterBtn').forEach(function(btn){
-    if(btn.id === 'resetDataBtn' || btn.id === 'licenseBtn') return;
-    btn.addEventListener('click', function(){ showToast('준비 중인 기능이에요'); });
+  // V117: portable backup and restore of all Dalmpang local save keys.
+  const BACKUP_FORMAT='dalmpang-local-backup';
+  const BACKUP_VERSION=1;
+  function collectBackupData(){
+    // Save current settled round before export; avoid taking an in-flight snapshot.
+    if(!poppingInProgress && !dragging && !reshufflePending)saveRound();
+    const data=Object.create(null);
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key && key.startsWith('sp_'))data[key]=localStorage.getItem(key);
+    }
+    return {format:BACKUP_FORMAT,version:BACKUP_VERSION,createdAt:new Date().toISOString(),data};
+  }
+  document.getElementById('exportBackupBtn').addEventListener('click',async function(){
+    try{
+      const json=JSON.stringify(collectBackupData(),null,2);
+      const stamp=new Date().toISOString().slice(0,10);
+      const filename='dalmpang-backup-'+stamp+'.json';
+      const file=new File([json],filename,{type:'application/json'});
+      if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'닮팡 데이터 백업'});return;}
+        catch(err){if(err && err.name==='AbortError')return;}
+      }
+      const url=URL.createObjectURL(file);
+      const link=document.createElement('a');
+      link.href=url;link.download=filename;
+      document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+      showToast('백업 파일 저장을 확인해 주세요');
+    }catch(err){console.error('Backup export failed',err);showToast('백업 파일을 만들지 못했어요');}
+  });
+  const importFile=document.getElementById('backupFileInput');
+  document.getElementById('importBackupBtn').addEventListener('click',()=>importFile.click());
+  importFile.addEventListener('change',async function(){
+    const file=this.files && this.files[0];
+    this.value='';
+    if(!file)return;
+    try{
+      if(file.size>2*1024*1024)throw new Error('too large');
+      const backup=JSON.parse(await file.text());
+      if(!backup || backup.format!==BACKUP_FORMAT || backup.version!==BACKUP_VERSION
+        || !backup.data || typeof backup.data!=='object' || Array.isArray(backup.data))throw new Error('invalid format');
+      const entries=Object.entries(backup.data);
+      if(!entries.length || entries.length>400)throw new Error('invalid item count');
+      for(const [key,val] of entries){
+        if(!/^sp_[a-zA-Z0-9_:-]{1,90}$/.test(key) || typeof val!=='string'||val.length>100000)
+          throw new Error('invalid save data');
+      }
+      if(!confirm('선택한 백업으로 현재 닮팡 게임 데이터를 덮어쓸까요? 현재 진행 기록은 바뀝니다.'))return;
+      const previous=Object.create(null);
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);if(k&&k.startsWith('sp_'))previous[k]=localStorage.getItem(k);
+      }
+      try{
+        for(const k of Object.keys(previous))localStorage.removeItem(k);
+        for(const [k,v] of entries)localStorage.setItem(k,v);
+      }catch(err){
+        for(const k of Object.keys(localStorage))if(k.startsWith('sp_'))localStorage.removeItem(k);
+        for(const [k,v] of Object.entries(previous))localStorage.setItem(k,v);
+        throw err;
+      }
+      alert('복원 완료! 게임을 다시 불러옵니다.');
+      location.reload();
+    }catch(err){console.error('Backup import failed',err);alert('백업 파일이 올바르지 않거나 복원하지 못했어요. 기존 데이터는 유지됩니다.');}
+  });
+  document.querySelectorAll('.sActionBtn[data-action], .sFooterBtn[data-action]').forEach(function(btn){
+    btn.addEventListener('click',function(){showToast('준비 중인 기능이에요');});
   });
   document.getElementById('licenseBtn').addEventListener('click', function(){
     document.getElementById('licenseOverlay').classList.add('show');

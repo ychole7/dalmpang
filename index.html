@@ -98,6 +98,13 @@
  #shopPage .shopEarnCopy span{font-size:9px}
  #shopPage .shopEarnPlay{font-size:11px;padding:8px 6px}
 }
+
+/* V115: 5 compact coin-shop items, preserve approved skin */
+#shopPage #starShopSection .shopList{gap:9px!important}
+#shopPage #starShopSection .shopRow.star{min-height:78px!important;padding:7px 11px!important}
+#shopPage #starShopSection .shopRow.star .shopIcon{width:57px!important;height:57px!important;min-width:57px!important}
+#shopPage #starShopSection .shopRow.star .shopIcon img{width:54px!important;height:54px!important}
+#shopPage .shopEarnPanel{margin-top:12px!important;padding:10px 12px!important}
 </style>
 </head>
 <body>
@@ -174,11 +181,11 @@
     <img class="achieveRibbon" src="assets/images/shop_ribbon.png" alt="상점">
     <div class="achieveFrame">
       <div class="shopSection" id="starShopSection">
-        <div class="shopIntro"><div><strong>별 아이템 상점</strong><span>모은 별로 아이템을 교환하세요</span></div><div class="starBalance" aria-live="polite"><span class="balanceLabel">보유 별</span><div class="balanceValue"><img src="assets/images/icon_star.png" alt=""><b id="shopStarBalance">0</b></div></div></div>
+        <div class="shopIntro"><div><strong>모이 아이템 상점</strong><span>모이로 플레이 아이템을 준비하세요</span></div><div class="starBalance" aria-live="polite"><span class="balanceLabel">보유 모이</span><div class="balanceValue"><img src="assets/images/icon_coin.png" alt=""><b id="shopStarBalance">0</b></div></div></div>
         <div class="shopList" id="starShopList"></div>
-        <div class="shopEarnPanel" aria-label="별 획득 안내">
-          <div class="shopEarnIcon"><img src="assets/images/icon_star.png" alt=""></div>
-          <div class="shopEarnCopy"><strong>별이 부족한가요?</strong><span>새 스테이지 첫 클리어 시 별 1~3개를 받을 수 있어요.</span></div>
+        <div class="shopEarnPanel" aria-label="모이 획득 안내">
+          <div class="shopEarnIcon"><img src="assets/images/icon_coin.png" alt=""></div>
+          <div class="shopEarnCopy"><strong>모이가 부족한가요?</strong><span>스테이지를 플레이해 모이를 모아보세요.</span></div>
           <button type="button" id="shopPlayBtn" class="shopEarnPlay">플레이 <span aria-hidden="true">›</span></button>
         </div>
         <div class="starShopHelp">구매한 아이템은 바로 보관함에 추가돼요.</div>
@@ -251,7 +258,12 @@
       <div class="sGroup">
         <div class="sRow">
           <span class="sIcon">☁️</span><span class="sLabel">데이터 백업</span>
-          <button class="sActionBtn" data-action="backup">백업하기</button>
+          <button class="sActionBtn" id="exportBackupBtn" type="button">백업하기</button>
+        </div>
+        <div class="sRow">
+          <span class="sIcon">📂</span><span class="sLabel">데이터 복원</span>
+          <button class="sActionBtn" id="importBackupBtn" type="button">파일 선택</button>
+          <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
         </div>
         <div class="sRow">
           <span class="sIcon">🗑️</span><span class="sLabel">데이터 초기화</span>
