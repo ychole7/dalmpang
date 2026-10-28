@@ -3374,8 +3374,9 @@
     }
     return null;
   }
+  // The HUD + is navigation only; purchases require an explicit shop selection.
   document.getElementById('coinPlus').addEventListener('click',()=>{
-    showToast('모이는 힌트, 하트 충전, 이어하기에 사용할 수 있어요!');
+    document.getElementById('navShop').click();
   });
   document.getElementById('btnHint').addEventListener('click',()=>{
     if(stageOutcome||dragging||poppingInProgress||reshufflePending)return;
