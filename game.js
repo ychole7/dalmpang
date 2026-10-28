@@ -3246,7 +3246,7 @@
 
   // V115: coins buy consumable boosters; stars remain saved for future cosmetics.
   const COIN_SHOP_ITEMS = [
-    {key:'heart',name:'하트 전체 충전',desc:'하트를 최대 5개까지 채워요',coin:30},
+    {key:'heart',name:'하트 +1',desc:'하트 1개를 회복해요 (최대 5개)',coin:15},
     {key:'hint',name:'힌트 +1',desc:'연결 가능한 타일을 알려줘요',coin:150},
     {key:'shuffle',name:'셔플 +1',desc:'보드를 다시 섞어요',coin:250},
     {key:'bomb',name:'폭탄 +1',desc:'주변 타일을 한번에 제거',coin:400},
@@ -3264,7 +3264,7 @@
       const fullHeart=it.key==='heart' && hearts>=HEART_MAX;
       const affordable=coins>=it.coin && !fullHeart;
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
-        +'<div class="shopIcon"><img src="assets/images/powerup_'+it.key+'.png" alt="'+it.name+'" loading="lazy"></div>'
+        +'<div class="shopIcon"><img src="'+(it.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+it.key+'.png')+'" alt="'+it.name+'" loading="lazy"></div>'
         +'<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
         +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(affordable?'':' disabled aria-label="모이 '+(it.coin-coins)+'개 부족"')+'>'
         +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span><small class="purchaseHint">'+(fullHeart?'이미 가득 참':(affordable?'교환하기':(it.coin-coins)+' 부족'))+'</small></button></div>';
@@ -3274,15 +3274,15 @@
       if(!COIN_SHOP_ITEMS.some(it=>it.key===key&&it.coin===cost))return;
       if(coins<cost){showToast('모이가 부족해요');renderShop();return;}
       if(key==='heart' && hearts>=HEART_MAX){showToast('하트가 이미 가득 찼어요');renderShop();return;}
-      if(!window.confirm(key==='heart'?'모이 30개로 하트를 모두 충전할까요?':COIN_SHOP_ITEMS.find(it=>it.key===key).name+'을(를) 모이 '+cost+'개로 구매할까요?'))return;
+      if(!window.confirm(key==='heart'?'모이 15개로 하트 1개를 충전할까요?':COIN_SHOP_ITEMS.find(it=>it.key===key).name+'을(를) 모이 '+cost+'개로 구매할까요?'))return;
       const writes={'sp_coins':String(coins-cost)};
       let nextPower=null;
-      if(key==='heart'){writes.sp_hearts=String(HEART_MAX);writes.sp_heart_regen_at='0';}
+      if(key==='heart'){writes.sp_hearts=String(Math.min(HEART_MAX,hearts+1));writes.sp_heart_regen_at=String(hearts+1>=HEART_MAX?0:heartRegenAt);}
       else if(key==='hint')writes[HINT_STOCK_KEY]=String(hintStock+1);
       else {nextPower={...powerCounts,[key]:(powerCounts[key]||0)+1};writes.sp_power_counts=JSON.stringify(nextPower);}
       if(!commitSpend(writes))return;
       coins-=cost;
-      if(key==='heart'){hearts=HEART_MAX;heartRegenAt=0;}
+      if(key==='heart'){hearts=Math.min(HEART_MAX,hearts+1);if(hearts>=HEART_MAX)heartRegenAt=0;}
       else if(key==='hint'){hintStock++;renderHintStock();}
       else powerCounts=nextPower;
       coinsValEl.textContent=fmt(coins);
@@ -3336,7 +3336,6 @@
   }
 
   // ---- top bar / bottom nav stubs ----
-  const HEART_REFILL_COST = 30;
   // Heart HUD + opens the shop; no currency is charged on navigation.
   document.getElementById('heartPlus').addEventListener('click', ()=>{
     document.getElementById('navShop').click();
