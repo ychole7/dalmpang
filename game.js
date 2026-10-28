@@ -3267,7 +3267,7 @@
         +'<div class="shopIcon"><img src="'+(it.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+it.key+'.png')+'" alt="'+it.name+'" loading="lazy"></div>'
         +'<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
         +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(affordable?'':' disabled aria-label="모이 '+(it.coin-coins)+'개 부족"')+'>'
-        +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span><small class="purchaseHint">'+(fullHeart?'이미 가득 참':(affordable?'교환하기':(it.coin-coins)+' 부족'))+'</small></button></div>';
+        +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span></button></div>';
     }).join('');
     list.querySelectorAll('.shopBuyBtn.star').forEach(btn=>btn.addEventListener('click',()=>{
       const cost=Number(btn.dataset.coin),key=btn.dataset.key;
