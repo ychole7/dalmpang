@@ -2777,6 +2777,7 @@
     hideChainScorePreview();
     if(completed){
       holdFinishedChain();
+      playSfx('tile_connect');
       popChain(chain.slice());
     } else {
       clearChainPath();
@@ -2887,6 +2888,9 @@
     totalPops++;
     localStorage.setItem('sp_total_tiles',totalTilesRemoved);
     localStorage.setItem('sp_total_pops',totalPops);
+    playSfx('tile_pop');
+    if(originalCount>=5 && !isBonus)playSfx('combo');
+    if(splash.exploded || splash.giftCount || splash.star || splash.thawed)playSfx('special_tile');
     triggerPopEffect(originalCount,gained);
     if(splash.exploded)showToast('💥 폭탄! 주변 '+splash.bonus+'개 추가 제거');
     else if(splash.giftCount)showToast('🎁 선물 보너스 +'+(splash.giftCount*40)+' 모이');
@@ -3003,6 +3007,7 @@
   function showStageClear(){
     if(stageOutcome) return;
     stageOutcome='clear';
+    playSfx('stage_clear');
     forgetRound();
     settlePendingPower();
     pauseStageTimer();
@@ -3080,6 +3085,7 @@
   function showStageFail(){
     if(stageOutcome) return;
     stageOutcome='fail';
+    playSfx('stage_fail');
     forgetRound();
     settlePendingPower();
     pauseStageTimer();
@@ -3186,6 +3192,7 @@
   document.getElementById('btnCandy').addEventListener('click', ()=>{
     if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.candy<=0){ showToast('사탕 개수가 없어요'); return; }
+    playSfx('item_use');
     powerCounts.candy--;
     savePowerCounts();
     movesLeft += 3;
@@ -3206,6 +3213,7 @@
       const r=center.r+dr, c=center.c+dc;
       if(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]!==null) cells.push({r,c});
     }
+    playSfx('item_use');
     beginPendingPower('bomb');
     powerCounts.bomb--;
     savePowerCounts();
@@ -3216,6 +3224,7 @@
   document.getElementById('btnShuffle').addEventListener('click', ()=>{
     if(poppingInProgress || dragging || stageOutcome || reshufflePending) return;
     if(powerCounts.shuffle<=0){ showToast('셔플 개수가 없어요'); return; }
+    playSfx('item_use');
     powerCounts.shuffle--;
     savePowerCounts();
     updateHud();
@@ -3236,6 +3245,7 @@
     const value = board[pick.r][pick.c];
     const cells=[];
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===value) cells.push({r,c});
+    playSfx('item_use');
     beginPendingPower('rainbow');
     powerCounts.rainbow--;
     savePowerCounts();
@@ -3405,6 +3415,37 @@
     resumeStageTimer();
   }
 
+  // V127: lightweight SFX with independent volume/toggle and mobile-safe playback.
+  const SFX_BASE='assets/sfx/';
+  const SFX_NAMES=['tile_connect','tile_pop','combo','special_tile','item_use','stage_clear','stage_fail','ui_click'];
+  const sfxEnabledDefault=localStorage.getItem('sp_sfx_on') !== '0';
+  let sfxOn=sfxEnabledDefault;
+  const sfxBank=Object.create(null);
+  const sfxLast=Object.create(null);
+  const sfxGap={tile_connect:100,tile_pop:100,combo:250,special_tile:180,item_use:120,stage_clear:500,stage_fail:500,ui_click:65};
+  const sfxVolume={tile_connect:.22,tile_pop:.4,combo:.38,special_tile:.43,item_use:.32,stage_clear:.52,stage_fail:.37,ui_click:.16};
+  SFX_NAMES.forEach(name=>{
+    const audio=new Audio(SFX_BASE+name+'.mp3');
+    audio.preload='auto';
+    audio.volume=sfxVolume[name];
+    sfxBank[name]=audio;
+  });
+  function playSfx(name){
+    if(!sfxOn || !sfxBank[name])return;
+    const now=performance.now();
+    if(now-(sfxLast[name]??-10000)<sfxGap[name])return;
+    sfxLast[name]=now;
+    try{
+      const source=sfxBank[name];
+      // Clone only when a previous sound is still playing (fast repeated moves).
+      const audio=source.paused?source:source.cloneNode(true);
+      audio.volume=sfxVolume[name];
+      if(audio===source)audio.currentTime=0;
+      const result=audio.play();
+      if(result && result.catch)result.catch(()=>{}); // autoplay restriction, missing file
+    }catch(err){console.warn('[Dalmpang] SFX unavailable:',name,err);}
+  }
+
   // ---- background music ----
   const bgmAudio = new Audio('assets/sounds/bgm.mp3');
   bgmAudio.loop = true;
@@ -3423,6 +3464,12 @@
     else if(count>=5) vibrate(30);
     else vibrate(15);
   }
+
+  document.addEventListener('click',function(event){
+    const button=event.target.closest('button');
+    if(!button || button.matches('.sToggle, #btnCandy, #btnBomb, #btnShuffle, #btnRainbow, #btnHint'))return;
+    playSfx('ui_click');
+  },{passive:true});
 
   // ---- top bar / bottom nav stubs ----
   // Heart HUD + opens the shop; no currency is charged on navigation.
@@ -3485,6 +3532,7 @@
       showToast('힌트를 저장하지 못했어요. 다시 시도해 주세요.');
       return;
     }
+    playSfx('item_use');
     hintStock--;
     renderHintStock();
     clearCoinHint();
@@ -3500,6 +3548,8 @@
   });
   const bgmToggleBtn = document.querySelector('.sToggle[data-key="bgm"]');
   if(bgmToggleBtn) bgmToggleBtn.classList.toggle('on', bgmOn);
+  const sfxToggleBtn=document.querySelector('.sToggle[data-key="sfx"]');
+  if(sfxToggleBtn)sfxToggleBtn.classList.toggle('on',sfxOn);
   const vibrateToggleBtn = document.querySelector('.sToggle[data-key="vibrate"]');
   if(vibrateToggleBtn) vibrateToggleBtn.classList.toggle('on', vibrateOn);
   document.querySelectorAll('.sToggle').forEach(function(btn){
@@ -3510,6 +3560,10 @@
         localStorage.setItem('sp_bgm_on', bgmOn ? '1' : '0');
         if(bgmOn) bgmAudio.play().catch(()=>{});
         else bgmAudio.pause();
+      } else if(btn.dataset.key === 'sfx'){
+        sfxOn=isOn;
+        localStorage.setItem('sp_sfx_on',sfxOn?'1':'0');
+        if(sfxOn)playSfx('ui_click');
       } else if(btn.dataset.key === 'vibrate'){
         vibrateOn = isOn;
         localStorage.setItem('sp_vibrate_on', vibrateOn ? '1' : '0');
