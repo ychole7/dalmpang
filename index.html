@@ -44,6 +44,16 @@
 #mainScreen #btnHint .dpHintIcon{width:100%!important;height:100%!important;object-fit:fill!important;display:block!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important}
 #mainScreen #btnHint .dpHintPrice{font-size:10px!important;letter-spacing:-.5px!important;white-space:nowrap!important}
 @media(max-width:340px){#mainScreen .powerRow .powerBtn{flex-basis:18vw!important;width:18vw!important;height:18vw!important}}
+.dpExchangePanel{margin:13px 12px 0;padding:12px;border:2px solid #ead2a0;border-radius:18px;background:linear-gradient(155deg,#fffdf4,#fff0ce);box-shadow:inset 0 2px #fff,0 3px 7px #76582812}
+.dpExchangeTitle{display:flex;align-items:center;gap:5px;color:#775026;font-size:15px}
+.dpExchangeTitle img{width:24px;height:24px;object-fit:contain}
+.dpExchangeTitle span{margin-left:auto;font-weight:800;font-size:12px;color:#946c32}
+.dpExchangeRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.dpExchangeText{display:flex;flex-direction:column;gap:4px;color:#815322}
+.dpExchangeText strong{font-size:19px}
+.dpExchangeText small{font-size:11px;color:#967750}
+.dpExchangeButton{border:1px solid #d5a23d;background:linear-gradient(#ffde77,#f3b539);color:#785018;border-radius:13px;padding:12px 16px;font-weight:900;font-size:15px;box-shadow:0 3px 0 #ba8521;cursor:pointer}
+.dpExchangeButton:active{transform:translateY(2px);box-shadow:0 1px 0 #ba8521}
 /* V118: move only the coin + affordance slightly right, without changing HUD layout */
 .topbar #coinPlus{position:relative!important;left:4px!important;z-index:2!important;cursor:pointer!important;touch-action:manipulation!important}
 </style>
@@ -207,6 +217,10 @@
       <div class="shopSection" id="starShopSection">
         <div class="shopIntro"><div><strong>모이 아이템 상점</strong><span>모이로 플레이 아이템을 준비하세요</span></div><div class="starBalance" aria-live="polite"><span class="balanceLabel">보유 모이</span><div class="balanceValue"><img src="assets/images/icon_coin.png" alt=""><b id="shopStarBalance">0</b></div></div></div>
         <div class="shopList" id="starShopList"></div>
+        <section class="dpExchangePanel" aria-label="별을 모이로 교환">
+          <div class="dpExchangeTitle"><img src="assets/images/icon_star.png" alt=""> <strong>별 교환소</strong><span>보유 ⭐ <b id="dpExchangeStarBalance">0</b></span></div>
+          <div class="dpExchangeRow"><div class="dpExchangeText"><strong>⭐ 10 <span aria-hidden="true">→</span> 🪙 100</strong><small>모은 별을 모이로 바꿔요</small></div><button type="button" id="dpStarExchangeButton" class="dpExchangeButton">교환</button></div>
+        </section>
         <div class="shopEarnPanel" aria-label="모이 획득 안내">
           <div class="shopEarnIcon"><img src="assets/images/icon_coin.png" alt=""></div>
           <div class="shopEarnCopy"><strong>모이가 부족한가요?</strong><span>스테이지를 플레이해 모이를 모아보세요.</span></div>

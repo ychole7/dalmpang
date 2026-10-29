@@ -1880,7 +1880,7 @@
   // V92: absolute-value transaction journal for spending currencies.
   // Replaying exact target values prevents both double spend and free grants.
   const SPEND_TX_KEY='sp_spend_tx_v1';
-  const SPEND_ALLOWED=new Set(['sp_stars','sp_coins','sp_hearts','sp_heart_regen_at','sp_power_counts','sp_active_round_v1','sp_hint_stock']);
+  const SPEND_ALLOWED=new Set(['sp_stars','sp_coins','sp_hearts','sp_heart_regen_at','sp_power_counts','sp_active_round_v1','sp_hint_stock','sp_stars_exchanged_total']);
   function applySpendWrites(writes){
     for(const [key,value] of Object.entries(writes)) localStorage.setItem(key,value);
   }
@@ -1938,7 +1938,7 @@
   let heartRegenAt = parseInt(localStorage.getItem('sp_heart_regen_at'), 10);
   if(!Number.isFinite(heartRegenAt) || heartRegenAt < 0) heartRegenAt = 0;
   let coins = Math.max(0, parseInt(localStorage.getItem('sp_coins')||'0',10) || 0);
-  let totalStars = parseInt(localStorage.getItem('sp_stars')||'0',10);
+  let totalStars = Math.max(0, parseInt(localStorage.getItem('sp_stars')||'0',10) || 0);
   let noAdsOwned = localStorage.getItem('sp_no_ads') === '1';
   let heartPassUntil = parseInt(localStorage.getItem('sp_heart_pass_until')||'0',10);
   let stageBests = JSON.parse(localStorage.getItem('sp_stage_bests')||'[]');
@@ -3270,13 +3270,17 @@
     const backdrop=document.getElementById('dpPurchaseBackdrop');
     if(!backdrop)return Promise.resolve(false);
     const img=backdrop.querySelector('#dpPurchaseIcon');
-    img.src=item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png';
+    img.src=item.exchange?'assets/images/icon_coin.png':(item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png');
     img.alt=item.name;
     backdrop.querySelector('#dpPurchaseName').textContent=item.name;
     backdrop.querySelector('#dpPurchasePrice').textContent=String(item.coin);
-    backdrop.querySelector('#dpPurchaseQuestion').textContent=item.name+'을(를) 모이 '+item.coin+'개로 구매할까요?';
+    backdrop.querySelector('.dpPurchaseCost img').src=item.exchange?'assets/images/icon_star.png':'assets/images/icon_coin.png';
+    backdrop.querySelector('.dpPurchaseCost span').textContent=item.exchange?'별':'모이';
+    backdrop.querySelector('#dpPurchaseHeading').textContent=item.exchange?'별 교환':'아이템 구매';
+    backdrop.querySelector('#dpPurchaseQuestion').textContent=item.exchange?('별 '+item.coin+'개를 모이 '+item.moi+'개로 교환할까요?'):(item.name+'을(를) 모이 '+item.coin+'개로 구매할까요?');
     backdrop.hidden=false;
     const accept=backdrop.querySelector('#dpPurchaseAccept');
+    accept.textContent=item.exchange?'교환':'구매';
     const cancel=backdrop.querySelector('#dpPurchaseCancel');
     const close=backdrop.querySelector('#dpPurchaseClose');
     return new Promise(resolve=>{
@@ -3321,14 +3325,16 @@
     const cancel=backdrop.querySelector('#dpPurchaseCancel');
     const close=backdrop.querySelector('#dpPurchaseClose');
     const previousFocus=document.activeElement;
-    img.src=item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png';
+    img.src=item.exchange?'assets/images/icon_coin.png':(item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png');
     img.alt=item.name;
     name.textContent=item.name;
     price.textContent=String(item.coin);
-    heading.textContent=kind==='success'?'구매 완료!':'모이 부족!';
-    question.textContent=kind==='success'
-      ? item.name+'이(가) 보관함에 추가되었어요!'
-      : '보유 모이 '+coins+'개 · '+(item.coin-coins)+'개가 더 필요해요.';
+    backdrop.querySelector('.dpPurchaseCost img').src=item.exchange?'assets/images/icon_star.png':'assets/images/icon_coin.png';
+    backdrop.querySelector('.dpPurchaseCost span').textContent=item.exchange?'별':'모이';
+    heading.textContent=item.exchange?(kind==='success'?'교환 완료!':'별 부족!'):(kind==='success'?'구매 완료!':'모이 부족!');
+    question.textContent=item.exchange
+      ? (kind==='success'?'모이 '+item.moi+'개가 추가되었어요!':'보유 별 '+totalStars+'개 · '+(item.coin-totalStars)+'개가 더 필요해요.')
+      : (kind==='success'?item.name+'이(가) 보관함에 추가되었어요!':'보유 모이 '+coins+'개 · '+(item.coin-coins)+'개가 더 필요해요.');
     cancel.hidden=true;
     accept.textContent='확인';
     backdrop.hidden=false;
@@ -3352,11 +3358,36 @@
     accept.focus();
   }
 
+  // V131: exchange earned stars for coins, without changing stage-clear ratings.
+  const STAR_EXCHANGE={key:'exchange',name:'모이 100개',coin:10,moi:100,exchange:true};
+  let exchangeBusy=false;
+  document.getElementById('dpStarExchangeButton')?.addEventListener('click',async()=>{
+    if(exchangeBusy)return;
+    exchangeBusy=true;
+    try{
+      if(totalStars<STAR_EXCHANGE.coin){showShopOutcome(STAR_EXCHANGE,'insufficient');return;}
+      if(!await confirmShopPurchase(STAR_EXCHANGE))return;
+      if(totalStars<STAR_EXCHANGE.coin){renderShop();return;}
+      const exchanged=Math.max(0,parseInt(localStorage.getItem('sp_stars_exchanged_total')||'0',10)||0);
+      const writes={sp_stars:String(totalStars-STAR_EXCHANGE.coin),sp_coins:String(coins+STAR_EXCHANGE.moi),sp_stars_exchanged_total:String(exchanged+STAR_EXCHANGE.coin)};
+      if(!commitSpend(writes))return;
+      totalStars-=STAR_EXCHANGE.coin;
+      coins+=STAR_EXCHANGE.moi;
+      starsValEl.textContent=fmt(totalStars);
+      coinsValEl.textContent=fmt(coins);
+      updateHud();
+      renderShop();
+      showShopOutcome(STAR_EXCHANGE,'success');
+    }finally{exchangeBusy=false;}
+  });
+
   function renderShop(){
     const list=document.getElementById('starShopList');
     const balance=document.getElementById('shopStarBalance');
     if(!list)return;
     if(balance)balance.textContent=fmt(coins);
+    const starBalance=document.getElementById('dpExchangeStarBalance');
+    if(starBalance)starBalance.textContent=fmt(totalStars);
     list.innerHTML=COIN_SHOP_ITEMS.map(it=>{
       const fullHeart=it.key==='heart' && hearts>=HEART_MAX;
       const affordable=coins>=it.coin && !fullHeart;
