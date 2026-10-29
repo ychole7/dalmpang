@@ -3298,6 +3298,50 @@
     });
   }
 
+  // V124: Visual-only purchase outcome dialogs; no currency/inventory writes here.
+  function showShopOutcome(item,kind){
+    const backdrop=document.getElementById('dpPurchaseBackdrop');
+    if(!backdrop)return;
+    const heading=backdrop.querySelector('#dpPurchaseHeading');
+    const img=backdrop.querySelector('#dpPurchaseIcon');
+    const name=backdrop.querySelector('#dpPurchaseName');
+    const price=backdrop.querySelector('#dpPurchasePrice');
+    const question=backdrop.querySelector('#dpPurchaseQuestion');
+    const accept=backdrop.querySelector('#dpPurchaseAccept');
+    const cancel=backdrop.querySelector('#dpPurchaseCancel');
+    const close=backdrop.querySelector('#dpPurchaseClose');
+    const previousFocus=document.activeElement;
+    img.src=item.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+item.key+'.png';
+    img.alt=item.name;
+    name.textContent=item.name;
+    price.textContent=String(item.coin);
+    heading.textContent=kind==='success'?'구매 완료!':'모이 부족!';
+    question.textContent=kind==='success'
+      ? item.name+'이(가) 보관함에 추가되었어요!'
+      : '보유 모이 '+coins+'개 · '+(item.coin-coins)+'개가 더 필요해요.';
+    cancel.hidden=true;
+    accept.textContent='확인';
+    backdrop.hidden=false;
+    function finish(){
+      backdrop.hidden=true;
+      cancel.hidden=false;
+      accept.textContent='구매';
+      heading.textContent='아이템 구매';
+      accept.removeEventListener('click',finish);
+      close.removeEventListener('click',finish);
+      backdrop.removeEventListener('click',outside);
+      document.removeEventListener('keydown',keyDown);
+      if(previousFocus?.isConnected)previousFocus.focus();
+    }
+    function outside(e){if(e.target===backdrop)finish();}
+    function keyDown(e){if(e.key==='Escape'){e.preventDefault();finish();}}
+    accept.addEventListener('click',finish);
+    close.addEventListener('click',finish);
+    backdrop.addEventListener('click',outside);
+    document.addEventListener('keydown',keyDown);
+    accept.focus();
+  }
+
   function renderShop(){
     const list=document.getElementById('starShopList');
     const balance=document.getElementById('shopStarBalance');
@@ -3309,13 +3353,14 @@
       return '<div class="shopRow star'+(affordable?'':' disabled')+'">'
         +'<div class="shopIcon"><img src="'+(it.key==='heart'?'assets/images/icon_heart.png':'assets/images/powerup_'+it.key+'.png')+'" alt="'+it.name+'" loading="lazy"></div>'
         +'<div class="shopBody"><div class="sTitle">'+it.name+'</div><div class="sDesc">'+it.desc+'</div></div>'
-        +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(affordable?'':' disabled aria-label="모이 '+(it.coin-coins)+'개 부족"')+'>'
+        +'<button class="shopBuyBtn star" type="button" data-key="'+it.key+'" data-coin="'+it.coin+'"'+(fullHeart?' disabled aria-label="하트가 가득 찼어요"':(!affordable?' aria-label="'+it.name+' 구매에 모이 '+(it.coin-coins)+'개 부족" data-insufficient="true"':''))+'>'
         +'<span class="priceLine"><img src="assets/images/icon_coin.png" alt="모이">'+it.coin+'</span></button></div>';
     }).join('');
     list.querySelectorAll('.shopBuyBtn.star').forEach(btn=>btn.addEventListener('click',async()=>{
       const cost=Number(btn.dataset.coin),key=btn.dataset.key;
       if(!COIN_SHOP_ITEMS.some(it=>it.key===key&&it.coin===cost))return;
-      if(coins<cost){showToast('모이가 부족해요');renderShop();return;}
+      const item=COIN_SHOP_ITEMS.find(it=>it.key===key);
+      if(coins<cost){showShopOutcome(item,'insufficient');return;}
       if(key==='heart' && hearts>=HEART_MAX){showToast('하트가 이미 가득 찼어요');renderShop();return;}
       if(!await confirmShopPurchase(COIN_SHOP_ITEMS.find(it=>it.key===key)))return;
       if(coins<cost || (key==='heart' && hearts>=HEART_MAX)){renderShop();return;}
@@ -3331,8 +3376,8 @@
       else powerCounts=nextPower;
       coinsValEl.textContent=fmt(coins);
       updateHud();
-      showToast(COIN_SHOP_ITEMS.find(it=>it.key===key).name+' 구매 완료!');
       renderShop();
+      showShopOutcome(item,'success');
     }));
   }
 
