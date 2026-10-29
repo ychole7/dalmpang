@@ -3449,7 +3449,7 @@
   // ---- background music ----
   const bgmAudio = new Audio('assets/sounds/bgm.mp3');
   bgmAudio.loop = true;
-  bgmAudio.volume = 0.5;
+  bgmAudio.volume = 0.20;
   let bgmOn = localStorage.getItem('sp_bgm_on') !== '0';
   // Keep BGM confined to the foreground. Do not start it automatically
   // until the player has entered the game or explicitly enabled BGM.
