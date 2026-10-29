@@ -3469,14 +3469,10 @@
     const pair=coinHintPair();
     if(!pair){showToast('연결 가능한 타일이 없어요');return;}
     if(hintStock<=0){
-      if(coins<COIN_HINT_COST){showToast('힌트가 0개예요. 구매에는 모이 150개가 필요해요.');return;}
-      if(!window.confirm('힌트 1개를 모이 150개로 구매할까요?'))return;
-      if(!commitSpend({'sp_coins':String(coins-COIN_HINT_COST),[HINT_STOCK_KEY]:'1'}))return;
-      coins-=COIN_HINT_COST;
-      hintStock=1;
-      coinsValEl.textContent=fmt(coins);
-      renderHintStock();
-      showToast('힌트 1개 구매 완료! 다시 눌러 사용하세요.');
+      // Keep all item purchases inside the shop's unified confirmation flow.
+      // Tapping an empty hint icon must never charge coins directly.
+      showToast('힌트가 없어요. 상점에서 구매할 수 있어요.');
+      document.getElementById('navShop').click();
       return;
     }
     // Hint usage is an inventory decrement, not a currency purchase.
