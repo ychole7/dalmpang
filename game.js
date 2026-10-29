@@ -3415,34 +3415,74 @@
     resumeStageTimer();
   }
 
-  // V127: lightweight SFX with independent volume/toggle and mobile-safe playback.
+  // V130: unlock effects on the first user gesture (iOS/Android autoplay policy).
   const SFX_BASE='assets/sfx/';
   const SFX_NAMES=['tile_connect','tile_pop','combo','special_tile','item_use','stage_clear','stage_fail','ui_click'];
-  const sfxEnabledDefault=localStorage.getItem('sp_sfx_on') !== '0';
-  let sfxOn=sfxEnabledDefault;
+  let sfxOn=localStorage.getItem('sp_sfx_on') !== '0';
   const sfxBank=Object.create(null);
   const sfxLast=Object.create(null);
   const sfxGap={tile_connect:100,tile_pop:100,combo:250,special_tile:180,item_use:120,stage_clear:500,stage_fail:500,ui_click:65};
   const sfxVolume={tile_connect:.22,tile_pop:.4,combo:.38,special_tile:.43,item_use:.32,stage_clear:.52,stage_fail:.37,ui_click:.16};
+  let sfxContext=null;
+  const sfxBuffers=Object.create(null);
+  let sfxLoadsStarted=false;
+  let sfxActiveSources=new Set();
   SFX_NAMES.forEach(name=>{
     const audio=new Audio(SFX_BASE+name+'.mp3');
     audio.preload='auto';
     audio.volume=sfxVolume[name];
     sfxBank[name]=audio;
   });
+  function unlockSfx(){
+    if(!sfxContext){
+      const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+      if(AudioContextClass){
+        try{sfxContext=new AudioContextClass();}catch(e){sfxContext=null;}
+      }
+    }
+    if(sfxContext){
+      if(sfxContext.state==='suspended')sfxContext.resume().catch(()=>{});
+      if(!sfxLoadsStarted){
+        sfxLoadsStarted=true;
+        SFX_NAMES.forEach(name=>{
+          fetch(SFX_BASE+name+'.mp3')
+            .then(r=>{if(!r.ok)throw Error('SFX HTTP '+r.status);return r.arrayBuffer();})
+            .then(bytes=>sfxContext.decodeAudioData(bytes))
+            .then(buffer=>{sfxBuffers[name]=buffer;})
+            .catch(err=>console.warn('[Dalmpang] SFX load failed:',name,err));
+        });
+      }
+    }
+  }
+  function stopSfx(){
+    for(const source of sfxActiveSources){try{source.stop();}catch(e){}}
+    sfxActiveSources.clear();
+    Object.values(sfxBank).forEach(audio=>audio.pause());
+  }
   function playSfx(name){
     if(!sfxOn || !sfxBank[name] || document.hidden || appInBackground)return;
     const now=performance.now();
     if(now-(sfxLast[name]??-10000)<sfxGap[name])return;
     sfxLast[name]=now;
     try{
+      if(sfxContext && sfxContext.state==='running' && sfxBuffers[name]){
+        const source=sfxContext.createBufferSource();
+        const gain=sfxContext.createGain();
+        source.buffer=sfxBuffers[name];
+        gain.gain.value=sfxVolume[name];
+        source.connect(gain);gain.connect(sfxContext.destination);
+        source.onended=()=>{sfxActiveSources.delete(source);source.disconnect();gain.disconnect();};
+        sfxActiveSources.add(source);
+        source.start();
+        return;
+      }
+      // Fallback while assets are loading or Web Audio is unavailable.
       const source=sfxBank[name];
-      // Clone only when a previous sound is still playing (fast repeated moves).
       const audio=source.paused?source:source.cloneNode(true);
       audio.volume=sfxVolume[name];
       if(audio===source)audio.currentTime=0;
       const result=audio.play();
-      if(result && result.catch)result.catch(()=>{}); // autoplay restriction, missing file
+      if(result&&result.catch)result.catch(()=>{});
     }catch(err){console.warn('[Dalmpang] SFX unavailable:',name,err);}
   }
 
@@ -3465,7 +3505,7 @@
   function pauseAppAudio(){
     appInBackground = true;
     bgmAudio.pause();
-    Object.values(sfxBank).forEach(audio=>audio.pause());
+    stopSfx();
   }
   function resumeAppAudio(){
     if(document.hidden)return;
@@ -3480,6 +3520,31 @@
   window.addEventListener('pageshow',resumeAppAudio);
   window.addEventListener('blur',pauseAppAudio);
   window.addEventListener('focus',resumeAppAudio);
+
+  // V130: keep the screen awake during active play where the platform supports it.
+  let playWakeLock=null;
+  async function requestPlayWakeLock(){
+    if(document.hidden || appInBackground || playWakeLock || !('wakeLock' in navigator))return;
+    try{
+      const sentinel=await navigator.wakeLock.request('screen');
+      if(document.hidden || appInBackground){await sentinel.release();return;}
+      playWakeLock=sentinel;
+      sentinel.addEventListener('release',()=>{if(playWakeLock===sentinel)playWakeLock=null;});
+    }catch(err){console.info('[Dalmpang] Screen Wake Lock unavailable:',err?.name||err);}
+  }
+  function releasePlayWakeLock(){
+    if(playWakeLock){const lock=playWakeLock;playWakeLock=null;lock.release().catch(()=>{});}
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)releasePlayWakeLock();
+    else if(bgmStarted)requestPlayWakeLock();
+  });
+  window.addEventListener('pagehide',releasePlayWakeLock);
+  // A real user gesture is needed to start an AudioContext on mobile browsers.
+  document.addEventListener('pointerdown',()=>{
+    unlockSfx();
+    if(bgmStarted)requestPlayWakeLock();
+  },{passive:true});
 
   // ---- vibration (haptics) ----
   let vibrateOn = localStorage.getItem('sp_vibrate_on') !== '0';
@@ -3592,7 +3657,7 @@
       } else if(btn.dataset.key === 'sfx'){
         sfxOn=isOn;
         localStorage.setItem('sp_sfx_on',sfxOn?'1':'0');
-        if(sfxOn)playSfx('ui_click');
+        if(sfxOn){unlockSfx();playSfx('ui_click');}
       } else if(btn.dataset.key === 'vibrate'){
         vibrateOn = isOn;
         localStorage.setItem('sp_vibrate_on', vibrateOn ? '1' : '0');
@@ -3880,6 +3945,8 @@
     splashEl.addEventListener('click', ()=>{
       splashEl.classList.add('hide');
       bgmStarted=true;
+      unlockSfx();
+      requestPlayWakeLock();
       syncBgmPlayback();
     }, { once:true });
   }
