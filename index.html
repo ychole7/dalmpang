@@ -308,7 +308,7 @@
       <div class="sFooterRow">
         <button class="sFooterBtn" id="licenseBtn"><span class="sIcon">🎵</span>라이선스 표시</button>
         <button class="sFooterBtn" data-action="terms"><span class="sIcon">📄</span>이용약관</button>
-        <button class="sFooterBtn" data-action="privacy"><span class="sIcon">🔒</span>개인정보 방침</button>
+        <button class="sFooterBtn" data-action="privacy"><span class="sIcon">🔒</span>개인정보처리방침</button>
       </div>
       <div class="sVersion">버전 1.0.0</div>
     </div>
@@ -324,6 +324,20 @@
     Pixabay License — 출처 표시 불필요, 상업적 이용 가능</p>
     <button class="btn" id="licenseCloseBtn" style="width:100%">닫기</button>
   </div>
+</div>
+
+
+<style id="dpPolicyViewerStyles">
+#policyOverlay{position:fixed;inset:0;z-index:99999;background:rgba(18,36,64,.73);display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+#policyOverlay.show{display:flex}
+#policyOverlay .policyPanel{display:flex;flex-direction:column;width:min(100%,560px);height:min(82dvh,760px);min-height:320px;overflow:hidden;border:3px solid #e6b85c;border-radius:24px;background:#fff8ed;box-shadow:0 14px 48px #0e203b8c}
+#policyOverlay .policyHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:linear-gradient(#ffe7a1,#f0c167);color:#70451c;font-weight:900;font-size:18px}
+#policyOverlay .policyClose{height:36px;min-width:48px;border:0;border-radius:12px;background:#fffaf0;color:#70451c;font-size:22px;cursor:pointer}
+#policyOverlay iframe{display:block;flex:1;width:100%;border:0;background:white}
+</style>
+<div id="policyOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="policyTitle">
+ <div class="policyPanel"><div class="policyHead"><span id="policyTitle">이용약관</span><button class="policyClose" id="policyCloseBtn" type="button" aria-label="닫기">×</button></div>
+ <iframe id="policyFrame" title="정책 문서"></iframe></div>
 </div>
 
 <script src="game.js"></script>

@@ -3586,9 +3586,26 @@
       location.reload();
     }catch(err){console.error('Backup import failed',err);alert('백업 파일이 올바르지 않거나 복원하지 못했어요. 기존 데이터는 유지됩니다.');}
   });
-  document.querySelectorAll('.sActionBtn[data-action], .sFooterBtn[data-action]').forEach(function(btn){
-    btn.addEventListener('click',function(){showToast('준비 중인 기능이에요');});
+  // Open local policy documents inside the game without affecting saved progress.
+  const policyOverlay = document.getElementById('policyOverlay');
+  const policyFrame = document.getElementById('policyFrame');
+  const policyTitle = document.getElementById('policyTitle');
+  function closePolicy(){
+    policyOverlay.classList.remove('show');
+    policyOverlay.setAttribute('aria-hidden','true');
+    policyFrame.removeAttribute('src');
+  }
+  document.querySelectorAll('.sFooterBtn[data-action="terms"], .sFooterBtn[data-action="privacy"]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      const isTerms = btn.dataset.action === 'terms';
+      policyTitle.textContent = isTerms ? '이용약관' : '개인정보처리방침';
+      policyFrame.src = isTerms ? 'terms.html' : 'privacy.html';
+      policyOverlay.classList.add('show');
+      policyOverlay.setAttribute('aria-hidden','false');
+    });
   });
+  document.getElementById('policyCloseBtn').addEventListener('click',closePolicy);
+  policyOverlay.addEventListener('click',function(e){if(e.target===policyOverlay)closePolicy();});
   document.getElementById('licenseBtn').addEventListener('click', function(){
     document.getElementById('licenseOverlay').classList.add('show');
   });
