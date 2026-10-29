@@ -3431,7 +3431,7 @@
     sfxBank[name]=audio;
   });
   function playSfx(name){
-    if(!sfxOn || !sfxBank[name])return;
+    if(!sfxOn || !sfxBank[name] || document.hidden || appInBackground)return;
     const now=performance.now();
     if(now-(sfxLast[name]??-10000)<sfxGap[name])return;
     sfxLast[name]=now;
@@ -3451,6 +3451,35 @@
   bgmAudio.loop = true;
   bgmAudio.volume = 0.5;
   let bgmOn = localStorage.getItem('sp_bgm_on') !== '0';
+  // Keep BGM confined to the foreground. Do not start it automatically
+  // until the player has entered the game or explicitly enabled BGM.
+  let bgmStarted = false;
+  let appInBackground = document.hidden;
+  function syncBgmPlayback(){
+    if(appInBackground || document.hidden || !bgmOn || !bgmStarted){
+      bgmAudio.pause();
+      return;
+    }
+    if(bgmAudio.paused)bgmAudio.play().catch(()=>{});
+  }
+  function pauseAppAudio(){
+    appInBackground = true;
+    bgmAudio.pause();
+    Object.values(sfxBank).forEach(audio=>audio.pause());
+  }
+  function resumeAppAudio(){
+    if(document.hidden)return;
+    appInBackground = false;
+    syncBgmPlayback();
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)pauseAppAudio();
+    else resumeAppAudio();
+  });
+  window.addEventListener('pagehide',pauseAppAudio);
+  window.addEventListener('pageshow',resumeAppAudio);
+  window.addEventListener('blur',pauseAppAudio);
+  window.addEventListener('focus',resumeAppAudio);
 
   // ---- vibration (haptics) ----
   let vibrateOn = localStorage.getItem('sp_vibrate_on') !== '0';
@@ -3558,8 +3587,8 @@
       if(btn.dataset.key === 'bgm'){
         bgmOn = isOn;
         localStorage.setItem('sp_bgm_on', bgmOn ? '1' : '0');
-        if(bgmOn) bgmAudio.play().catch(()=>{});
-        else bgmAudio.pause();
+        if(bgmOn)bgmStarted=true;
+        syncBgmPlayback();
       } else if(btn.dataset.key === 'sfx'){
         sfxOn=isOn;
         localStorage.setItem('sp_sfx_on',sfxOn?'1':'0');
@@ -3850,7 +3879,8 @@
   if(splashEl){
     splashEl.addEventListener('click', ()=>{
       splashEl.classList.add('hide');
-      if(bgmOn) bgmAudio.play().catch(()=>{});
+      bgmStarted=true;
+      syncBgmPlayback();
     }, { once:true });
   }
 })();
